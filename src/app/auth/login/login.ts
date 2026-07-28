@@ -43,17 +43,17 @@ export class LoginComponent implements OnInit, OnDestroy {
         {
           title: 'تحكم في كل مشروع من مكان واحد',
           desc: 'تابع الأداء، وزّع المسؤوليات، وحافظ على انسجام كل مراحل العمل بكفاءة.',
-          image: 'assets/illustration1.jpg'
+          image: 'assets/login_illustration1.png'
         },
         {
           title: 'التخطيط والتحكم والتنفيذ بفعالية',
           desc: 'إدارة خطط المشاريع والاعتمادات وسير العمل التشغيلي من خلال نظام موحد.',
-          image: 'assets/illustration.svg.png'
+          image: 'assets/login_illustration2.png'
         },
         {
           title: 'ابقِ المواعيد النهائية تحت السيطرة',
           desc: 'مراقبة الجداول الزمنية، المهام المتأخرة، ومحطات المشاريع قبل أن تؤثر على التسليم.',
-          image: 'assets/illustration3.jpg'
+          image: 'assets/login_illustration3.png'
         }
       ]
     },
@@ -72,17 +72,17 @@ export class LoginComponent implements OnInit, OnDestroy {
         {
           title: 'Control Every Project From One Place',
           desc: 'Track performance, assign responsibilities, and keep every workflow aligned efficiently.',
-          image: 'assets/illustration1.jpg'
+          image: 'assets/login_illustration1.png'
         },
         {
           title: 'Plan, Govern, And Execute Efficiently',
           desc: 'Manage project plans, approvals, and operational workflows through one unified system.',
-          image: 'assets/illustration.svg.png'
+          image: 'assets/login_illustration2.png'
         },
         {
           title: 'Keep Every Deadline Under Control',
           desc: 'Monitor timelines, delayed tasks, and project milestones before they impact delivery.',
-          image: 'assets/illustration3.jpg'
+          image: 'assets/login_illustration3.png'
         }
       ]
     }
