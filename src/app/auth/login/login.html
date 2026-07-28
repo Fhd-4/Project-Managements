@@ -1,0 +1,84 @@
+<div class="login-container" [dir]="isRtl ? 'rtl' : 'ltr'">
+  <!-- Left panel with illustrations and sliding content -->
+  <div class="left-panel">
+    <div class="logo">PS</div>
+    <div class="slide-content">
+      <img [src]="slides[activeIndex].image" alt="Illustration" class="slide-image">
+      <h2>{{slides[activeIndex].title}}</h2>
+      <p>{{slides[activeIndex].desc}}</p>
+    </div>
+    <div class="slider-dots">
+      <span class="dot" *ngFor="let s of slides; let i = index"
+            [class.active]="activeIndex === i" (click)="activeIndex = i"></span>
+    </div>
+  </div>
+
+  <!-- Right panel with form inputs -->
+  <div class="right-panel">
+    <!-- Language Selector with custom globe-chat-bubbles icon -->
+    <div class="lang-selector" (click)="changeLang()">
+      <span>{{t.langLabel}}</span>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="globe-icon">
+        <circle cx="12" cy="12" r="9"></circle>
+        <path d="M3.6 9h16.8M3.6 15h16.8"></path>
+        <path d="M11.5 3a17 17 0 0 0 0 18M12.5 3a17 17 0 0 1 0 18"></path>
+        <!-- Speech bubble on left -->
+        <rect x="2" y="8" width="5" height="4" rx="1.2" fill="white" stroke="currentColor" stroke-width="1.2"></rect>
+        <path d="M4 12l-1 1v-1" stroke="currentColor" stroke-width="1.2"></path>
+        <!-- Speech bubble on right -->
+        <rect x="17" y="12" width="5" height="4" rx="1.2" fill="white" stroke="currentColor" stroke-width="1.2"></rect>
+        <path d="M20 16l1 1v-1" stroke="currentColor" stroke-width="1.2"></path>
+      </svg>
+    </div>
+
+    <h1 class="login-title">{{t.loginTitle}}</h1>
+
+    <form (ngSubmit)="onSubmit()">
+      <!-- Mobile number input with static +966 prefix -->
+      <div class="input-group">
+        <label>{{t.mobileLabel}}</label>
+        <div class="input-wrapper" dir="ltr">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6c757d" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="icon">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+          </svg>
+          <span class="phone-prefix">+966</span>
+          <input type="text" name="phone" [(ngModel)]="phone" (input)="onPhoneInput($event)" inputmode="numeric" pattern="[0-9]*" [placeholder]="t.mobilePlaceholder" class="phone-input">
+        </div>
+      </div>
+
+      <!-- Password input with eye icon toggling visibility -->
+      <div class="input-group">
+        <label>{{t.passwordLabel}}</label>
+        <div class="input-wrapper">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6c757d" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="icon">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          <input [type]="passwordType" name="password" [(ngModel)]="password" placeholder="••••••••">
+          <!-- Eye icon styling in blue -->
+          <span class="eye-icon" (click)="togglePassword()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#007bff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+              <line *ngIf="isPasswordHidden" x1="2" y1="2" x2="22" y2="22" stroke="#007bff" stroke-width="1.8"></line>
+            </svg>
+          </span>
+        </div>
+      </div>
+
+      <!-- Forgot Password link container -->
+      <div class="forgot-link-container">
+        <a href="#" class="forgot-link">{{t.forgotPassword}}</a>
+      </div>
+
+      <!-- Error message container -->
+      <p class="error-message" *ngIf="errorMessage">{{errorMessage}}</p>
+
+      <!-- Submit button -->
+      <button type="submit" [disabled]="isLoading">
+        {{ isLoading ? t.loadingButton : t.loginButton }}
+        <span class="btn-arrow" *ngIf="!isLoading">→</span>
+      </button>
+    </form>
+  </div>
+</div>
