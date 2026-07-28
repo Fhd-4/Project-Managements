@@ -97,6 +97,12 @@ export class ForgotPasswordComponent {
     private ngZone: NgZone,
     @Inject(DOCUMENT) private document: Document
   ) {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const savedLang = localStorage.getItem('preferred_lang') as LangCode;
+      if (savedLang) {
+        this.currentLang = savedLang;
+      }
+    }
     this.applyDirection();
   }
 
@@ -110,6 +116,9 @@ export class ForgotPasswordComponent {
 
   changeLang() {
     this.currentLang = this.currentLang === 'ar' ? 'en' : 'ar';
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.setItem('preferred_lang', this.currentLang);
+    }
     this.applyDirection();
     this.cdr.detectChanges();
   }
