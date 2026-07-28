@@ -157,10 +157,7 @@ export class CreatePortfolioComponent implements OnInit, OnDestroy {
   }
 
   savePortfolio() {
-    this.nameEn = this.nameAr;
-    this.descriptionEn = this.descriptionAr;
-
-    if (!this.nameAr || !this.nameEn || this.budget <= 0 || !this.startDate || !this.endDate) {
+    if (!this.nameAr || this.budget <= 0 || !this.startDate || !this.endDate) {
       this.portfolioService.triggerErrorToast();
       return;
     }
@@ -174,14 +171,15 @@ export class CreatePortfolioComponent implements OnInit, OnDestroy {
 
     const payload = {
       nameAr: this.nameAr,
-      nameEn: this.nameEn,
       descriptionAr: this.descriptionAr,
-      descriptionEn: this.descriptionEn,
       budget: this.budget,
       startDate: new Date(this.startDate).toISOString(),
       endDate: new Date(this.endDate).toISOString(),
       status: this.status,
-      ownerName: this.ownerName
+      ownerName: this.ownerName,
+      category: this.category,
+      sponsorName: this.sponsorName,
+      managerName: this.managerName
     };
 
     if (this.isEditMode && this.editingId !== null) {

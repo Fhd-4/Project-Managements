@@ -193,7 +193,8 @@ export class PortfoliosComponent implements OnInit {
 
   loadPortfolios() {
     this.isLoading = true;
-    this.portfolioService.getAllPortfolios().subscribe({
+    const sortParam = this.projectsSortDirection !== 'none' ? this.projectsSortDirection : undefined;
+    this.portfolioService.getAllPortfolios(sortParam).subscribe({
       next: (list) => {
         this.portfolios = list;
         this.calculateStats();
@@ -223,7 +224,7 @@ export class PortfoliosComponent implements OnInit {
     } else {
       this.projectsSortDirection = 'none';
     }
-    this.cdr.detectChanges();
+    this.loadPortfolios();
   }
 
   get filteredPortfolios(): Portfolio[] {
@@ -236,12 +237,6 @@ export class PortfoliosComponent implements OnInit {
         p.nameEn.toLowerCase().includes(query) ||
         (p.ownerName && p.ownerName.toLowerCase().includes(query))
       );
-    }
-
-    if (this.projectsSortDirection === 'desc') {
-      result.sort((a, b) => (b.projectsCount || 0) - (a.projectsCount || 0));
-    } else if (this.projectsSortDirection === 'asc') {
-      result.sort((a, b) => (a.projectsCount || 0) - (b.projectsCount || 0));
     }
 
     return result;
