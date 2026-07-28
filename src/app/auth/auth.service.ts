@@ -47,4 +47,18 @@ export class AuthService {
     localStorage.removeItem('auth_phone');
     localStorage.removeItem('auth_userId');
   }
+
+  forgotPassword(phone: string): Observable<any> {
+    const url = `${API_CONFIG.baseUrl}${API_CONFIG.endpoints.auth.forgotPassword}`;
+    return this.http.post<any>(url, { phoneNumber: phone });
+  }
+
+  resetPassword(phone: string, token: string, newPassword: string): Observable<any> {
+    const url = `${API_CONFIG.baseUrl}${API_CONFIG.endpoints.auth.resetPassword}`;
+    return this.http.post<any>(url, {
+      phoneNumber: phone,
+      token: token,
+      newPassword: newPassword
+    });
+  }
 }
