@@ -1,0 +1,203 @@
+<div class="portfolios-container" [dir]="isRtl ? 'rtl' : 'ltr'">
+
+  <!-- Success Toast Alert -->
+  <div class="toast-alert success" *ngIf="showSuccessToast">
+    <div class="toast-content">
+      <div class="toast-circle-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </div>
+      <span>{{ isRtl ? 'تم إضافة المحفظة بنجاح.' : 'New portfolio added successfully.' }}</span>
+    </div>
+  </div>
+
+  <!-- Error Toast Alert -->
+  <div class="toast-alert error" *ngIf="showErrorToast">
+    <div class="toast-content">
+      <div class="toast-circle-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </div>
+      <span>{{ isRtl ? 'فشل إنشاء المحفظة.' : 'Failed to create portfolio.' }}</span>
+    </div>
+  </div>
+
+  <!-- Statistics Cards Row at the top matching Figma (Icon next to number) -->
+  <div class="stats-row">
+    <!-- Card 1: Total Portfolio -->
+    <div class="stat-card">
+      <span class="card-title">{{ t.stats.total }}</span>
+      <div class="value-container">
+        <!-- suitcase icon -->
+        <svg class="card-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#102a43" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="7" width="18" height="13" rx="2.5" ry="2.5"></rect>
+          <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"></path>
+        </svg>
+        <strong class="card-value">{{ portfolioCount }}</strong>
+      </div>
+    </div>
+
+    <!-- Card 2: Pending -->
+    <div class="stat-card">
+      <span class="card-title">{{ t.stats.pending }}</span>
+      <div class="value-container">
+        <!-- Pending clock with counter-clockwise arrow icon -->
+        <svg class="card-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#102a43" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+          <polyline points="3 3 3 8 8 8"></polyline>
+          <line x1="12" y1="7" x2="12" y2="12"></line>
+          <line x1="12" y1="12" x2="15" y2="15"></line>
+        </svg>
+        <strong class="card-value">{{ pendingCount }}</strong>
+      </div>
+    </div>
+
+    <!-- Card 3: On Track -->
+    <div class="stat-card">
+      <span class="card-title">{{ t.stats.onTrack }}</span>
+      <div class="value-container">
+        <!-- Dashed Loader Circle icon -->
+        <svg class="card-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#102a43" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3 3">
+          <circle cx="12" cy="12" r="10"></circle>
+        </svg>
+        <strong class="card-value">{{ onTrackCount }}</strong>
+      </div>
+    </div>
+
+    <!-- Card 4: Completed -->
+    <div class="stat-card">
+      <span class="card-title">{{ t.stats.completed }}</span>
+      <div class="value-container">
+        <!-- Shield Check badge icon -->
+        <svg class="card-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#102a43" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="9 12 11 14 15 10"></polyline>
+        </svg>
+        <strong class="card-value">{{ completedCount }}</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table Section -->
+  <div class="portfolios-content-card">
+    <!-- Toolbar Row inside the card -->
+    <div class="toolbar-row">
+      <div class="tab-title">
+        <h3>{{ isRtl ? 'جميع المحافظ' : 'All portfolios' }}</h3>
+      </div>
+
+      <div class="toolbar-actions">
+        <!-- Search input box -->
+        <div class="search-box">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#627d98" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" [(ngModel)]="searchQuery" [placeholder]="isRtl ? 'ابحث عن أي شيء...' : 'Search for everything'">
+        </div>
+
+        <!-- Status Filter Dropdown -->
+        <select class="status-filter" [(ngModel)]="status" (change)="loadPortfolios()">
+          <option value="Active">Status</option>
+          <option value="Active">Active</option>
+          <option value="OnHold">On Hold</option>
+          <option value="Completed">Completed</option>
+          <option value="Archived">Archived</option>
+        </select>
+
+        <!-- + Crete Portfolio Button -->
+        <button class="create-btn" (click)="openCreateModal()">
+          <span>+</span> {{ isRtl ? 'إنشاء محفظة' : 'Crete Portfolio' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Table content headers & rows -->
+    <div class="table-wrapper">
+      <table class="portfolios-table">
+        <thead>
+          <tr>
+            <th>{{ t.headers.name }}</th>
+            <th>{{ isRtl ? 'التصنيف' : 'Category' }}</th>
+            <th>{{ isRtl ? 'البرامج' : 'Programs' }}</th>
+            <th class="clickable-header" (click)="toggleProjectsSort()" style="cursor: pointer; user-select: none;">
+              <div class="sortable-header">
+                <!-- Sorting double arrows on the left of Projects -->
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="sort-icon">
+                  <polyline points="15 18 12 21 9 18" [attr.stroke]="projectsSortDirection === 'asc' ? '#cbd5e1' : 'currentColor'"></polyline>
+                  <polyline points="9 6 12 3 15 6" [attr.stroke]="projectsSortDirection === 'desc' ? '#cbd5e1' : 'currentColor'"></polyline>
+                  <line x1="12" y1="3" x2="12" y2="21"></line>
+                </svg>
+                <span>{{ isRtl ? 'المشاريع' : 'Projects' }}</span>
+              </div>
+            </th>
+            <th>{{ isRtl ? 'المالك' : 'Owner' }}</th>
+            <th>{{ t.headers.status }}</th>
+            <th>{{ t.headers.actions }}</th>
+          </tr>
+        </thead>
+        <tbody *ngIf="filteredPortfolios.length > 0">
+          <tr *ngFor="let p of filteredPortfolios">
+            <td class="name-cell">{{ isRtl ? p.nameAr : p.nameEn }}</td>
+            <td class="category-cell">{{ isRtl ? 'محفظة استراتيجية' : 'Strategic' }}</td>
+            <td>{{ p.programsCount || 0 }}</td>
+            <td>{{ p.projectsCount || 0 }}</td>
+            <td class="owner-cell">
+              <div class="owner-avatar-cell">
+                <div class="small-owner-avatar">FA</div>
+                <span>{{ p.ownerName || 'Faisal Al-Otaibi' }}</span>
+              </div>
+            </td>
+            <td>
+              <span class="status-badge" [ngClass]="p.status.toLowerCase()">
+                {{ p.status }}
+              </span>
+            </td>
+            <td class="actions-cell">
+              <button class="action-icon edit" (click)="openEditModal(p)" title="Edit">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                  <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+              </button>
+              <button class="action-icon delete" (click)="deletePortfolio(p.id)" title="Delete">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Empty state inside table when filteredPortfolios has 0 items -->
+      <div class="empty-state-section" *ngIf="filteredPortfolios.length === 0">
+        <div class="empty-illustration">
+          <svg width="120" height="120" viewBox="0 0 120 120" fill="none">
+            <circle cx="60" cy="60" r="45" fill="#ebf8ff"></circle>
+            <path d="M48 35h18l12 12v38H48V35z" fill="white" stroke="#3182ce" stroke-width="2.5" stroke-linejoin="round"></path>
+            <path d="M60 35L54 52l12 14L56 85" stroke="#3182ce" stroke-width="2.5" stroke-linejoin="round"></path>
+            <path d="M66 35v12h12" stroke="#3182ce" stroke-width="2" stroke-linejoin="round"></path>
+            <circle cx="48" cy="75" r="10" fill="#1a365d"></circle>
+            <line x1="44" y1="71" x2="52" y2="79" stroke="white" stroke-width="2.2" stroke-linecap="round"></line>
+            <line x1="52" y1="71" x2="44" y2="79" stroke="white" stroke-width="2.2" stroke-linecap="round"></line>
+          </svg>
+        </div>
+        <h2 class="empty-title">{{ isRtl ? 'لا توجد بيانات حالياً' : 'No data right now' }}</h2>
+        <p class="empty-subtitle">
+          {{ isRtl ? 'يرجى الضغط على إنشاء جديد لاختيار الخيار المناسب' : 'Please click on ' }}<strong>{{ isRtl ? '' : 'create new' }}</strong>{{ isRtl ? '' : ' to choose the sutible option' }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer description row -->
+  <footer class="footer-description">
+    <span>Footer Description</span>
+  </footer>
+
+</div>

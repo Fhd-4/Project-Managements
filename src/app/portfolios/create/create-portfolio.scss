@@ -1,0 +1,350 @@
+.create-page-container {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    animation: fadeIn 0.4s ease-out;
+
+    .create-page-card {
+        background: white;
+        padding: 10px 0;
+
+        .create-portfolio-form {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            width: 100%;
+
+            .form-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 24px 30px;
+            }
+
+            .form-field-group {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+
+                label {
+                    font-size: 0.95rem;
+                    font-weight: 600;
+                    color: #334155;
+                    text-align: start;
+                }
+
+                input[type="text"],
+                input[type="number"],
+                select {
+                    background: #f8fafc;
+                    border: 1.5px solid #e2e8f0;
+                    padding: 12px 18px;
+                    border-radius: 12px;
+                    font-size: 0.95rem;
+                    color: #102a43;
+                    outline: none;
+                    width: 100%;
+                    box-sizing: border-box;
+                    transition: border-color 0.2s, background 0.2s;
+                    text-align: start;
+
+                    &::placeholder {
+                        color: #94a3b8;
+                    }
+
+                    &:focus {
+                        border-color: #102a43;
+                        background: white;
+                        box-shadow: 0 0 0 3px rgba(16, 42, 67, 0.08);
+                    }
+                }
+            }
+
+            /* Custom Styled Select with Avatar integration */
+            .select-wrapper {
+                position: relative;
+                width: 100%;
+                display: flex;
+                align-items: center;
+
+                select {
+                    appearance: none; /* Hide default native arrow */
+                    padding-inline-start: 48px; /* Allow space for avatar badge on left */
+                    padding-inline-end: 40px; /* Allow space for chevron on right */
+                    cursor: pointer;
+                }
+
+                .select-chevron {
+                    position: absolute;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    color: #627d98;
+                    pointer-events: none;
+                }
+
+                .avatar-badge-preview {
+                    position: absolute;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    pointer-events: none;
+                    display: flex;
+                    align-items: center;
+                }
+
+                .small-preview-avatar {
+                    width: 24px;
+                    height: 24px;
+                    border-radius: 50%;
+                    font-size: 0.7rem;
+                    font-weight: 700;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+
+                    &.FO { background: #fed7d7; color: #c53030; }
+                    &.OH { background: #e0fcff; color: #008290; }
+                    &.MS { background: #fffae6; color: #b7791f; }
+                }
+            }
+
+            .form-full-field {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+
+                label {
+                    font-size: 0.95rem;
+                    font-weight: 600;
+                    color: #334155;
+                    text-align: start;
+                }
+
+                textarea {
+                    background: #f8fafc;
+                    border: 1.5px solid #e2e8f0;
+                    padding: 14px 18px;
+                    border-radius: 12px;
+                    font-size: 0.95rem;
+                    color: #102a43;
+                    outline: none;
+                    resize: vertical;
+                    width: 100%;
+                    box-sizing: border-box;
+                    transition: border-color 0.2s, background 0.2s;
+                    text-align: start;
+
+                    &::placeholder {
+                        color: #94a3b8;
+                    }
+
+                    &:focus {
+                        border-color: #102a43;
+                        background: white;
+                        box-shadow: 0 0 0 3px rgba(16, 42, 67, 0.08);
+                    }
+                }
+            }
+
+            /* Attachment file design from Figma */
+            .attachment-section {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+
+                .section-label {
+                    font-size: 0.95rem;
+                    font-weight: 600;
+                    color: #334155;
+                    text-align: start;
+                }
+
+                .attachment-grid {
+                    display: grid;
+                    grid-template-columns: 1.2fr 1fr;
+                    gap: 30px;
+                    width: 100%;
+                }
+
+                /* Dashed upload triggering box */
+                .upload-dashed-box {
+                    border: 1.5px dashed #2563eb;
+                    background: #f8fafc;
+                    border-radius: 12px;
+                    padding: 24px;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    text-align: center;
+                    gap: 8px;
+
+                    .drag-text {
+                        font-size: 0.85rem;
+                        font-weight: 600;
+                        color: #475569;
+                    }
+
+                    .or-divider {
+                        font-size: 0.8rem;
+                        color: #94a3b8;
+                        font-weight: 500;
+                    }
+
+                    .upload-trigger-btn {
+                        background: white;
+                        border: 1.5px solid #e2e8f0;
+                        color: #1e293b;
+                        padding: 6px 20px;
+                        border-radius: 20px;
+                        font-weight: 700;
+                        font-size: 0.85rem;
+                        cursor: pointer;
+                        display: flex;
+                        align-items: center;
+                        gap: 6px;
+                        transition: all 0.2s;
+
+                        &:hover {
+                            background-color: #f1f5f9;
+                            border-color: #cbd5e1;
+                        }
+                    }
+
+                    .limits-text {
+                        font-size: 0.75rem;
+                        color: #94a3b8;
+                        margin-top: 4px;
+                    }
+                }
+
+                /* Block showing No attachments state */
+                .no-attachments-box {
+                    background: #f8fafc;
+                    border: 1.5px solid #e2e8f0;
+                    border-radius: 12px;
+                    padding: 24px;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 12px;
+
+                    .attachment-visual {
+                        position: relative;
+                        color: #627d98;
+
+                        .red-delete-badge {
+                            position: absolute;
+                            bottom: -4px;
+                            left: -4px;
+                            width: 18px;
+                            height: 18px;
+                            border-radius: 50%;
+                            background-color: #ef4444; /* red delete overlay */
+                            border: 1.5px solid white;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            color: white;
+                            box-shadow: 0 2px 5px rgba(239, 68, 68, 0.2);
+                        }
+                    }
+
+                    .no-attachment-text {
+                        font-size: 0.85rem;
+                        font-weight: 600;
+                        color: #627d98;
+                    }
+                }
+            }
+
+            /* Controls footer */
+            .form-footer-actions {
+                display: flex;
+                justify-content: flex-end;
+                gap: 16px;
+                border-top: 1.5px solid #e2e8f0;
+                padding-top: 25px;
+                margin-top: 15px;
+
+                button {
+                    padding: 10px 28px;
+                    border-radius: 30px; /* Pill buttons matching Cancel/AddNew */
+                    font-weight: 700;
+                    font-size: 0.95rem;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    transition: all 0.2s;
+                }
+
+                .cancel-btn {
+                    background: white;
+                    border: 1.5px solid #cbd5e1;
+                    color: #475569;
+
+                    &:hover {
+                        background: #f1f5f9;
+                        border-color: #cbd5e1;
+                    }
+                }
+
+                .add-new-btn {
+                    background: #112b50;
+                    border: none;
+                    color: white;
+
+                    &:hover {
+                        background: #1a365d;
+                    }
+                }
+            }
+        }
+    }
+
+    /* Footer Description */
+    .footer-description {
+        text-align: center;
+        font-size: 0.8rem;
+        color: #94a3b8;
+        padding-top: 15px;
+        border-top: 1px solid #e4e7eb;
+        margin-top: 20px;
+    }
+}
+
+/* LTR Specific layout positions */
+[dir="ltr"] {
+    .create-portfolio-form {
+        .select-wrapper {
+            .select-chevron {
+                right: 18px;
+            }
+            .avatar-badge-preview {
+                left: 14px;
+            }
+        }
+    }
+}
+
+/* RTL Specific layout positions */
+[dir="rtl"] {
+    .create-portfolio-form {
+        .select-wrapper {
+            select {
+                padding-inline-start: 48px;
+                padding-inline-end: 40px;
+            }
+            .select-chevron {
+                left: 18px;
+            }
+            .avatar-badge-preview {
+                right: 14px;
+            }
+        }
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}

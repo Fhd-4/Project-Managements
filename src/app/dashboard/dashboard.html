@@ -1,0 +1,172 @@
+<div class="dashboard-container" [dir]="isRtl ? 'rtl' : 'ltr'">
+  <!-- Top row: Search bar & + Create New Button -->
+  <div class="top-row">
+    <div class="search-box">
+      <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#627d98" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input type="text" [placeholder]="t.searchPlaceholder">
+    </div>
+
+    <!-- Create New Dropdown Anchor -->
+    <div class="create-new-wrapper">
+      <button class="create-new-btn" (click)="toggleCreateDropdown()">
+        <span>+</span> {{ t.createNewBtn }}
+      </button>
+
+      <!-- Dropdown Popup matching Figma "Create New Button Kit" -->
+      <div class="create-new-dropdown" *ngIf="isCreateDropdownOpen">
+        <div class="dropdown-header">
+          <h3>{{ t.dropdownTitle }}</h3>
+          <span class="close-x" (click)="toggleCreateDropdown()">✕</span>
+        </div>
+        <div class="dropdown-grid">
+          <!-- Portfolios -->
+          <div class="dropdown-option" (click)="navigateToOption('portfolio')">
+            <div class="option-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="7" width="18" height="13" rx="2.5" ry="2.5"></rect>
+                <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"></path>
+              </svg>
+            </div>
+            <span>{{ isRtl ? 'المحافظ' : 'Portfolios' }}</span>
+          </div>
+
+          <!-- Programs -->
+          <div class="dropdown-option" (click)="toggleCreateDropdown()">
+            <div class="option-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="4" y="4" width="16" height="9" rx="1.5"></rect>
+                <line x1="12" y1="13" x2="12" y2="17"></line>
+                <line x1="7" y1="17" x2="17" y2="17"></line>
+                <circle cx="7" cy="18.5" r="1.5" fill="currentColor"></circle>
+                <circle cx="12" cy="18.5" r="1.5" fill="currentColor"></circle>
+                <circle cx="17" cy="18.5" r="1.5" fill="currentColor"></circle>
+              </svg>
+            </div>
+            <span>{{ isRtl ? 'البرامج' : 'Programs' }}</span>
+          </div>
+
+          <!-- Projects -->
+          <div class="dropdown-option" (click)="toggleCreateDropdown()">
+            <div class="option-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+              </svg>
+            </div>
+            <span>{{ isRtl ? 'المشاريع' : 'Projects' }}</span>
+          </div>
+
+          <!-- Task -->
+          <div class="dropdown-option" (click)="toggleCreateDropdown()">
+            <div class="option-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 11 12 14 22 4"></polyline>
+                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+              </svg>
+            </div>
+            <span>{{ isRtl ? 'المهام' : 'Task' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats row cards matching Figma layout (Icon next to number) -->
+  <div class="stats-row">
+    <!-- Card 1: Total Portfolio -->
+    <div class="stat-card">
+      <span class="card-title">{{ t.cards.portfolio }}</span>
+      <div class="value-container">
+        <!-- suitcase icon -->
+        <svg class="card-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#102a43" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="7" width="18" height="13" rx="2.5" ry="2.5"></rect>
+          <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"></path>
+        </svg>
+        <strong class="card-value">{{ totalPortfolios > 0 ? 128 : 0 }}</strong>
+      </div>
+      <div class="card-trend" *ngIf="totalPortfolios > 0">
+        <span class="trend-arrow">↗</span>
+        <span class="trend-text">36 {{ t.trendSuffix }}</span>
+      </div>
+    </div>
+
+    <!-- Card 2: Total Programs -->
+    <div class="stat-card">
+      <span class="card-title">{{ t.cards.programs }}</span>
+      <div class="value-container">
+        <!-- grid with connected nodes icon -->
+        <svg class="card-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#102a43" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="4" y="4" width="16" height="9" rx="1.5"></rect>
+          <line x1="12" y1="13" x2="12" y2="17"></line>
+          <line x1="7" y1="17" x2="17" y2="17"></line>
+          <circle cx="7" cy="18.5" r="1.5" fill="currentColor"></circle>
+          <circle cx="12" cy="18.5" r="1.5" fill="currentColor"></circle>
+          <circle cx="17" cy="18.5" r="1.5" fill="currentColor"></circle>
+        </svg>
+        <strong class="card-value">{{ totalPortfolios > 0 ? 90 : 0 }}</strong>
+      </div>
+      <div class="card-trend" *ngIf="totalPortfolios > 0">
+        <span class="trend-arrow">↗</span>
+        <span class="trend-text">36 {{ t.trendSuffix }}</span>
+      </div>
+    </div>
+
+    <!-- Card 3: Total Projects -->
+    <div class="stat-card">
+      <span class="card-title">{{ t.cards.projects }}</span>
+      <div class="value-container">
+        <!-- document with lines icon -->
+        <svg class="card-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#102a43" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <line x1="10" y1="9" x2="8" y2="9"></line>
+        </svg>
+        <strong class="card-value">{{ totalPortfolios > 0 ? 298 : 0 }}</strong>
+      </div>
+      <div class="card-trend" *ngIf="totalPortfolios > 0">
+        <span class="trend-arrow">↗</span>
+        <span class="trend-text">36 {{ t.trendSuffix }}</span>
+      </div>
+    </div>
+
+    <!-- Card 4: Total Budget -->
+    <div class="stat-card">
+      <span class="card-title">{{ t.cards.budget }}</span>
+      <div class="value-container">
+        <!-- Saudi Riyal outline icon -->
+        <svg class="card-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#102a43" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+        </svg>
+        <strong class="card-value">{{ totalPortfolios > 0 ? '6,500,000' : '00' }}</strong>
+      </div>
+      <div class="card-trend" *ngIf="totalPortfolios > 0">
+        <span class="trend-arrow">↗</span>
+        <span class="trend-text">36 {{ t.trendSuffix }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State (Figma "Dashboard-First Time" Cracked Folder Illustration) -->
+  <div class="empty-state-section" *ngIf="totalPortfolios === 0">
+    <div class="empty-illustration">
+      <svg width="120" height="120" viewBox="0 0 120 120" fill="none">
+        <circle cx="60" cy="60" r="50" fill="#ebf8ff"></circle>
+        <path d="M35 45V75C35 77.2 36.8 79 39 79H81C83.2 79 85 77.2 85 75V51C85 48.8 83.2 47 81 47H58L53 41H39C36.8 41 35 42.8 35 45Z" fill="#3182ce" opacity="0.35"></path>
+        <path d="M35 51V75C35 77.2 36.8 79 39 79H81C83.2 79 85 77.2 85 75V51C85 48.8 83.2 47 81 47H39C36.8 47 35 48.8 35 51Z" fill="#3182ce"></path>
+        <path d="M50 47L58 60L54 68L62 79" stroke="white" stroke-width="2.5" stroke-linejoin="round"></path>
+        <circle cx="85" cy="75" r="11" fill="#1a365d"></circle>
+        <line x1="85" y1="70" x2="85" y2="80" stroke="white" stroke-width="2" stroke-linecap="round"></line>
+        <line x1="80" y1="75" x2="90" y2="75" stroke="white" stroke-width="2" stroke-linecap="round"></line>
+      </svg>
+    </div>
+    <h2 class="empty-title">{{ t.noDataTitle }}</h2>
+    <p class="empty-subtitle">{{ t.noDataSubtitle }}</p>
+  </div>
+</div>

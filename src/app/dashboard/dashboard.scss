@@ -1,0 +1,306 @@
+.dashboard-container {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    animation: fadeIn 0.4s ease-out;
+
+    /* Top Row: Search & Button */
+    .top-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 24px;
+        position: relative;
+        flex-wrap: nowrap; /* Avoid wrapping on large screens so it stays side by side */
+        width: 100%;
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: white;
+            border: 1px solid #cbd5e1;
+            padding: 12px 24px;
+            border-radius: 30px; /* Pill shape */
+            flex: 1; /* Spans across almost the full width */
+            height: 48px;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+
+            &:focus-within {
+                border-color: #102a43;
+                box-shadow: 0 0 0 3px rgba(16, 42, 67, 0.08);
+            }
+
+            .search-icon {
+                flex-shrink: 0;
+            }
+
+            input {
+                border: none;
+                background: transparent;
+                outline: none;
+                width: 100%;
+                font-size: 0.95rem;
+                color: #102a43;
+
+                &::placeholder {
+                    color: #94a3b8;
+                }
+            }
+        }
+
+        .create-new-wrapper {
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .create-new-btn {
+            background: #112b50; /* Figma dark blue button */
+            color: white;
+            border: none;
+            padding: 0 32px;
+            height: 48px;
+            border-radius: 30px; /* Pill shape */
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s;
+            box-shadow: 0 4px 10px rgba(17, 43, 80, 0.12);
+            box-sizing: border-box;
+
+            &:hover {
+                background: #1a365d;
+            }
+        }
+
+        /* Figma Dropdown Panel "Create New Button Kit" */
+        .create-new-dropdown {
+            position: absolute;
+            top: 55px;
+            right: 0;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(16, 42, 67, 0.1);
+            width: 320px;
+            z-index: 100;
+            overflow: hidden;
+            animation: slideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+
+            .dropdown-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 16px 20px;
+                border-bottom: 1px solid #f1f5f9;
+                background: #f8fafc;
+
+                h3 {
+                    font-size: 1.05rem;
+                    font-weight: 700;
+                    color: #102a43;
+                    margin: 0;
+                }
+
+                .close-x {
+                    cursor: pointer;
+                    color: #627d98;
+                    font-size: 1rem;
+                    font-weight: 700;
+                    padding: 4px;
+                    transition: color 0.2s;
+
+                    &:hover {
+                        color: #102a43;
+                    }
+                }
+            }
+
+            .dropdown-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+                padding: 16px;
+
+                .dropdown-option {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 8px;
+                    padding: 16px;
+                    border: 1px solid #f1f5f9;
+                    border-radius: 12px;
+                    cursor: pointer;
+                    transition: all 0.2s;
+
+                    .option-icon {
+                        color: #627d98;
+                        transition: color 0.2s;
+                    }
+
+                    span {
+                        font-size: 0.85rem;
+                        font-weight: 600;
+                        color: #486581;
+                    }
+
+                    &:hover {
+                        background: #f4f6fa;
+                        border-color: #cbd5e1;
+
+                        .option-icon {
+                            color: #112b50;
+                        }
+                        span {
+                            color: #112b50;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /* Stats row cards */
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 24px;
+        width: 100%;
+
+        .stat-card {
+            background: white;
+            border: 1.5px solid #e4e7eb; /* Outlined grey cards matching Figma */
+            border-radius: 14px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+
+            &:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+            }
+
+            .card-title {
+                font-size: 0.95rem;
+                font-weight: 700;
+                color: #102a43;
+                text-align: start;
+            }
+
+            /* Icon next to number */
+            .value-container {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                margin-top: 4px;
+
+                .card-icon {
+                    color: #102a43;
+                    flex-shrink: 0;
+                }
+
+                .card-value {
+                    font-size: 1.85rem;
+                    font-weight: 700;
+                    color: #102a43;
+                }
+            }
+
+            .card-trend {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                font-size: 0.85rem;
+                font-weight: 600;
+                margin-top: 4px;
+
+                .trend-arrow {
+                    color: #2ecc71; /* Green arrow */
+                    font-size: 1rem;
+                }
+
+                .trend-text {
+                    color: #94a3b8; /* Light gray text from Figma */
+                }
+            }
+        }
+    }
+
+    /* Empty state section */
+    .empty-state-section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        margin-top: 80px;
+        animation: fadeIn 0.4s ease-out;
+
+        .empty-illustration {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .empty-title {
+            font-size: 1.45rem;
+            font-weight: 700;
+            color: #102a43;
+            margin-bottom: 10px;
+        }
+
+        .empty-subtitle {
+            font-size: 0.95rem;
+            color: #627d98;
+            max-width: 450px;
+            line-height: 1.5;
+        }
+    }
+}
+
+/* RTL Specific adjustments */
+[dir="rtl"] {
+    .create-new-dropdown {
+        right: auto;
+        left: 0;
+    }
+}
+
+/* Responsiveness */
+@media screen and (max-width: 900px) {
+    .dashboard-container {
+        .top-row {
+            flex-wrap: wrap;
+            
+            .search-box {
+                max-width: 100%;
+                width: 100%;
+            }
+            .create-new-wrapper {
+                width: 100%;
+                .create-new-btn {
+                    width: 100%;
+                    justify-content: center;
+                }
+            }
+        }
+    }
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}

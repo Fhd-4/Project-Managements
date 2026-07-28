@@ -1,7 +1,10 @@
 import { Routes } from '@angular/router';
 import { LoginComponent } from './auth/login/login';
-import { DashboardComponent } from './dashboard/dashboard';
 import { ForgotPasswordComponent } from './auth/forgot-password/forgot-password';
+import { LayoutComponent } from './layout/layout';
+import { DashboardComponent } from './dashboard/dashboard';
+import { PortfoliosComponent } from './portfolios/portfolios.component';
+import { CreatePortfolioComponent } from './portfolios/create/create-portfolio';
 
 export const routes: Routes = [
   {
@@ -18,8 +21,26 @@ export const routes: Routes = [
     component: ForgotPasswordComponent
   },
   {
-    path: 'dashboard',
-    component: DashboardComponent
+    path: '',
+    component: LayoutComponent,
+    children: [
+      {
+        path: 'dashboard',
+        component: DashboardComponent
+      },
+      {
+        path: 'portfolios',
+        component: PortfoliosComponent
+      },
+      {
+        path: 'portfolios/create',
+        component: CreatePortfolioComponent
+      },
+      {
+        path: 'portfolios/edit/:id',
+        component: CreatePortfolioComponent
+      }
+    ]
   },
   {
     path: '**',
