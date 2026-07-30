@@ -87,7 +87,7 @@
           <rect x="3" y="7" width="18" height="13" rx="2.5" ry="2.5"></rect>
           <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"></path>
         </svg>
-        <strong class="card-value">{{ totalPortfolios > 0 ? 128 : 0 }}</strong>
+        <strong class="card-value">{{ totalPortfolios }}</strong>
       </div>
       <div class="card-trend" *ngIf="totalPortfolios > 0">
         <span class="trend-arrow">↗</span>
@@ -108,7 +108,7 @@
           <circle cx="12" cy="18.5" r="1.5" fill="currentColor"></circle>
           <circle cx="17" cy="18.5" r="1.5" fill="currentColor"></circle>
         </svg>
-        <strong class="card-value">{{ totalPortfolios > 0 ? 90 : 0 }}</strong>
+        <strong class="card-value">{{ totalPrograms }}</strong>
       </div>
       <div class="card-trend" *ngIf="totalPortfolios > 0">
         <span class="trend-arrow">↗</span>
@@ -128,7 +128,7 @@
           <line x1="16" y1="17" x2="8" y2="17"></line>
           <line x1="10" y1="9" x2="8" y2="9"></line>
         </svg>
-        <strong class="card-value">{{ totalPortfolios > 0 ? 298 : 0 }}</strong>
+        <strong class="card-value">{{ totalProjects }}</strong>
       </div>
       <div class="card-trend" *ngIf="totalPortfolios > 0">
         <span class="trend-arrow">↗</span>
@@ -144,7 +144,7 @@
         <svg class="card-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#102a43" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
         </svg>
-        <strong class="card-value">{{ totalPortfolios > 0 ? '6,500,000' : '00' }}</strong>
+        <strong class="card-value">{{ formatBudget(totalBudget) }}</strong>
       </div>
       <div class="card-trend" *ngIf="totalPortfolios > 0">
         <span class="trend-arrow">↗</span>
