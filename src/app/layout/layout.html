@@ -128,7 +128,7 @@
     <!-- Top Header -->
     <header class="top-header">
       <div class="breadcrumb-title">
-        <div class="header-breadcrumb-container" *ngIf="portfolioService.isCreatePageActive; else normalHeaderTitle">
+        <div class="header-breadcrumb-container" *ngIf="currentRoute.includes('/portfolios/create') || currentRoute.includes('/portfolios/edit') || currentRoute.includes('/portfolios/details'); else normalHeaderTitle">
           <button class="header-back-btn" (click)="goBackToPortfoliosList()">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#102a43" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <line x1="19" y1="12" x2="5" y2="12"></line>
@@ -137,7 +137,15 @@
           </button>
           <div class="breadcrumb-meta">
             <h2 class="breadcrumb-main">{{ isRtl ? 'المحافظ' : 'Portfolios' }}</h2>
-            <span class="breadcrumb-sub">{{ isRtl ? 'المحافظ / إضافة جديد' : 'Portfolios / Create New' }}</span>
+            <span class="breadcrumb-sub" *ngIf="currentRoute.includes('/portfolios/create')">
+              {{ isRtl ? 'المحافظ / إضافة جديد' : 'Portfolios / Create New' }}
+            </span>
+            <span class="breadcrumb-sub" *ngIf="currentRoute.includes('/portfolios/edit')">
+              {{ isRtl ? 'المحافظ / تعديل' : 'Portfolios / Edit' }}
+            </span>
+            <span class="breadcrumb-sub" *ngIf="currentRoute.includes('/portfolios/details')">
+              {{ isRtl ? 'المحافظ / تفاصيل' : 'Portfolios / Details' }}
+            </span>
           </div>
         </div>
         <ng-template #normalHeaderTitle>

@@ -19,6 +19,43 @@ export class CreatePortfolioComponent implements OnInit, OnDestroy {
   editingId: number | null = null;
   isLoading: boolean = false;
 
+  // File Upload State
+  attachedFiles: Array<{ name: string, progress: number, size: string, type: string }> = [
+    { name: 'Topic_1.pdf', progress: 75, size: '2.4 MB', type: 'pdf' },
+    { name: 'Topic_2.doc', progress: 100, size: '1.8 MB', type: 'doc' }
+  ];
+
+  triggerFileInput(fileInput: HTMLInputElement) {
+    fileInput.click();
+  }
+
+  onFileSelected(event: any) {
+    const files = event.target.files;
+    if (files) {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const ext = file.name.split('.').pop()?.toLowerCase() || '';
+        this.attachedFiles.push({
+          name: file.name,
+          progress: 100,
+          size: (file.size / (1024 * 1024)).toFixed(1) + ' MB',
+          type: ext
+        });
+      }
+      this.cdr.detectChanges();
+    }
+  }
+
+  removeFile(index: number) {
+    this.attachedFiles.splice(index, 1);
+    this.cdr.detectChanges();
+  }
+
+  clearAllFiles() {
+    this.attachedFiles = [];
+    this.cdr.detectChanges();
+  }
+
   // Form Fields
   nameAr: string = '';
   nameEn: string = '';
@@ -110,6 +147,30 @@ export class CreatePortfolioComponent implements OnInit, OnDestroy {
     return this.translations[this.currentLang];
   }
 
+  formatBudget(val: number): string {
+    return new Intl.NumberFormat('en-US').format(val);
+  }
+
+  /** Returns 2-letter initials from a full name, e.g. "Faisal Al-Otaibi" → "FA" */
+  getInitials(name: string): string {
+    if (!name) return '?';
+    const parts = name.trim().split(/\s+/);
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  }
+
+  /** Returns a CSS class string for the avatar color based on the selected name */
+  getAvatarClass(name: string): string {
+    const map: Record<string, string> = {
+      'Faisal Al-Otaibi': 'FO',
+      'Omar Al-Harbi':    'OH',
+      'Mahmoud Salah':    'MS',
+    };
+    return 'small-preview-avatar ' + (map[name] || 'FO');
+  }
+
   get isRtl(): boolean {
     return this.currentLang === 'ar';
   }
@@ -142,10 +203,13 @@ export class CreatePortfolioComponent implements OnInit, OnDestroy {
         this.descriptionAr = portfolio.descriptionAr || '';
         this.descriptionEn = portfolio.descriptionEn || '';
         this.budget = portfolio.budget;
-        this.startDate = portfolio.startDate.split('T')[0];
-        this.endDate = portfolio.endDate.split('T')[0];
+        this.startDate = portfolio.startDate ? portfolio.startDate.split('T')[0] : new Date().toISOString().split('T')[0];
+        this.endDate = portfolio.endDate ? portfolio.endDate.split('T')[0] : new Date().toISOString().split('T')[0];
         this.status = portfolio.status;
         this.ownerName = portfolio.ownerName || 'Faisal Al-Otaibi';
+        this.sponsorName = portfolio.sponsorName || 'Omar Al-Harbi';
+        this.managerName = portfolio.managerName || 'Mahmoud Salah';
+        this.category = portfolio.category || 'Execution';
         this.isLoading = false;
         this.cdr.detectChanges();
       },
@@ -157,24 +221,40 @@ export class CreatePortfolioComponent implements OnInit, OnDestroy {
   }
 
   savePortfolio() {
-    if (!this.nameAr || this.budget <= 0 || !this.startDate || !this.endDate) {
+    // Only require name and a valid budget – dates are optional/auto-generated
+    if (!this.nameAr) {
       this.portfolioService.triggerErrorToast();
       return;
     }
 
-    if (new Date(this.endDate) < new Date(this.startDate)) {
+    if (this.budget <= 0) {
       this.portfolioService.triggerErrorToast();
       return;
     }
 
     this.isLoading = true;
 
+    // Auto-generate dates if not provided by the user
+    const today = new Date();
+    const sixMonthsLater = new Date();
+    sixMonthsLater.setMonth(sixMonthsLater.getMonth() + 6);
+
+    const resolvedStartDate = this.startDate
+      ? new Date(this.startDate).toISOString()
+      : today.toISOString();
+
+    const resolvedEndDate = this.endDate
+      ? new Date(this.endDate).toISOString()
+      : sixMonthsLater.toISOString();
+
     const payload = {
       nameAr: this.nameAr,
+      name: this.nameAr,
       descriptionAr: this.descriptionAr,
+      description: this.descriptionAr,
       budget: this.budget,
-      startDate: new Date(this.startDate).toISOString(),
-      endDate: new Date(this.endDate).toISOString(),
+      startDate: resolvedStartDate,
+      endDate: resolvedEndDate,
       status: this.status,
       ownerName: this.ownerName,
       category: this.category,

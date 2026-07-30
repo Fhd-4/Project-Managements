@@ -5,6 +5,7 @@ import { LayoutComponent } from './layout/layout';
 import { DashboardComponent } from './dashboard/dashboard';
 import { PortfoliosComponent } from './portfolios/portfolios.component';
 import { CreatePortfolioComponent } from './portfolios/create/create-portfolio';
+import { PortfolioDetailsComponent } from './portfolios/details/portfolio-details';
 
 export const routes: Routes = [
   {
@@ -39,6 +40,10 @@ export const routes: Routes = [
       {
         path: 'portfolios/edit/:id',
         component: CreatePortfolioComponent
+      },
+      {
+        path: 'portfolios/details/:id',
+        component: PortfolioDetailsComponent
       }
     ]
   },

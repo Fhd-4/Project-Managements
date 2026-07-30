@@ -182,18 +182,32 @@
                         color: #475569;
                     }
 
-                    .or-divider {
-                        font-size: 0.8rem;
-                        color: #94a3b8;
-                        font-weight: 500;
+                    .or-separator {
+                        display: flex;
+                        align-items: center;
+                        width: 80%;
+                        margin: 4px 0;
+                        
+                        .line {
+                            flex: 1;
+                            height: 1px;
+                            background-color: #cbd5e1;
+                        }
+                        
+                        .text {
+                            font-size: 0.8rem;
+                            color: #94a3b8;
+                            font-weight: 600;
+                            margin: 0 12px;
+                        }
                     }
 
                     .upload-trigger-btn {
                         background: white;
-                        border: 1.5px solid #e2e8f0;
-                        color: #1e293b;
-                        padding: 6px 20px;
-                        border-radius: 20px;
+                        border: 1.5px solid #1e3a8a;
+                        color: #1e3a8a;
+                        padding: 8px 24px;
+                        border-radius: 8px;
                         font-weight: 700;
                         font-size: 0.85rem;
                         cursor: pointer;
@@ -204,7 +218,7 @@
 
                         &:hover {
                             background-color: #f1f5f9;
-                            border-color: #cbd5e1;
+                            border-color: #1e293b;
                         }
                     }
 
@@ -215,17 +229,25 @@
                     }
                 }
 
-                /* Block showing No attachments state */
-                .no-attachments-box {
+                /* Attachments Panel on Right */
+                .attachments-panel {
+                    flex: 1;
                     background: #f8fafc;
                     border: 1.5px solid #e2e8f0;
                     border-radius: 12px;
-                    padding: 24px;
+                    padding: 20px;
+                    display: flex;
+                    flex-direction: column;
+                    min-height: 175px;
+                }
+
+                .no-attachments-box {
                     display: flex;
                     flex-direction: column;
                     align-items: center;
                     justify-content: center;
                     gap: 12px;
+                    flex: 1;
 
                     .attachment-visual {
                         position: relative;
@@ -238,7 +260,7 @@
                             width: 18px;
                             height: 18px;
                             border-radius: 50%;
-                            background-color: #ef4444; /* red delete overlay */
+                            background-color: #ef4444;
                             border: 1.5px solid white;
                             display: flex;
                             align-items: center;
@@ -252,6 +274,170 @@
                         font-size: 0.85rem;
                         font-weight: 600;
                         color: #627d98;
+                    }
+                }
+
+                .attached-files-list-container {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 14px;
+                    height: 100%;
+                    width: 100%;
+
+                    .attached-title {
+                        font-size: 0.95rem;
+                        font-weight: 700;
+                        color: #1e293b;
+                        margin: 0;
+                        text-align: start;
+                    }
+                }
+
+                .attached-files-list {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+                    max-height: 150px;
+                    overflow-y: auto;
+                    width: 100%;
+                }
+
+                .attached-file-item {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    background: white;
+                    padding: 10px 14px;
+                    border-radius: 8px;
+                    border: 1px solid #e2e8f0;
+                    width: 100%;
+                    box-sizing: border-box;
+
+                    .file-icon-badge {
+                        width: 32px;
+                        height: 36px;
+                        border-radius: 4px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-weight: 800;
+                        font-size: 0.65rem;
+                        color: white;
+                        flex-shrink: 0;
+
+                        &.pdf { background-color: #ef4444; }
+                        &.doc, &.docx { background-color: #3b82f6; }
+                        &.zip, &.rar { background-color: #f59e0b; }
+                        &.png, &.jpg, &.jpeg, &.svg { background-color: #10b981; }
+                    }
+
+                    .file-progress-details {
+                        flex: 1;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 4px;
+
+                        .file-name-row {
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+
+                            .file-name {
+                                font-size: 0.8rem;
+                                font-weight: 600;
+                                color: #334155;
+                                text-align: start;
+                                overflow: hidden;
+                                text-overflow: ellipsis;
+                                white-space: nowrap;
+                                max-width: 150px;
+                            }
+                        }
+
+                        .progress-bar-wrapper {
+                            display: flex;
+                            align-items: center;
+                            gap: 8px;
+
+                            .progress-track {
+                                flex: 1;
+                                height: 6px;
+                                background-color: #f1f5f9;
+                                border-radius: 3px;
+                                overflow: hidden;
+                            }
+
+                            .progress-fill {
+                                height: 100%;
+                                background-color: #3b82f6;
+                                border-radius: 3px;
+                                transition: width 0.3s ease;
+                            }
+
+                            .progress-pct {
+                                font-size: 0.7rem;
+                                font-weight: 700;
+                                color: #64748b;
+                                width: 30px;
+                                text-align: right;
+                            }
+                        }
+                    }
+
+                    .delete-file-btn {
+                        background: none;
+                        border: none;
+                        padding: 4px;
+                        cursor: pointer;
+                        color: #ef4444;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        transition: transform 0.2s;
+
+                        &:hover {
+                            transform: scale(1.15);
+                        }
+                    }
+                }
+
+                .attachments-footer-actions {
+                    display: flex;
+                    justify-content: flex-end;
+                    gap: 12px;
+                    margin-top: auto;
+                    padding-top: 10px;
+
+                    button {
+                        padding: 6px 16px;
+                        border-radius: 20px;
+                        font-weight: 700;
+                        font-size: 0.8rem;
+                        cursor: pointer;
+                        display: flex;
+                        align-items: center;
+                        gap: 6px;
+                        transition: all 0.2s;
+                    }
+
+                    .clear-all-btn {
+                        background: white;
+                        border: 1px solid #cbd5e1;
+                        color: #475569;
+
+                        &:hover {
+                            background: #f1f5f9;
+                        }
+                    }
+
+                    .add-attached-btn {
+                        background: #112b50;
+                        border: none;
+                        color: white;
+
+                        &:hover {
+                            background: #1a365d;
+                        }
                     }
                 }
             }

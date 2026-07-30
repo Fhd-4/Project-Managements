@@ -1,0 +1,343 @@
+.details-page-container {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    animation: fadeIn 0.4s ease-out;
+
+    .details-main-card {
+        background: white;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 28px 32px;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    /* ── Card Title Row ── */
+    .card-title-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        .portfolio-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin: 0;
+            text-align: start;
+            flex: 1;
+        }
+
+        .edit-icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+
+            &:hover {
+                background: #eff6ff;
+            }
+        }
+    }
+
+    /* ── Persons + Wheel Row ── */
+    .persons-status-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 20px;
+        align-items: stretch;
+    }
+
+    /* 3 Person Cards in a row */
+    .persons-cards-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+    }
+
+    .person-card {
+        border: 1.5px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 14px 16px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 16px;
+        background: white;
+        min-height: 120px;
+
+        .person-card-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            position: relative;
+
+            .person-avatar {
+                width: 34px;
+                height: 34px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+
+                &.FO { background: #fee2e2; color: #b91c1c; }
+                &.OH { background: #e0fcff; color: #008290; }
+                &.MS { background: #fffae6; color: #b7791f; }
+            }
+
+            .person-meta {
+                display: flex;
+                flex-direction: column;
+                gap: 2px;
+                text-align: start;
+
+                .person-name {
+                    font-size: 0.82rem;
+                    font-weight: 700;
+                    color: #0f172a;
+                    line-height: 1.2;
+                }
+
+                .person-role {
+                    font-size: 0.72rem;
+                    color: #64748b;
+                    font-weight: 500;
+                }
+            }
+
+            .card-date {
+                position: absolute;
+                top: 0;
+                inset-inline-end: 0;
+                font-size: 0.7rem;
+                color: #94a3b8;
+                font-weight: 600;
+                white-space: nowrap;
+            }
+        }
+
+        .person-card-footer {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            text-align: start;
+
+            &.approved { color: #16a34a; }
+            &.pending { color: #d97706; }
+            &.refusing { color: #dc2626; }
+        }
+    }
+
+    /* Right: Progress Wheel Card */
+    .status-wheel-card {
+        border: 1.5px solid #fcd34d;
+        border-radius: 12px;
+        padding: 18px 22px;
+        background: white;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        min-width: 150px;
+
+        .wheel-status-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+
+            .status-text {
+                font-size: 0.95rem;
+                font-weight: 800;
+
+                &.active { color: #22c55e; }
+                &.onhold, &.pending { color: #f59e0b; }
+                &.completed { color: #3b82f6; }
+                &.rejected { color: #ef4444; }
+            }
+
+            .bullet-row {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+
+                .dot {
+                    width: 7px;
+                    height: 7px;
+                    border-radius: 50%;
+
+                    &.active { background: #22c55e; }
+                    &.onhold, &.pending { background: #f59e0b; }
+                    &.completed { background: #3b82f6; }
+                    &.rejected { background: #ef4444; }
+                }
+
+                .in-progress-label {
+                    font-size: 0.72rem;
+                    color: #f59e0b;
+                    font-weight: 700;
+                }
+            }
+        }
+
+        .donut-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            .donut-svg {
+                display: block;
+            }
+
+            .wheel-dot-marker {
+                position: absolute;
+                top: 4px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 6px;
+                height: 6px;
+                border-radius: 50%;
+                background: #f59e0b;
+            }
+        }
+    }
+
+    /* ── Stats Pills Row ── */
+    .stats-pills-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+
+        .stat-pill {
+            border: 1.5px solid #102a43;
+            border-radius: 10px;
+            padding: 13px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: white;
+
+            .pill-label {
+                font-size: 0.9rem;
+                font-weight: 600;
+                color: #334155;
+            }
+
+            .pill-value {
+                font-size: 0.95rem;
+                font-weight: 800;
+                color: #0f172a;
+            }
+
+            &.budget-pill {
+                .riyal-icon {
+                    font-size: 1.1rem;
+                    font-weight: 800;
+                    color: #0f172a;
+                }
+            }
+        }
+    }
+
+    /* ── Documents Row ── */
+    .documents-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 20px;
+        background: #f8fafc;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 12px;
+
+        .documents-label {
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: #334155;
+        }
+
+        .doc-files {
+            display: flex;
+            gap: 20px;
+
+            .file-badge {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 5px;
+                cursor: pointer;
+                transition: transform 0.2s;
+
+                &:hover {
+                    transform: scale(1.06);
+                }
+
+                .file-label {
+                    font-size: 0.7rem;
+                    color: #64748b;
+                    font-weight: 600;
+                }
+            }
+        }
+    }
+
+    /* ── Description Block ── */
+    .description-block {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        text-align: start;
+
+        .desc-title {
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: #334155;
+            margin: 0;
+        }
+
+        .desc-text {
+            font-size: 0.88rem;
+            color: #475569;
+            line-height: 1.7;
+            margin: 0;
+            background: #f8fafc;
+            padding: 14px 18px;
+            border-radius: 10px;
+        }
+    }
+}
+
+/* ── RTL Direction Overrides ── */
+[dir="rtl"] {
+    .person-card {
+        .person-card-header {
+            .person-meta {
+                text-align: right;
+            }
+            .person-card-footer {
+                text-align: right;
+            }
+        }
+    }
+    .description-block {
+        .desc-title, .desc-text {
+            text-align: right;
+        }
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
