@@ -68,7 +68,7 @@
               <option value="Mahmoud Salah">Mahmoud Salah</option>
             </select>
             <div class="avatar-badge-preview">
-              <div class="small-preview-avatar FO">FA</div>
+              <div class="small-preview-avatar" [class]="getAvatarClass(ownerName)">{{ getInitials(ownerName) }}</div>
             </div>
             <svg class="select-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="6 9 12 15 18 9"></polyline>
@@ -86,7 +86,7 @@
               <option value="Mahmoud Salah">Mahmoud Salah</option>
             </select>
             <div class="avatar-badge-preview">
-              <div class="small-preview-avatar OH">OM</div>
+              <div class="small-preview-avatar" [class]="getAvatarClass(sponsorName)">{{ getInitials(sponsorName) }}</div>
             </div>
             <svg class="select-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="6 9 12 15 18 9"></polyline>
@@ -104,7 +104,7 @@
               <option value="Omar Al-Harbi">Omar Al-Harbi</option>
             </select>
             <div class="avatar-badge-preview">
-              <div class="small-preview-avatar MS">MS</div>
+              <div class="small-preview-avatar" [class]="getAvatarClass(managerName)">{{ getInitials(managerName) }}</div>
             </div>
             <svg class="select-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="6 9 12 15 18 9"></polyline>

@@ -147,6 +147,30 @@ export class CreatePortfolioComponent implements OnInit, OnDestroy {
     return this.translations[this.currentLang];
   }
 
+  formatBudget(val: number): string {
+    return new Intl.NumberFormat('en-US').format(val);
+  }
+
+  /** Returns 2-letter initials from a full name, e.g. "Faisal Al-Otaibi" → "FA" */
+  getInitials(name: string): string {
+    if (!name) return '?';
+    const parts = name.trim().split(/\s+/);
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  }
+
+  /** Returns a CSS class string for the avatar color based on the selected name */
+  getAvatarClass(name: string): string {
+    const map: Record<string, string> = {
+      'Faisal Al-Otaibi': 'FO',
+      'Omar Al-Harbi':    'OH',
+      'Mahmoud Salah':    'MS',
+    };
+    return 'small-preview-avatar ' + (map[name] || 'FO');
+  }
+
   get isRtl(): boolean {
     return this.currentLang === 'ar';
   }
