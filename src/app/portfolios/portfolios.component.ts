@@ -269,6 +269,10 @@ export class PortfoliosComponent implements OnInit {
     this.router.navigate(['/portfolios/edit', portfolio.id]);
   }
 
+  viewPortfolioDetails(id: number) {
+    this.router.navigate(['/portfolios/details', id]);
+  }
+
   closeModal() {
     this.isModalOpen = false;
     this.portfolioService.isCreatePageActive = false;
