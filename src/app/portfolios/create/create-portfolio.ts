@@ -19,6 +19,43 @@ export class CreatePortfolioComponent implements OnInit, OnDestroy {
   editingId: number | null = null;
   isLoading: boolean = false;
 
+  // File Upload State
+  attachedFiles: Array<{ name: string, progress: number, size: string, type: string }> = [
+    { name: 'Topic_1.pdf', progress: 75, size: '2.4 MB', type: 'pdf' },
+    { name: 'Topic_2.doc', progress: 100, size: '1.8 MB', type: 'doc' }
+  ];
+
+  triggerFileInput(fileInput: HTMLInputElement) {
+    fileInput.click();
+  }
+
+  onFileSelected(event: any) {
+    const files = event.target.files;
+    if (files) {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const ext = file.name.split('.').pop()?.toLowerCase() || '';
+        this.attachedFiles.push({
+          name: file.name,
+          progress: 100,
+          size: (file.size / (1024 * 1024)).toFixed(1) + ' MB',
+          type: ext
+        });
+      }
+      this.cdr.detectChanges();
+    }
+  }
+
+  removeFile(index: number) {
+    this.attachedFiles.splice(index, 1);
+    this.cdr.detectChanges();
+  }
+
+  clearAllFiles() {
+    this.attachedFiles = [];
+    this.cdr.detectChanges();
+  }
+
   // Form Fields
   nameAr: string = '';
   nameEn: string = '';
@@ -142,10 +179,13 @@ export class CreatePortfolioComponent implements OnInit, OnDestroy {
         this.descriptionAr = portfolio.descriptionAr || '';
         this.descriptionEn = portfolio.descriptionEn || '';
         this.budget = portfolio.budget;
-        this.startDate = portfolio.startDate.split('T')[0];
-        this.endDate = portfolio.endDate.split('T')[0];
+        this.startDate = portfolio.startDate ? portfolio.startDate.split('T')[0] : new Date().toISOString().split('T')[0];
+        this.endDate = portfolio.endDate ? portfolio.endDate.split('T')[0] : new Date().toISOString().split('T')[0];
         this.status = portfolio.status;
         this.ownerName = portfolio.ownerName || 'Faisal Al-Otaibi';
+        this.sponsorName = portfolio.sponsorName || 'Omar Al-Harbi';
+        this.managerName = portfolio.managerName || 'Mahmoud Salah';
+        this.category = portfolio.category || 'Execution';
         this.isLoading = false;
         this.cdr.detectChanges();
       },

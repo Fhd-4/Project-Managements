@@ -84,10 +84,10 @@ export class DashboardComponent implements OnInit {
     this.isLoading = true;
     this.portfolioService.getDashboardStats().subscribe({
       next: (stats) => {
-        this.totalPortfolios = stats.totalPortfolios;
-        this.totalPrograms = stats.totalPortfolios > 0 ? 90 : 0; // matching Figma pop stats if populated, otherwise 0
-        this.totalProjects = stats.totalProjects;
-        this.totalBudget = stats.totalBudget;
+        this.totalPortfolios = stats.totalPortfolios ?? 0;
+        this.totalPrograms   = stats.totalPrograms   ?? 0;
+        this.totalProjects   = stats.totalProjects   ?? 0;
+        this.totalBudget     = stats.totalBudget     ?? 0;
         this.isLoading = false;
         this.cdr.detectChanges();
       },

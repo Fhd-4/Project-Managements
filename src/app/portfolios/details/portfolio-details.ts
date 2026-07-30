@@ -1,6 +1,6 @@
 import { Component, ChangeDetectorRef, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, ActivatedRoute, RouterLink } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { PortfolioService, Portfolio } from '../portfolio.service';
 
 type LangCode = 'ar' | 'en';
@@ -8,7 +8,7 @@ type LangCode = 'ar' | 'en';
 @Component({
   selector: 'app-portfolio-details',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule],
   templateUrl: './portfolio-details.html',
   styleUrl: './portfolio-details.scss'
 })
@@ -21,34 +21,10 @@ export class PortfolioDetailsComponent implements OnInit, OnDestroy {
   translations = {
     ar: {
       langLabel: 'English',
-      title: 'تفاصيل المحفظة',
-      breadcrumb: 'المحافظ / تفاصيل المحفظة',
-      ownerRole: 'مالك المحفظة',
-      sponsorRole: 'راعي المحفظة',
-      managerRole: 'مدير المحفظة',
-      approved: 'تمت الموافقة',
-      pending: 'قيد الانتظار',
-      refusing: 'مرفوض',
-      projects: 'المشاريع',
-      programs: 'البرامج',
-      budget: 'الميزانية',
-      documents: 'المستندات:',
       description: 'الوصف'
     },
     en: {
       langLabel: 'العربية',
-      title: 'Portfolio Details',
-      breadcrumb: 'Portfolios / Portfolio Details',
-      ownerRole: 'Portfolio Owner',
-      sponsorRole: 'Portfolio Sponsor',
-      managerRole: 'Portfolio Manager',
-      approved: 'Approved',
-      pending: 'Pending',
-      refusing: 'Refusing',
-      projects: 'Projects',
-      programs: 'Programs',
-      budget: 'Budget',
-      documents: 'Documents:',
       description: 'Description'
     }
   };
@@ -65,7 +41,6 @@ export class PortfolioDetailsComponent implements OnInit, OnDestroy {
         this.currentLang = savedLang;
       }
     }
-    // Inform the layout shell that the Create/Details page is active to display breadcrumbs in the header
     this.portfolioService.isCreatePageActive = true;
   }
 
@@ -83,7 +58,6 @@ export class PortfolioDetailsComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    // Reset layout shell title state when leaving the page
     this.portfolioService.isCreatePageActive = false;
   }
 
@@ -105,7 +79,6 @@ export class PortfolioDetailsComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         console.error('Error fetching details', err);
-        // Serve a mock portfolio if API is offline so page doesn't break
         this.portfolio = {
           id: id,
           nameAr: 'محفظة التحول الرقمي المؤقتة',
@@ -117,8 +90,11 @@ export class PortfolioDetailsComponent implements OnInit, OnDestroy {
           endDate: new Date().toISOString(),
           status: 'Active',
           ownerName: 'Faisal Al-Otaibi',
+          sponsorName: 'Omar Al-Harbi',
+          managerName: 'Mahmoud Salah',
+          createdDate: '2026-05-10T00:00:00Z',
           projectsCount: 50,
-          programsCount: 12
+          programsCount: 50
         };
         this.isLoading = false;
         this.cdr.detectChanges();

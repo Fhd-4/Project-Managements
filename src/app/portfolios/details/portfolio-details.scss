@@ -1,386 +1,338 @@
 .details-page-container {
     display: flex;
     flex-direction: column;
-    gap: 30px;
+    gap: 24px;
     animation: fadeIn 0.4s ease-out;
 
-    .details-card {
+    .details-main-card {
         background: white;
-        padding: 10px 0;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 28px 32px;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+    }
 
-        /* Title Card Header with edit action */
-        .details-title-card {
+    /* ── Card Title Row ── */
+    .card-title-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        .portfolio-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin: 0;
+            text-align: start;
+            flex: 1;
+        }
+
+        .edit-icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 8px;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 1.5px solid #e4e7eb;
-            border-radius: 12px;
-            padding: 16px 24px;
-            margin-bottom: 24px;
-            background: white;
-
-            .title-text {
-                font-size: 1.15rem;
-                font-weight: 700;
-                color: #102a43;
-                margin: 0;
-            }
-
-            .edit-btn {
-                background: #f1f5f9;
-                border: 1.5px solid #cbd5e1;
-                border-radius: 8px;
-                width: 38px;
-                height: 38px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                cursor: pointer;
-                outline: none;
-                transition: all 0.2s;
-
-                &:hover {
-                    background: #e2e8f0;
-                    border-color: #94a3b8;
-                }
-            }
-        }
-
-        /* Overview grid containing cards */
-        .overview-grid {
-            display: grid;
-            grid-template-columns: 2.8fr 1fr;
-            gap: 24px;
-            margin-bottom: 24px;
-        }
-
-        /* 3 Administrators cards container */
-        .admin-cards-container {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-
-            .admin-card {
-                border: 1.5px solid #cbd5e1;
-                border-radius: 12px;
-                padding: 16px;
-                background: white;
-                display: flex;
-                flex-direction: column;
-                justify-content: space-between;
-                gap: 20px;
-                min-height: 120px;
-
-                .admin-header {
-                    display: flex;
-                    align-items: center;
-                    gap: 10px;
-                    position: relative;
-                    width: 100%;
-
-                    .avatar-circle {
-                        width: 32px;
-                        height: 32px;
-                        border-radius: 50%;
-                        font-size: 0.8rem;
-                        font-weight: 700;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        flex-shrink: 0;
-
-                        &.font-fa { background: #fee2e2; color: #b91c1c; }
-                        &.font-oh { background: #e0fcff; color: #008290; }
-                        &.font-ms { background: #fffae6; color: #b7791f; }
-                    }
-
-                    .admin-meta {
-                        display: flex;
-                        flex-direction: column;
-                        align-items: flex-start;
-                        text-align: start;
-
-                        .admin-name {
-                            font-size: 0.85rem;
-                            font-weight: 700;
-                            color: #102a43;
-                        }
-
-                        .admin-role {
-                            font-size: 0.75rem;
-                            color: #627d98;
-                            font-weight: 500;
-                        }
-                    }
-
-                    .admin-date {
-                        position: absolute;
-                        top: 0;
-                        inset-inline-end: 0; /* automatic RTL/LTR placement */
-                        font-size: 0.7rem;
-                        color: #94a3b8;
-                        font-weight: 600;
-                    }
-                }
-
-                .admin-status {
-                    display: flex;
-                    align-items: center;
-                    gap: 6px;
-                    font-size: 0.85rem;
-                    font-weight: 700;
-
-                    .status-icon {
-                        flex-shrink: 0;
-                    }
-
-                    &.approved {
-                        color: #22c55e;
-                    }
-
-                    &.pending {
-                        color: #f59e0b;
-                    }
-
-                    &.refusing {
-                        color: #ef4444;
-                    }
-                }
-            }
-        }
-
-        /* Right side progress wheel card */
-        .progress-wheel-card {
-            border: 1.5px solid #f59e0b;
-            border-radius: 12px;
-            padding: 16px;
-            background: white;
-            display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 16px;
-            min-height: 120px;
-            box-sizing: border-box;
+            transition: background 0.2s;
 
-            .wheel-header {
+            &:hover {
+                background: #eff6ff;
+            }
+        }
+    }
+
+    /* ── Persons + Wheel Row ── */
+    .persons-status-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 20px;
+        align-items: stretch;
+    }
+
+    /* 3 Person Cards in a row */
+    .persons-cards-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+    }
+
+    .person-card {
+        border: 1.5px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 14px 16px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 16px;
+        background: white;
+        min-height: 120px;
+
+        .person-card-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            position: relative;
+
+            .person-avatar {
+                width: 34px;
+                height: 34px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+
+                &.FO { background: #fee2e2; color: #b91c1c; }
+                &.OH { background: #e0fcff; color: #008290; }
+                &.MS { background: #fffae6; color: #b7791f; }
+            }
+
+            .person-meta {
+                display: flex;
+                flex-direction: column;
+                gap: 2px;
+                text-align: start;
+
+                .person-name {
+                    font-size: 0.82rem;
+                    font-weight: 700;
+                    color: #0f172a;
+                    line-height: 1.2;
+                }
+
+                .person-role {
+                    font-size: 0.72rem;
+                    color: #64748b;
+                    font-weight: 500;
+                }
+            }
+
+            .card-date {
+                position: absolute;
+                top: 0;
+                inset-inline-end: 0;
+                font-size: 0.7rem;
+                color: #94a3b8;
+                font-weight: 600;
+                white-space: nowrap;
+            }
+        }
+
+        .person-card-footer {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            text-align: start;
+
+            &.approved { color: #16a34a; }
+            &.pending { color: #d97706; }
+            &.refusing { color: #dc2626; }
+        }
+    }
+
+    /* Right: Progress Wheel Card */
+    .status-wheel-card {
+        border: 1.5px solid #fcd34d;
+        border-radius: 12px;
+        padding: 18px 22px;
+        background: white;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        min-width: 150px;
+
+        .wheel-status-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+
+            .status-text {
+                font-size: 0.95rem;
+                font-weight: 800;
+
+                &.active { color: #22c55e; }
+                &.onhold, &.pending { color: #f59e0b; }
+                &.completed { color: #3b82f6; }
+                &.rejected { color: #ef4444; }
+            }
+
+            .bullet-row {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+
+                .dot {
+                    width: 7px;
+                    height: 7px;
+                    border-radius: 50%;
+
+                    &.active { background: #22c55e; }
+                    &.onhold, &.pending { background: #f59e0b; }
+                    &.completed { background: #3b82f6; }
+                    &.rejected { background: #ef4444; }
+                }
+
+                .in-progress-label {
+                    font-size: 0.72rem;
+                    color: #f59e0b;
+                    font-weight: 700;
+                }
+            }
+        }
+
+        .donut-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            .donut-svg {
+                display: block;
+            }
+
+            .wheel-dot-marker {
+                position: absolute;
+                top: 4px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 6px;
+                height: 6px;
+                border-radius: 50%;
+                background: #f59e0b;
+            }
+        }
+    }
+
+    /* ── Stats Pills Row ── */
+    .stats-pills-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+
+        .stat-pill {
+            border: 1.5px solid #102a43;
+            border-radius: 10px;
+            padding: 13px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: white;
+
+            .pill-label {
+                font-size: 0.9rem;
+                font-weight: 600;
+                color: #334155;
+            }
+
+            .pill-value {
+                font-size: 0.95rem;
+                font-weight: 800;
+                color: #0f172a;
+            }
+
+            &.budget-pill {
+                .riyal-icon {
+                    font-size: 1.1rem;
+                    font-weight: 800;
+                    color: #0f172a;
+                }
+            }
+        }
+    }
+
+    /* ── Documents Row ── */
+    .documents-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 20px;
+        background: #f8fafc;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 12px;
+
+        .documents-label {
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: #334155;
+        }
+
+        .doc-files {
+            display: flex;
+            gap: 20px;
+
+            .file-badge {
                 display: flex;
                 flex-direction: column;
                 align-items: center;
-                width: 100%;
+                gap: 5px;
+                cursor: pointer;
+                transition: transform 0.2s;
 
-                .status-title {
-                    font-size: 0.9rem;
-                    font-weight: 700;
-                    color: #102a43;
+                &:hover {
+                    transform: scale(1.06);
                 }
 
-                .status-bullet-row {
-                    display: flex;
-                    align-items: center;
-                    gap: 6px;
-                    font-size: 0.75rem;
-                    color: #f59e0b;
-                    font-weight: 700;
-                    margin-top: 2px;
-
-                    .bullet {
-                        width: 6px;
-                        height: 6px;
-                        border-radius: 50%;
-
-                        &.orange {
-                            background: #f59e0b;
-                        }
-                    }
-                }
-            }
-
-            .donut-chart-container {
-                position: relative;
-                width: 110px;
-                height: 110px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-
-                .donut-svg {
-                    transform: rotate(-90deg);
-                }
-
-                .donut-ring {
-                    stroke: #f1f5f9;
-                }
-
-                .donut-segment {
-                    stroke: #f59e0b;
-                    stroke-linecap: round;
-                }
-
-                .percentage-text {
-                    font-size: 7px;
-                    font-weight: 700;
-                    fill: #f59e0b;
-                }
-
-                /* small bullet marker overlaying circle start */
-                .circle-bullet-marker {
-                    position: absolute;
-                    top: 5px; /* aligned to the top marker */
-                    left: 50%;
-                    transform: translateX(-50%);
-                    width: 5px;
-                    height: 5px;
-                    border-radius: 50%;
-                    background: #f59e0b;
-                    pointer-events: none;
-                }
-            }
-        }
-
-        /* Metadata Pills Row */
-        .metadata-pills-row {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-            margin-bottom: 24px;
-
-            .meta-pill {
-                border: 1.5px solid #102a43;
-                border-radius: 8px;
-                padding: 12px 24px;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                gap: 10px;
-                font-size: 0.95rem;
-                background: white;
-
-                .pill-label {
-                    color: #102a43;
+                .file-label {
+                    font-size: 0.7rem;
+                    color: #64748b;
                     font-weight: 600;
                 }
-
-                .pill-value {
-                    color: #102a43;
-                    font-weight: 700;
-                }
             }
         }
+    }
 
-        /* Documents list box */
-        .documents-container {
-            border: 1.5px solid #e4e7eb;
-            border-radius: 12px;
-            padding: 16px 24px;
+    /* ── Description Block ── */
+    .description-block {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        text-align: start;
+
+        .desc-title {
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: #334155;
+            margin: 0;
+        }
+
+        .desc-text {
+            font-size: 0.88rem;
+            color: #475569;
+            line-height: 1.7;
+            margin: 0;
             background: #f8fafc;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-
-            .documents-label {
-                font-size: 0.95rem;
-                font-weight: 700;
-                color: #102a43;
-            }
-
-            .doc-files-row {
-                display: flex;
-                gap: 16px;
-
-                .file-badge {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    gap: 4px;
-                    width: 60px;
-
-                    .file-icon {
-                        cursor: pointer;
-                        transition: transform 0.2s;
-
-                        &:hover {
-                            transform: scale(1.08);
-                        }
-                    }
-
-                    .file-name {
-                        font-size: 0.75rem;
-                        color: #627d98;
-                        font-weight: 600;
-                        white-space: nowrap;
-                        overflow: hidden;
-                        text-overflow: ellipsis;
-                        width: 100%;
-                    }
-                }
-            }
-        }
-
-        /* Description Block */
-        .description-section {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-bottom: 24px;
-
-            .section-title {
-                font-size: 0.95rem;
-                font-weight: 700;
-                color: #627d98;
-                text-align: start;
-                margin: 0;
-            }
-
-            .description-content-box {
-                background: #f8fafc;
-                border-radius: 12px;
-                padding: 18px 24px;
-                border: 1.5px solid #e4e7eb;
-
-                p {
-                    font-size: 0.9rem;
-                    color: #486581;
-                    line-height: 1.6;
-                    text-align: start;
-                    margin: 0;
-                }
-            }
-        }
-
-        /* Footer description row inside the card */
-        .footer-description {
-            text-align: center;
-            font-size: 0.8rem;
-            color: #94a3b8;
-            padding-top: 15px;
-            border-top: 1px solid #e4e7eb;
-            margin-top: 20px;
+            padding: 14px 18px;
+            border-radius: 10px;
         }
     }
 }
 
-/* Responsive grid layouts */
-@media (max-width: 992px) {
-    .details-page-container {
-        .details-card {
-            .overview-grid {
-                grid-template-columns: 1fr;
+/* ── RTL Direction Overrides ── */
+[dir="rtl"] {
+    .person-card {
+        .person-card-header {
+            .person-meta {
+                text-align: right;
+            }
+            .person-card-footer {
+                text-align: right;
             }
         }
     }
-}
-
-@media (max-width: 768px) {
-    .details-page-container {
-        .details-card {
-            .admin-cards-container {
-                grid-template-columns: 1fr;
-            }
-            .metadata-pills-row {
-                grid-template-columns: 1fr;
-            }
+    .description-block {
+        .desc-title, .desc-text {
+            text-align: right;
         }
     }
 }

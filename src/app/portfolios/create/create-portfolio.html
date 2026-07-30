@@ -122,17 +122,26 @@
       <!-- Attach Files row -->
       <div class="attachment-section">
         <label class="section-label">Attach File</label>
-        <div class="attachment-grid">
+        
+        <!-- Hidden real file input -->
+        <input type="file" #fileInput style="display: none;" (change)="onFileSelected($event)" multiple>
+        
+        <div class="attachment-grid" [class.has-attachments]="attachedFiles.length > 0">
+          
           <!-- Dashed Upload trigger box -->
-          <div class="upload-dashed-box">
+          <div class="upload-dashed-box" (click)="triggerFileInput(fileInput)">
             <svg class="upload-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
               <line x1="12" y1="11" x2="12" y2="17"></line>
               <polyline points="9 14 12 11 15 14"></polyline>
             </svg>
             <span class="drag-text">Drag your file(s) to start uploading</span>
-            <span class="or-divider">OR</span>
-            <button type="button" class="upload-trigger-btn">
+            <div class="or-separator">
+              <span class="line"></span>
+              <span class="text">OR</span>
+              <span class="line"></span>
+            </div>
+            <button type="button" class="upload-trigger-btn" (click)="$event.stopPropagation(); triggerFileInput(fileInput)">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="12" y1="19" x2="12" y2="5"></line>
                 <polyline points="5 12 12 5 19 12"></polyline>
@@ -142,25 +151,79 @@
             <span class="limits-text">You can upload up to 5 files max. Only support .jpg, .png and .svg and .zip files</span>
           </div>
 
-          <!-- Empty attachment visual representation -->
-          <div class="no-attachments-box">
-            <div class="attachment-visual">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#627d98" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                <polyline points="14 2 14 8 20 8"></polyline>
-                <line x1="16" y1="13" x2="8" y2="13"></line>
-                <line x1="16" y1="17" x2="8" y2="17"></line>
-              </svg>
-              <!-- Red delete circular overlay -->
-              <div class="red-delete-badge">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
+          <!-- Attachments Panel (Right Side) -->
+          <div class="attachments-panel">
+            <!-- Case 1: Empty Attachments State -->
+            <div class="no-attachments-box" *ngIf="attachedFiles.length === 0">
+              <div class="attachment-visual">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#627d98" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
                 </svg>
+                <div class="red-delete-badge">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </div>
+              </div>
+              <span class="no-attachment-text">No Attachment</span>
+            </div>
+
+            <!-- Case 2: Attached Files List -->
+            <div class="attached-files-list-container" *ngIf="attachedFiles.length > 0">
+              <h4 class="attached-title">File Attached</h4>
+              
+              <div class="attached-files-list">
+                <div class="attached-file-item" *ngFor="let file of attachedFiles; let idx = index">
+                  <!-- File type icon -->
+                  <div class="file-icon-badge" [class]="file.type">
+                    <span class="type-text">{{ file.type.toUpperCase() }}</span>
+                  </div>
+                  
+                  <!-- File details & Progress bar -->
+                  <div class="file-progress-details">
+                    <div class="file-name-row">
+                      <span class="file-name">{{ file.name }}</span>
+                    </div>
+                    <div class="progress-bar-wrapper">
+                      <div class="progress-track">
+                        <div class="progress-fill" [style.width.%]="file.progress"></div>
+                      </div>
+                      <span class="progress-pct">{{ file.progress }}%</span>
+                    </div>
+                  </div>
+
+                  <!-- Trash delete button -->
+                  <button type="button" class="delete-file-btn" (click)="removeFile(idx)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="3 6 5 6 21 6"></polyline>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                      <line x1="10" y1="11" x2="10" y2="17"></line>
+                      <line x1="14" y1="11" x2="14" y2="17"></line>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Attachments action footer -->
+              <div class="attachments-footer-actions">
+                <button type="button" class="clear-all-btn" (click)="clearAllFiles()">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                  Cancel
+                </button>
+                <button type="button" class="add-attached-btn" (click)="triggerFileInput(fileInput)">
+                  <span>+</span> Add New
+                </button>
               </div>
             </div>
-            <span class="no-attachment-text">No Attachment</span>
           </div>
+
         </div>
       </div>
 
