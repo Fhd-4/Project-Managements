@@ -141,22 +141,15 @@
     </div>
 
     <!-- Documents Row -->
-    <div class="documents-row">
+    <div class="documents-row" *ngIf="attachedFiles && attachedFiles.length > 0">
       <span class="documents-label">Documents:</span>
       <div class="doc-files">
-        <div class="file-badge">
+        <div class="file-badge" *ngFor="let file of attachedFiles" (click)="downloadFile(file.path)" [title]="file.name">
           <svg width="36" height="44" viewBox="0 0 36 44" fill="none">
-            <rect width="36" height="44" rx="4" fill="#3B82F6"/>
-            <text x="18" y="28" text-anchor="middle" fill="white" font-size="9" font-weight="800">DOC</text>
+            <rect width="36" height="44" rx="4" [attr.fill]="getFileColor(file.type)"/>
+            <text x="18" y="28" text-anchor="middle" fill="white" font-size="8" font-weight="800">{{ file.type ? file.type.toUpperCase() : 'FILE' }}</text>
           </svg>
-          <span class="file-label">topic_doc</span>
-        </div>
-        <div class="file-badge">
-          <svg width="36" height="44" viewBox="0 0 36 44" fill="none">
-            <rect width="36" height="44" rx="4" fill="#EF4444"/>
-            <text x="18" y="28" text-anchor="middle" fill="white" font-size="9" font-weight="800">PDF</text>
-          </svg>
-          <span class="file-label">topic_pdf</span>
+          <span class="file-label">{{ file.name }}</span>
         </div>
       </div>
     </div>

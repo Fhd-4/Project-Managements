@@ -20,10 +20,7 @@ export class CreatePortfolioComponent implements OnInit, OnDestroy {
   isLoading: boolean = false;
 
   // File Upload State
-  attachedFiles: Array<{ name: string, progress: number, size: string, type: string }> = [
-    { name: 'Topic_1.pdf', progress: 75, size: '2.4 MB', type: 'pdf' },
-    { name: 'Topic_2.doc', progress: 100, size: '1.8 MB', type: 'doc' }
-  ];
+  attachedFiles: Array<{ name: string, progress: number, size: string, type: string, path?: string }> = [];
 
   triggerFileInput(fileInput: HTMLInputElement) {
     fileInput.click();
@@ -31,18 +28,27 @@ export class CreatePortfolioComponent implements OnInit, OnDestroy {
 
   onFileSelected(event: any) {
     const files = event.target.files;
-    if (files) {
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        const ext = file.name.split('.').pop()?.toLowerCase() || '';
-        this.attachedFiles.push({
-          name: file.name,
-          progress: 100,
-          size: (file.size / (1024 * 1024)).toFixed(1) + ' MB',
-          type: ext
-        });
-      }
-      this.cdr.detectChanges();
+    if (files && files.length > 0) {
+      this.portfolioService.uploadFiles(files).subscribe({
+        next: (res) => {
+          if (res) {
+            res.forEach((file: any) => {
+              this.attachedFiles.push({
+                name: file.name,
+                progress: 100,
+                size: file.size,
+                type: file.type,
+                path: file.path
+              });
+            });
+          }
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('File upload failed', err);
+          this.portfolioService.triggerErrorToast();
+        }
+      });
     }
   }
 
@@ -210,6 +216,17 @@ export class CreatePortfolioComponent implements OnInit, OnDestroy {
         this.sponsorName = portfolio.sponsorName || 'Omar Al-Harbi';
         this.managerName = portfolio.managerName || 'Mahmoud Salah';
         this.category = portfolio.category || 'Execution';
+        
+        if (portfolio.attachedFiles) {
+          try {
+            this.attachedFiles = JSON.parse(portfolio.attachedFiles);
+          } catch (e) {
+            this.attachedFiles = [];
+          }
+        } else {
+          this.attachedFiles = [];
+        }
+
         this.isLoading = false;
         this.cdr.detectChanges();
       },
@@ -259,7 +276,8 @@ export class CreatePortfolioComponent implements OnInit, OnDestroy {
       ownerName: this.ownerName,
       category: this.category,
       sponsorName: this.sponsorName,
-      managerName: this.managerName
+      managerName: this.managerName,
+      attachedFiles: this.attachedFiles.length > 0 ? JSON.stringify(this.attachedFiles) : null
     };
 
     if (this.isEditMode && this.editingId !== null) {

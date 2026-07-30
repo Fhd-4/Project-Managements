@@ -2,6 +2,7 @@ import { Component, ChangeDetectorRef, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { PortfolioService, Portfolio } from '../portfolio.service';
+import { API_CONFIG } from '../../api.config';
 
 type LangCode = 'ar' | 'en';
 
@@ -17,6 +18,7 @@ export class PortfolioDetailsComponent implements OnInit, OnDestroy {
   isLoading: boolean = true;
   portfolio: Portfolio | null = null;
   id: number | null = null;
+  attachedFiles: Array<any> = [];
 
   translations = {
     ar: {
@@ -74,6 +76,17 @@ export class PortfolioDetailsComponent implements OnInit, OnDestroy {
     this.portfolioService.getPortfolioDetails(id).subscribe({
       next: (data) => {
         this.portfolio = data;
+        
+        if (data.attachedFiles) {
+          try {
+            this.attachedFiles = JSON.parse(data.attachedFiles);
+          } catch (e) {
+            this.attachedFiles = [];
+          }
+        } else {
+          this.attachedFiles = [];
+        }
+
         this.isLoading = false;
         this.cdr.detectChanges();
       },
@@ -96,6 +109,7 @@ export class PortfolioDetailsComponent implements OnInit, OnDestroy {
           projectsCount: 50,
           programsCount: 50
         };
+        this.attachedFiles = [];
         this.isLoading = false;
         this.cdr.detectChanges();
       }
@@ -114,5 +128,21 @@ export class PortfolioDetailsComponent implements OnInit, OnDestroy {
 
   formatBudget(val: number): string {
     return new Intl.NumberFormat('en-US').format(val);
+  }
+
+  downloadFile(filePath: string) {
+    if (filePath) {
+      const domainUrl = API_CONFIG.baseUrl.replace('/api', '');
+      window.open(domainUrl + filePath, '_blank');
+    }
+  }
+
+  getFileColor(type: string): string {
+    const t = type?.toLowerCase();
+    if (t === 'pdf') return '#EF4444';
+    if (t === 'doc' || t === 'docx') return '#3B82F6';
+    if (t === 'xls' || t === 'xlsx') return '#10B981';
+    if (t === 'zip' || t === 'rar') return '#F59E0B';
+    return '#6B7280';
   }
 }

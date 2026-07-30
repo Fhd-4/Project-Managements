@@ -20,6 +20,7 @@ export interface Portfolio {
   sponsorName?: string;
   managerName?: string;
   category?: string;
+  attachedFiles?: string;
   createdDate?: string;
   projectsCount?: number;
   programsCount?: number;
@@ -152,6 +153,22 @@ export class PortfolioService {
   // Delete portfolio
   deletePortfolio(id: number): Observable<any> {
     return this.http.delete<any>(`${this.apiUrl}/${id}`, { headers: this.getHeaders() });
+  }
+
+  // Upload files to portfolio uploads directory
+  uploadFiles(files: FileList): Observable<any> {
+    const formData = new FormData();
+    for (let i = 0; i < files.length; i++) {
+      formData.append('files', files[i]);
+    }
+    let token: string | null = null;
+    if (typeof window !== 'undefined' && window.localStorage) {
+      token = localStorage.getItem('auth_token');
+    }
+    const headers = new HttpHeaders({
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    });
+    return this.http.post<any>(`${this.apiUrl}/upload`, formData, { headers });
   }
 
   // Get statistics for the dashboard
