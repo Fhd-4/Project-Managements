@@ -221,24 +221,40 @@ export class CreatePortfolioComponent implements OnInit, OnDestroy {
   }
 
   savePortfolio() {
-    if (!this.nameAr || this.budget <= 0 || !this.startDate || !this.endDate) {
+    // Only require name and a valid budget – dates are optional/auto-generated
+    if (!this.nameAr) {
       this.portfolioService.triggerErrorToast();
       return;
     }
 
-    if (new Date(this.endDate) < new Date(this.startDate)) {
+    if (this.budget <= 0) {
       this.portfolioService.triggerErrorToast();
       return;
     }
 
     this.isLoading = true;
 
+    // Auto-generate dates if not provided by the user
+    const today = new Date();
+    const sixMonthsLater = new Date();
+    sixMonthsLater.setMonth(sixMonthsLater.getMonth() + 6);
+
+    const resolvedStartDate = this.startDate
+      ? new Date(this.startDate).toISOString()
+      : today.toISOString();
+
+    const resolvedEndDate = this.endDate
+      ? new Date(this.endDate).toISOString()
+      : sixMonthsLater.toISOString();
+
     const payload = {
       nameAr: this.nameAr,
+      name: this.nameAr,
       descriptionAr: this.descriptionAr,
+      description: this.descriptionAr,
       budget: this.budget,
-      startDate: new Date(this.startDate).toISOString(),
-      endDate: new Date(this.endDate).toISOString(),
+      startDate: resolvedStartDate,
+      endDate: resolvedEndDate,
       status: this.status,
       ownerName: this.ownerName,
       category: this.category,
