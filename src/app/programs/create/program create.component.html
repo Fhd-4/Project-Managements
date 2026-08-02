@@ -1,0 +1,102 @@
+<div class="create-page" [dir]="isRtl ? 'rtl' : 'ltr'">
+  <h1 class="page-title">{{ isEditMode ? t.titleEdit : t.titleCreate }}</h1>
+
+  <div class="form-grid">
+    <div class="form-field">
+      <label>{{ t.programName }} *</label>
+      <input type="text" [(ngModel)]="name" [placeholder]="t.programName" />
+    </div>
+
+    <div class="form-field">
+      <label>
+        {{ t.programOwner }}
+        <span class="hint">{{ t.ownerComingSoon }}</span>
+      </label>
+      <select disabled>
+        <option>{{ t.selectPlaceholder }}</option>
+      </select>
+    </div>
+
+    <div class="form-field">
+      <label>{{ t.programSponsor }}</label>
+      <select [(ngModel)]="sponsorUserId">
+        <option value="">{{ t.selectPlaceholder }}</option>
+        <option *ngFor="let u of users" [value]="u.id">
+          {{ isRtl ? (u.nameAr || u.userName) : (u.nameEn || u.userName) }}
+        </option>
+      </select>
+    </div>
+
+    <div class="form-field">
+      <label>{{ t.programManager }} *</label>
+      <select [(ngModel)]="managerId">
+        <option value="">{{ t.selectPlaceholder }}</option>
+        <option *ngFor="let u of users" [value]="u.id">
+          {{ isRtl ? (u.nameAr || u.userName) : (u.nameEn || u.userName) }}
+        </option>
+      </select>
+    </div>
+
+    <div class="form-field" *ngIf="!isEditMode">
+      <label>{{ t.portfolioName }} *</label>
+      <select [(ngModel)]="portfolioId">
+        <option [ngValue]="null">{{ t.selectPlaceholder }}</option>
+        <option *ngFor="let p of portfolios" [ngValue]="p.id">
+          {{ isRtl ? p.nameAr : p.nameEn }}
+        </option>
+      </select>
+    </div>
+
+    <div class="form-field">
+      <label>{{ t.budget }} *</label>
+      <input type="number" [(ngModel)]="budget" min="0" />
+    </div>
+
+    <div class="form-field">
+      <label>{{ t.status }}</label>
+      <select [(ngModel)]="status">
+        <option *ngFor="let opt of statusOptions" [ngValue]="opt.value">
+          {{ isRtl ? opt.labelAr : opt.labelEn }}
+        </option>
+      </select>
+    </div>
+  </div>
+
+  <div class="form-field full-width">
+    <label>{{ t.description }}</label>
+    <textarea rows="4" [(ngModel)]="description"></textarea>
+  </div>
+
+  <div class="attach-section">
+    <label class="section-label">{{ t.attachFile }}</label>
+    <div class="attach-grid">
+      <div class="dropzone">
+        <p>{{ t.dragDrop }}</p>
+        <label class="upload-btn">
+          {{ t.upload }}
+          <input type="file" multiple hidden (change)="onFilesSelected($event)" />
+        </label>
+        <p class="hint">JPG, PNG, SVG, ZIP — up to 5 files</p>
+      </div>
+
+      <div class="file-list" *ngIf="attachedFiles.length">
+        <div class="file-item" *ngFor="let f of attachedFiles; let i = index">
+          <span class="file-name">{{ f.name }}</span>
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="f.progress"></div>
+          </div>
+          <button class="remove-btn" (click)="removeFile(i)">✕</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="error-banner" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+  <div class="actions-row">
+    <button class="btn-secondary" (click)="cancel()">{{ t.cancel }}</button>
+    <button class="btn-primary" [disabled]="isSaving" (click)="save()">
+      {{ isSaving ? t.saving : t.addNew }}
+    </button>
+  </div>
+</div>

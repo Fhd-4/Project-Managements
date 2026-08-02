@@ -1,0 +1,126 @@
+<div class="programs-page" [dir]="isRtl ? 'rtl' : 'ltr'">
+
+  <div class="toast toast-success" *ngIf="showSuccessToast">✔ {{ isRtl ? 'تمت العملية بنجاح' : 'Action completed successfully' }}</div>
+  <div class="toast toast-error" *ngIf="showErrorToast">✖ {{ isRtl ? 'حدث خطأ ما' : 'Something went wrong' }}</div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <span class="stat-icon">📦</span>
+      <div class="stat-text">
+        <span class="stat-value">{{ totalCount }}</span>
+        <span class="stat-label">{{ t.stats.total }}</span>
+      </div>
+    </div>
+    <div class="stat-card stat-pending">
+      <span class="stat-icon">⏱</span>
+      <div class="stat-text">
+        <span class="stat-value">{{ pendingCount }}</span>
+        <span class="stat-label">{{ t.stats.pending }}</span>
+      </div>
+    </div>
+    <div class="stat-card stat-active">
+      <span class="stat-icon">📈</span>
+      <div class="stat-text">
+        <span class="stat-value">{{ activeCount }}</span>
+        <span class="stat-label">{{ t.stats.active }}</span>
+      </div>
+    </div>
+    <div class="stat-card stat-completed">
+      <span class="stat-icon">✔</span>
+      <div class="stat-text">
+        <span class="stat-value">{{ completedCount }}</span>
+        <span class="stat-label">{{ t.stats.completed }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <h2 class="section-title">{{ t.title }}</h2>
+
+    <div class="view-toggle">
+      <button [class.active]="viewMode === 'list'" (click)="viewMode = 'list'">☰ {{ t.listView }}</button>
+      <button [class.active]="viewMode === 'kanban'" (click)="viewMode = 'kanban'">▦ {{ t.kanbanView }}</button>
+    </div>
+
+    <input class="search-input" type="text" [placeholder]="t.searchPlaceholder" [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange()" />
+
+    <select class="status-select" [(ngModel)]="statusFilter" (ngModelChange)="onStatusFilterChange()">
+      <option *ngFor="let opt of statusOptions" [ngValue]="opt.value">{{ isRtl ? opt.labelAr : opt.labelEn }}</option>
+    </select>
+
+    <button class="btn-primary" (click)="openCreatePage()">+ {{ t.createBtn }}</button>
+  </div>
+
+  <div class="loading-state" *ngIf="isLoading">{{ isRtl ? 'جار التحميل...' : 'Loading...' }}</div>
+
+  <!-- LIST VIEW -->
+  <div class="table-card" *ngIf="!isLoading && viewMode === 'list'">
+    <table *ngIf="pagedPrograms.length">
+      <thead>
+        <tr>
+          <th>{{ t.headers.name }}</th>
+          <th class="sortable" (click)="toggleSort('projects')">{{ t.headers.projects }} <span class="sort-icon">↕</span></th>
+          <th class="sortable" (click)="toggleSort('tasks')">{{ t.headers.tasks }} <span class="sort-icon">↕</span></th>
+          <th>{{ t.headers.owner }}</th>
+          <th>{{ t.headers.status }}</th>
+          <th>{{ t.headers.actions }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let p of pagedPrograms">
+          <td>{{ p.name }}</td>
+          <td>{{ p.projectsCount ?? 0 }}</td>
+          <td>{{ p.tasksCount ?? 0 }}</td>
+          <td>
+            <span class="owner-cell">
+              <span class="avatar-sm">{{ initials(p.managerName) }}</span>
+              {{ p.managerName || '-' }}
+            </span>
+          </td>
+          <td>
+            <span class="status-dot" [ngClass]="statusMeta(p.status).cssClass">
+              <i></i>{{ statusMeta(p.status).label }}
+            </span>
+          </td>
+          <td class="actions-cell">
+            <button class="icon-btn" title="View" (click)="viewProgramDetails(p.id)">👁</button>
+            <button class="icon-btn" title="Edit" (click)="openEditPage(p)">✎</button>
+            <button class="icon-btn icon-danger" title="Delete" (click)="deleteProgram(p.id)">🗑</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="empty-state" *ngIf="!pagedPrograms.length">
+      <p>{{ t.noData }}</p>
+    </div>
+
+    <div class="pagination" *ngIf="totalPages > 1">
+      <button *ngFor="let n of pageNumbers" [class.active]="n === currentPage" (click)="goToPage(n)">{{ n }}</button>
+    </div>
+  </div>
+
+  <!-- KANBAN VIEW -->
+  <div class="kanban-board" *ngIf="!isLoading && viewMode === 'kanban'">
+    <div class="kanban-column" *ngFor="let col of kanbanColumns">
+      <div class="kanban-col-header" [ngClass]="col.meta.cssClass">
+        <i></i>{{ col.meta.label }}
+      </div>
+      <div class="kanban-card" *ngFor="let p of col.programs" (click)="viewProgramDetails(p.id)">
+        <span class="kanban-card-title">{{ p.name }}</span>
+        <div class="kanban-card-row"><span>{{ t.headers.projects }}:</span><strong>{{ p.projectsCount ?? 0 }}</strong></div>
+        <div class="kanban-card-row"><span>{{ t.headers.tasks }}:</span><strong>{{ p.tasksCount ?? 0 }}</strong></div>
+        <div class="kanban-progress-bar">
+          <div class="kanban-progress-fill" [ngClass]="col.meta.cssClass" [style.width.%]="col.meta.progress"></div>
+        </div>
+        <div class="kanban-card-footer">
+          <span class="avatar-sm">{{ initials(p.managerName) }}</span>
+          <span class="kanban-progress-pct">{{ col.meta.progress }}%</span>
+        </div>
+      </div>
+      <div class="kanban-empty" *ngIf="!col.programs.length">{{ isRtl ? 'لا يوجد' : 'None' }}</div>
+    </div>
+  </div>
+</div>

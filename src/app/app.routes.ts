@@ -7,6 +7,12 @@ import { PortfoliosComponent } from './portfolios/portfolios.component';
 import { CreatePortfolioComponent } from './portfolios/create/create-portfolio';
 import { PortfolioDetailsComponent } from './portfolios/details/portfolio-details';
 
+// 👈 استدعاء مكونات البرامج الثلاثة الجديدة
+import { ProgramsComponent } from './programs/programs.component';
+import { ProgramCreateComponent } from './programs/create/program create.component';
+import { ProgramDetailsComponent } from './programs/details/program details.component';
+
+
 export const routes: Routes = [
   {
     path: '',
@@ -44,6 +50,24 @@ export const routes: Routes = [
       {
         path: 'portfolios/details/:id',
         component: PortfolioDetailsComponent
+      },
+      
+      // 👈 إضافة مسارات إدارة البرامج الجديدة هنا لتظهر داخل الـ Layout
+      {
+        path: 'programs',
+        component: ProgramsComponent
+      },
+      {
+        path: 'programs/create',
+        component: ProgramCreateComponent
+      },
+      {
+        path: 'programs/edit/:id',
+        component: ProgramCreateComponent
+      },
+      {
+        path: 'programs/view/:id',
+        component: ProgramDetailsComponent
       }
     ]
   },

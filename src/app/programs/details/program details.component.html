@@ -1,0 +1,71 @@
+<div class="details-page" [dir]="isRtl ? 'rtl' : 'ltr'" *ngIf="!isLoading && program">
+  <div class="header-row">
+    <h1 class="page-title">{{ program.name }}</h1>
+    <button class="icon-btn" (click)="editProgram()" title="{{ t.edit }}">✎</button>
+  </div>
+
+  <div class="details-grid">
+    <div class="people-card">
+      <div class="person">
+        <span class="person-role">{{ t.sponsor }}</span>
+        <span class="person-name">{{ program.sponsorName || '-' }}</span>
+      </div>
+      <div class="person">
+        <span class="person-role">{{ t.manager }}</span>
+        <span class="person-name">{{ program.managerName || '-' }}</span>
+      </div>
+      <!--
+        NOTE: the original Figma shows a per-person approval badge
+        (Approved / Pending / Refusing) next to each name. There is no
+        equivalent field anywhere in the API schema — only the single
+        overall `status: int` on the program itself. That per-person
+        approval concept has been left out rather than guessed. See
+        delivery notes for what the backend would need to add if you
+        want it back.
+      -->
+    </div>
+
+    <div class="status-card" [ngClass]="statusMeta.cssClass">
+      <span class="status-label">{{ statusMeta.label }}</span>
+      <div class="progress-ring-wrap">
+        <span class="progress-value">{{ progress }}%</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-box">
+      <span class="stat-label">{{ t.projects }}</span>
+      <span class="stat-value">{{ program.projectsCount ?? 0 }}</span>
+    </div>
+    <div class="stat-box">
+      <span class="stat-label">{{ t.tasks }}</span>
+      <span class="stat-value">{{ program.tasksCount ?? 0 }}</span>
+    </div>
+    <div class="stat-box">
+      <span class="stat-label">{{ t.budget }}</span>
+      <span class="stat-value">{{ formatBudget(program.budget) }}</span>
+    </div>
+  </div>
+
+  <div class="documents-section">
+    <span class="section-label">{{ t.documents }}:</span>
+    <div class="documents-list" *ngIf="program.attachedDocumentUrls?.length; else noDocs">
+      <a *ngFor="let url of program.attachedDocumentUrls" [href]="url" target="_blank" class="document-chip">
+        <span>{{ fileIcon(url) }}</span>
+        <span class="doc-name">{{ fileName(url) }}</span>
+      </a>
+    </div>
+    <ng-template #noDocs>
+      <p class="hint">{{ t.noDocuments }}</p>
+    </ng-template>
+  </div>
+
+  <div class="description-section">
+    <span class="section-label">{{ t.description }}</span>
+    <p class="description-text">{{ program.description || '-' }}</p>
+  </div>
+</div>
+
+<div class="loading-state" *ngIf="isLoading">Loading...</div>
+<div class="error-banner" *ngIf="errorMessage">{{ errorMessage }}</div>
