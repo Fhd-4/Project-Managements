@@ -2,7 +2,7 @@ import { Component, ChangeDetectorRef, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
-import { ProjectService, Project, ProjectTask } from '../project.service';
+import { ProjectService, Project, ProjectTask, ProjectMeeting } from '../project.service';
 import { API_CONFIG } from '../../api.config';
 
 type LangCode = 'ar' | 'en';
@@ -33,6 +33,11 @@ export class ProjectDetailsComponent implements OnInit, OnDestroy {
   taskSearchQuery: string = '';
   taskStatusFilter: string = 'All';
   viewMode: 'list' | 'kanban' = 'list'; // List view by default
+
+  // Meetings search & lists
+  projectMeetings: ProjectMeeting[] = [];
+  filteredMeetings: ProjectMeeting[] = [];
+  meetingSearchQuery: string = '';
 
   translations = {
     ar: {
@@ -96,7 +101,7 @@ export class ProjectDetailsComponent implements OnInit, OnDestroy {
   constructor(
     private projectService: ProjectService,
     private cdr: ChangeDetectorRef,
-    private router: Router,
+    public router: Router,
     private route: ActivatedRoute
   ) {
     if (typeof window !== 'undefined' && window.localStorage) {
@@ -117,7 +122,15 @@ export class ProjectDetailsComponent implements OnInit, OnDestroy {
           this.projectId = idVal;
           this.loadProjectDetails(idVal);
           this.loadProjectTasks(idVal);
+          this.loadProjectMeetings(idVal);
         }
+      }
+    });
+
+    this.route.queryParamMap.subscribe(qParams => {
+      const activeTab = qParams.get('tab');
+      if (activeTab) {
+        this.activeTab = activeTab;
       }
     });
   }
@@ -349,6 +362,63 @@ export class ProjectDetailsComponent implements OnInit, OnDestroy {
     if (s === 'in review' || s === 'inreview') return 75;
     if (s === 'in progress' || s === 'inprogress') return 50;
     return 0;
+  }
+
+  loadProjectMeetings(projectId: number) {
+    this.projectService.getMeetings(projectId).subscribe({
+      next: (res) => {
+        this.projectMeetings = res || [];
+        this.filteredMeetings = [...this.projectMeetings];
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error fetching meetings', err);
+        this.projectMeetings = [];
+        this.filteredMeetings = [];
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  onMeetingSearch() {
+    if (!this.meetingSearchQuery) {
+      this.filteredMeetings = [...this.projectMeetings];
+    } else {
+      const q = this.meetingSearchQuery.toLowerCase();
+      this.filteredMeetings = this.projectMeetings.filter(m =>
+        m.title.toLowerCase().includes(q) || (m.description && m.description.toLowerCase().includes(q))
+      );
+    }
+    this.cdr.detectChanges();
+  }
+
+  navigateToCreateMeeting() {
+    if (this.projectId) {
+      this.router.navigate([`/projects/details/${this.projectId}/meetings/create`]);
+    }
+  }
+
+  navigateToMeetingDetails(meetingId: number) {
+    if (this.projectId) {
+      this.router.navigate([`/projects/details/${this.projectId}/meetings/details/${meetingId}`]);
+    }
+  }
+
+  deleteMeeting(meetingId: number, event: MouseEvent) {
+    event.stopPropagation();
+    if (confirm(this.currentLang === 'ar' ? 'هل أنت متأكد من حذف هذا الاجتماع؟' : 'Are you sure you want to delete this meeting?')) {
+      this.projectService.deleteMeeting(meetingId).subscribe({
+        next: () => {
+          this.projectService.triggerSuccessToast();
+          if (this.projectId) {
+            this.loadProjectMeetings(this.projectId);
+          }
+        },
+        error: () => {
+          this.projectService.triggerErrorToast();
+        }
+      });
+    }
   }
 
   goBack() {

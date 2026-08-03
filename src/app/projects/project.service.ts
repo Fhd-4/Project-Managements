@@ -40,12 +40,28 @@ export interface ProjectTask {
   attachedFiles?: string;
 }
 
+export interface ProjectMeeting {
+  id: number;
+  title: string;
+  date: string;
+  time: string;
+  meetingLink?: string;
+  description?: string;
+  status: string; // Pending, Approved, Completed, Cancelled
+  invitedMembers?: string; // Comma-separated names
+  attachedFiles?: string;
+  projectId: number;
+  projectName?: string;
+  createdDate?: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class ProjectService {
   private readonly projectsUrl = `${API_CONFIG.baseUrl}/Projects`;
   private readonly tasksUrl = `${API_CONFIG.baseUrl}/ProjectTasks`;
+  private readonly meetingsUrl = `${API_CONFIG.baseUrl}/ProjectMeetings`;
 
   isCreatePageActive: boolean = false;
   successToast$ = new BehaviorSubject<boolean>(false);
@@ -201,5 +217,62 @@ export class ProjectService {
       ...(token ? { Authorization: `Bearer ${token}` } : {})
     });
     return this.http.post<any>(`${this.tasksUrl}/upload`, formData, { headers });
+  }
+
+  // --- PROJECT MEETINGS API ---
+
+  getMeetings(projectId?: number, keyword?: string): Observable<ProjectMeeting[]> {
+    if (!isPlatformBrowser(this.platformId)) {
+      return of([]);
+    }
+    let url = `${this.meetingsUrl}/all`;
+    const params: string[] = [];
+    if (projectId) params.push(`projectId=${projectId}`);
+    if (keyword) params.push(`keyword=${encodeURIComponent(keyword)}`);
+
+    if (params.length > 0) {
+      url += `?${params.join('&')}`;
+    }
+
+    return this.http.get<ProjectMeeting[]>(url, { headers: this.getHeaders() }).pipe(
+      catchError(err => {
+        console.error('Meetings API offline.', err);
+        return of([]);
+      })
+    );
+  }
+
+  getMeetingDetails(id: number): Observable<ProjectMeeting> {
+    if (!isPlatformBrowser(this.platformId)) {
+      return of({} as ProjectMeeting);
+    }
+    return this.http.get<ProjectMeeting>(`${this.meetingsUrl}/details/${id}`, { headers: this.getHeaders() });
+  }
+
+  createMeeting(meeting: any): Observable<any> {
+    return this.http.post<any>(`${this.meetingsUrl}/create`, meeting, { headers: this.getHeaders() });
+  }
+
+  updateMeeting(id: number, meeting: any): Observable<any> {
+    return this.http.put<any>(`${this.meetingsUrl}/update/${id}`, meeting, { headers: this.getHeaders() });
+  }
+
+  deleteMeeting(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.meetingsUrl}/delete/${id}`, { headers: this.getHeaders() });
+  }
+
+  uploadMeetingFiles(files: FileList): Observable<any> {
+    const formData = new FormData();
+    for (let i = 0; i < files.length; i++) {
+      formData.append('files', files[i]);
+    }
+    let token: string | null = null;
+    if (typeof window !== 'undefined' && window.localStorage) {
+      token = localStorage.getItem('auth_token');
+    }
+    const headers = new HttpHeaders({
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    });
+    return this.http.post<any>(`${this.meetingsUrl}/upload`, formData, { headers });
   }
 }

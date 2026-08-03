@@ -38,6 +38,18 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Server
   },
   {
+    path: 'projects/details/:projectId/meetings/create',
+    renderMode: RenderMode.Server
+  },
+  {
+    path: 'projects/details/:projectId/meetings/edit/:meetingId',
+    renderMode: RenderMode.Server
+  },
+  {
+    path: 'projects/details/:projectId/meetings/details/:meetingId',
+    renderMode: RenderMode.Server
+  },
+  {
     path: '**',
     renderMode: RenderMode.Prerender
   }

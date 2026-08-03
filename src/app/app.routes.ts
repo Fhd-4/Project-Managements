@@ -11,6 +11,8 @@ import { CreateProjectComponent } from './projects/create/create-project';
 import { ProjectDetailsComponent } from './projects/details/project-details';
 import { CreateTaskComponent } from './tasks/create/create-task';
 import { TasksComponent } from './tasks/tasks.component';
+import { CreateMeetingComponent } from './meetings/create/create-meeting';
+import { MeetingDetailsComponent } from './meetings/details/meeting-details';
 
 export const routes: Routes = [
   {
@@ -85,6 +87,18 @@ export const routes: Routes = [
       {
         path: 'tasks/edit/:id',
         component: CreateTaskComponent
+      },
+      {
+        path: 'projects/details/:projectId/meetings/create',
+        component: CreateMeetingComponent
+      },
+      {
+        path: 'projects/details/:projectId/meetings/edit/:meetingId',
+        component: CreateMeetingComponent
+      },
+      {
+        path: 'projects/details/:projectId/meetings/details/:meetingId',
+        component: MeetingDetailsComponent
       }
     ]
   },
