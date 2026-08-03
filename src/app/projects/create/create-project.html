@@ -1,0 +1,277 @@
+<div class="create-project-container" [dir]="isRtl ? 'rtl' : 'ltr'">
+  <!-- Spinner -->
+  <div class="spinner-overlay" *ngIf="isLoading">
+    <div class="loading-spinner"></div>
+  </div>
+
+  <div class="form-card">
+    <div class="form-grid">
+      <!-- Project Name -->
+      <div class="form-group">
+        <label>{{ t.lblProjName }}</label>
+        <input type="text" [(ngModel)]="name" placeholder="Write Here" class="form-input" />
+      </div>
+
+      <!-- Project Budget -->
+      <div class="form-group">
+        <label>{{ t.lblProjBudget }}</label>
+        <div class="budget-input-wrapper">
+          <input type="number" [(ngModel)]="budget" placeholder="00.0" class="form-input budget" />
+          <span class="riyal-label">﷼</span>
+        </div>
+      </div>
+
+      <!-- Project Category -->
+      <div class="form-group">
+        <label>{{ t.lblProjCategory }}</label>
+        <div class="select-wrapper">
+          <select [(ngModel)]="category" class="form-select">
+            <option value="SaaS">SaaS</option>
+            <option value="Strategic">Strategic</option>
+            <option value="Financial">Financial</option>
+            <option value="Execution">Execution</option>
+          </select>
+          <svg class="select-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Program Association -->
+      <div class="form-group">
+        <label>{{ t.lblProgName }}</label>
+        <div class="select-wrapper">
+          <select [(ngModel)]="programId" class="form-select">
+            <option [value]="0">Not associated with a program</option>
+            <option *ngFor="let prog of programsList" [value]="prog.id">{{ prog.name }}</option>
+          </select>
+          <svg class="select-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Linked Portfolio -->
+      <div class="form-group">
+        <label>{{ t.lblPortfolio }}</label>
+        <div class="select-wrapper">
+          <select [(ngModel)]="portfolioId" class="form-select">
+            <option [value]="0">Select Linked Portfolio</option>
+            <option *ngFor="let port of portfoliosList" [value]="port.id">{{ isRtl ? (port.nameAr || port.nameEn) : (port.nameEn || port.nameAr) }}</option>
+          </select>
+          <svg class="select-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Due Date (Start Date) -->
+      <div class="form-group">
+        <label>{{ t.lblStartDate }}</label>
+        <div class="date-input-wrapper">
+          <input type="date" [(ngModel)]="startDate" class="form-input date" />
+          <svg class="calendar-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+        </div>
+      </div>
+
+      <!-- End Date -->
+      <div class="form-group">
+        <label>{{ t.lblEndDate }}</label>
+        <div class="date-input-wrapper">
+          <input type="date" [(ngModel)]="endDate" class="form-input date" />
+          <svg class="calendar-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Priority -->
+      <div class="form-group">
+        <label>{{ t.lblPriority }}</label>
+        <div class="select-wrapper">
+          <select [(ngModel)]="priority" class="form-select">
+            <option [value]="1">{{ t.priorityLow }}</option>
+            <option [value]="2">{{ t.priorityMedium }}</option>
+            <option [value]="3">{{ t.priorityHigh }}</option>
+          </select>
+          <svg class="select-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Status -->
+      <div class="form-group">
+        <label>{{ t.lblStatus }}</label>
+        <div class="select-wrapper">
+          <select [(ngModel)]="status" class="form-select">
+            <option value="Active">{{ isRtl ? 'في المسار' : 'On Track' }}</option>
+            <option value="Completed">{{ isRtl ? 'مكتمل' : 'Completed' }}</option>
+            <option value="Pending">{{ isRtl ? 'قيد الانتظار' : 'Pending' }}</option>
+            <option value="Rejected">{{ isRtl ? 'بحاجة لإجراء' : 'Need Action' }}</option>
+          </select>
+          <svg class="select-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Project Manager (Select List with dynamic initials badge) -->
+      <div class="form-group">
+        <label>{{ t.lblManager }}</label>
+        <div class="select-wrapper badge-select-container">
+          <div [class]="getAvatarClass(managerName)">{{ getInitials(managerName) }}</div>
+          <select [(ngModel)]="managerName" class="form-select indent">
+            <option *ngFor="let m of managersList" [value]="m">{{ m }}</option>
+          </select>
+          <svg class="select-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Program Owner (Select List with initials badge) -->
+      <div class="form-group">
+        <label>{{ t.lblOwner }}</label>
+        <div class="select-wrapper badge-select-container">
+          <div [class]="getAvatarClass(ownerName)">{{ getInitials(ownerName) }}</div>
+          <select [(ngModel)]="ownerName" class="form-select indent">
+            <option *ngFor="let o of ownersList" [value]="o">{{ o }}</option>
+          </select>
+          <svg class="select-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Program Sponsor (Select List with initials badge) -->
+      <div class="form-group">
+        <label>{{ t.lblSponsor }}</label>
+        <div class="select-wrapper badge-select-container">
+          <div [class]="getAvatarClass(sponsorName)">{{ getInitials(sponsorName) }}</div>
+          <select [(ngModel)]="sponsorName" class="form-select indent">
+            <option *ngFor="let s of sponsorsList" [value]="s">{{ s }}</option>
+          </select>
+          <svg class="select-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Description -->
+    <div class="form-group textarea-group">
+      <label>{{ t.lblDescription }}</label>
+      <textarea [(ngModel)]="description" placeholder="Write Here" class="form-textarea"></textarea>
+    </div>
+
+    <!-- File Attachments Area (Double Column Layout matching Figma Screen 2) -->
+    <div class="file-attachments-area">
+      <!-- Left side: Attach File dropzone -->
+      <div class="upload-dropzone-box">
+        <label class="section-label">{{ t.lblAttachFile }}</label>
+        <div class="dropzone-border-container">
+          <!-- Hidden Input -->
+          <input type="file" #fileInput (change)="onFileSelected($event)" multiple style="display: none;" />
+
+          <div class="dropzone-inner" (click)="triggerFileInput(fileInput)">
+            <div class="upload-icon-box">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2B6CB0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+            </div>
+            <span class="dropzone-title">{{ t.uploadDragText }}</span>
+            <div class="or-separator">
+              <span class="line"></span>
+              <span class="text">OR</span>
+              <span class="line"></span>
+            </div>
+            <button type="button" class="dropzone-btn">{{ t.uploadBtn }}</button>
+            <p class="dropzone-subtext">{{ t.uploadSubtext }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right side: Attached Files List -->
+      <div class="attached-files-list-box">
+        <label class="section-label">{{ t.lblAttachedFilesList }}</label>
+        <div class="files-panel-container">
+          <!-- Files rows -->
+          <div class="files-list-scroller">
+            <div class="file-progress-row" *ngFor="let file of attachedFiles; let idx = index">
+              <!-- File extension icon -->
+              <div class="file-icon" [class]="file.type.toLowerCase()">
+                {{ file.type.toUpperCase() }}
+              </div>
+              <div class="file-meta">
+                <div class="file-name-row">
+                  <span class="name" [title]="file.name">{{ file.name }}</span>
+                  <button type="button" class="remove-btn" (click)="removeFile(idx)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E53E3E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="3 6 5 6 21 6"></polyline>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                  </button>
+                </div>
+                <!-- Progress bar -->
+                <div class="progress-container">
+                  <div class="progress-bar" [style.width.%]="file.progress"></div>
+                  <span class="progress-percent">{{ file.progress }}%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Actions inside attached files panel -->
+          <div class="panel-actions">
+            <button type="button" class="panel-btn cancel" (click)="clearAllFiles()">Cancel</button>
+            <button type="button" class="panel-btn add-new" (click)="triggerFileInput(fileInput)">+ Add New</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Form Action Buttons -->
+    <div class="main-form-actions">
+      <button type="button" class="action-btn cancel" (click)="goBack()">{{ t.cancelBtn }}</button>
+      <button type="button" class="action-btn save" (click)="saveProject()">
+        {{ isEditMode ? t.saveBtn : t.addBtn }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Success Alert -->
+<div class="toast-notification success" *ngIf="showSuccessToast">
+  <div class="toast-icon-box">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <polyline points="20 6 9 17 4 12"></polyline>
+    </svg>
+  </div>
+  <div class="toast-content">
+    <span class="toast-message">{{ isRtl ? 'تمت العملية بنجاح!' : 'Action completed successfully!' }}</span>
+  </div>
+</div>
+
+<!-- Error Alert -->
+<div class="toast-notification error" *ngIf="showErrorToast">
+  <div class="toast-icon-box">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+      <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg>
+  </div>
+  <div class="toast-content">
+    <span class="toast-message">{{ isRtl ? 'حدث خطأ ما، يرجى المحاولة لاحقاً.' : 'An error occurred, please try again.' }}</span>
+  </div>
+</div>

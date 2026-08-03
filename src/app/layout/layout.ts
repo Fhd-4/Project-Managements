@@ -30,6 +30,7 @@ export class LayoutComponent implements OnInit {
         portfolios: 'المحافظ',
         programs: 'البرامج',
         projects: 'المشاريع',
+        tasks: 'المهام',
         changeRequests: 'طلبات التعديل',
         plans: 'الخطط',
         users: 'المستخدمين',
@@ -44,6 +45,7 @@ export class LayoutComponent implements OnInit {
         portfolios: 'Portfolios',
         programs: 'Programs',
         projects: 'Projects',
+        tasks: 'Tasks',
         changeRequests: 'Change Requests',
         plans: 'Plans',
         users: 'Users',
@@ -133,9 +135,15 @@ export class LayoutComponent implements OnInit {
     return this.currentRoute.includes(route);
   }
 
-  goBackToPortfoliosList() {
+  goBackList() {
     this.portfolioService.isCreatePageActive = false;
-    this.router.navigate(['/portfolios']);
+    if (this.currentRoute.includes('/projects')) {
+      this.router.navigate(['/projects']);
+    } else if (this.currentRoute.includes('/tasks')) {
+      this.router.navigate(['/tasks']);
+    } else {
+      this.router.navigate(['/portfolios']);
+    }
     this.cdr.detectChanges();
   }
 }

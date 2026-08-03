@@ -1,0 +1,126 @@
+<div class="task-details-view" [dir]="isRtl ? 'rtl' : 'ltr'">
+  <!-- Trace Header Row -->
+  <div class="header-trace-row">
+    <button class="back-circle-btn" (click)="goBack()">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+      </svg>
+    </button>
+    <div class="trace-titles">
+      <h2>{{ t.taskDetailsTitle }}</h2>
+      <p class="breadcrumbs">
+        <span>Projects</span> / 
+        <span>Tasks</span> / 
+        <span class="active-node">Task Details</span>
+      </p>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-panel" *ngIf="isLoading">
+    <p>Loading task details...</p>
+  </div>
+
+  <!-- Task Details Content -->
+  <div class="details-content-wrapper" *ngIf="!isLoading && task">
+    <!-- Main Header Info Card -->
+    <div class="main-info-card">
+      <div class="card-title-row">
+        <h3>{{ task.title }}</h3>
+        <!-- Edit Icon to CreateTask (Edit Mode) -->
+        <button class="edit-link-icon-btn" 
+                [routerLink]="projectId ? ['/projects/details/' + projectId + '/tasks/edit/' + task.id] : ['/tasks/edit/' + task.id]" 
+                title="Edit Task">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+            <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4z"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Date, Priority, and Status Row -->
+      <div class="meta-details-grid">
+        <div class="meta-column">
+          <span class="meta-label">Project</span>
+          <span class="meta-value font-bold project-name-lbl" *ngIf="task.projectName">{{ task.projectName }}</span>
+          <span class="meta-value font-bold project-name-lbl" *ngIf="!task.projectName && project">{{ project.name }}</span>
+        </div>
+
+        <div class="meta-column">
+          <span class="meta-label">Due Date</span>
+          <span class="meta-value font-bold">{{ task.dueDate | date:'yyyy-M-dd' }}</span>
+        </div>
+
+        <div class="meta-column">
+          <span class="meta-label">Priority</span>
+          <span class="meta-value font-bold priority-lbl" [class]="getPriorityClass(task.priority)">
+            {{ getPriorityLabel(task.priority) }}
+          </span>
+        </div>
+
+        <div class="meta-column status-dropdown-col">
+          <span class="meta-label">{{ t.statusLabel }}</span>
+          <div class="status-dropdown-wrapper">
+            <select [ngModel]="task.status" (ngModelChange)="updateTaskStatus($event)">
+              <option value="To Do">To Do</option>
+              <option value="In Progress">In Progress</option>
+              <option value="In Review">In Review</option>
+              <option value="Done">Done</option>
+            </select>
+            <span class="dropdown-arrow-icon">▼</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Description Block -->
+    <div class="detail-section-block">
+      <h4 class="section-title">{{ t.descriptionHeader }}</h4>
+      <div class="description-text-card">
+        <p>{{ task.description || 'No description provided.' }}</p>
+      </div>
+    </div>
+
+    <!-- Documents Block -->
+    <div class="detail-section-block">
+      <h4 class="section-title">{{ t.documentsHeader }}</h4>
+      
+      <!-- Documents list files grid -->
+      <div class="documents-mini-grid" *ngIf="attachedFiles.length > 0">
+        <div class="file-mini-card" *ngFor="let file of attachedFiles" (click)="downloadFile(file.path)">
+          <div class="file-type-icon-wrapper">
+            <svg width="24" height="30" viewBox="0 0 36 44" fill="none">
+              <rect width="36" height="44" rx="4" [attr.fill]="getFileColor(file.type)"/>
+              <text x="18" y="28" text-anchor="middle" fill="white" font-size="8" font-weight="800">{{ file.type ? file.type.toUpperCase() : 'FILE' }}</text>
+            </svg>
+          </div>
+          <span class="file-name" [title]="file.name">{{ file.name }}</span>
+        </div>
+      </div>
+
+      <div class="empty-documents-box" *ngIf="attachedFiles.length === 0">
+        <p>{{ t.noAttachment }}</p>
+      </div>
+    </div>
+
+    <!-- Members Invite Block (Assignees) -->
+    <div class="detail-section-block">
+      <h4 class="section-title">{{ t.assigneeLabel }}</h4>
+      <div class="members-invite-row-card">
+        <div class="invited-avatars-list" *ngIf="task.assigneeName">
+          <span *ngFor="let name of task.assigneeName.split(','); let i = index">
+            <span *ngIf="i < 4" class="stacked-initial-avatar" [class]="getAvatarColorClass(name.trim())" [title]="name.trim()">
+              {{ getInitials(name.trim()) }}
+            </span>
+          </span>
+          <span class="stacked-initial-avatar more-bubble" *ngIf="task.assigneeName.split(',').length > 4">
+            +{{ task.assigneeName.split(',').length - 4 }}
+          </span>
+        </div>
+        
+        <span class="no-members-msg" *ngIf="!task.assigneeName">Not Assigned</span>
+      </div>
+    </div>
+  </div>
+</div>

@@ -6,6 +6,14 @@ import { DashboardComponent } from './dashboard/dashboard';
 import { PortfoliosComponent } from './portfolios/portfolios.component';
 import { CreatePortfolioComponent } from './portfolios/create/create-portfolio';
 import { PortfolioDetailsComponent } from './portfolios/details/portfolio-details';
+import { ProjectsComponent } from './projects/projects.component';
+import { CreateProjectComponent } from './projects/create/create-project';
+import { ProjectDetailsComponent } from './projects/details/project-details';
+import { CreateTaskComponent } from './tasks/create/create-task';
+import { TasksComponent } from './tasks/tasks.component';
+import { CreateMeetingComponent } from './meetings/create/create-meeting';
+import { MeetingDetailsComponent } from './meetings/details/meeting-details';
+import { TaskDetailsComponent } from './tasks/details/task-details';
 
 // 👈 استدعاء مكونات البرامج الثلاثة الجديدة
 import { ProgramsComponent } from './programs/programs.component';
@@ -68,6 +76,61 @@ export const routes: Routes = [
       {
         path: 'programs/view/:id',
         component: ProgramDetailsComponent
+      {
+        path: 'projects',
+        component: ProjectsComponent
+      },
+      {
+        path: 'projects/create',
+        component: CreateProjectComponent
+      },
+      {
+        path: 'projects/edit/:id',
+        component: CreateProjectComponent
+      },
+      {
+        path: 'projects/details/:id',
+        component: ProjectDetailsComponent
+      },
+      {
+        path: 'projects/details/:projectId/tasks/create',
+        component: CreateTaskComponent
+      },
+      {
+        path: 'projects/details/:projectId/tasks/edit/:id',
+        component: CreateTaskComponent
+      },
+      {
+        path: 'tasks',
+        component: TasksComponent
+      },
+      {
+        path: 'tasks/create',
+        component: CreateTaskComponent
+      },
+      {
+        path: 'tasks/edit/:id',
+        component: CreateTaskComponent
+      },
+      {
+        path: 'projects/details/:projectId/meetings/create',
+        component: CreateMeetingComponent
+      },
+      {
+        path: 'projects/details/:projectId/meetings/edit/:meetingId',
+        component: CreateMeetingComponent
+      },
+      {
+        path: 'projects/details/:projectId/meetings/details/:meetingId',
+        component: MeetingDetailsComponent
+      },
+      {
+        path: 'projects/details/:projectId/tasks/details/:id',
+        component: TaskDetailsComponent
+      },
+      {
+        path: 'tasks/details/:id',
+        component: TaskDetailsComponent
       }
     ]
   },

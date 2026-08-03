@@ -1,0 +1,189 @@
+<div class="create-meeting-view" [dir]="isRtl ? 'rtl' : 'ltr'">
+  <!-- Top Navigation Trace Header -->
+  <div class="header-trace-row">
+    <button class="back-circle-btn" (click)="goBack()">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+      </svg>
+    </button>
+    <div class="trace-titles">
+      <h2>{{ isEditMode ? t.editMeetingTitle : t.createMeetingTitle }}</h2>
+      <p class="breadcrumbs">
+        <span>Projects</span> / 
+        <span class="active-node" *ngIf="project">{{ project.name }}</span> / 
+        <span>{{ isEditMode ? 'Edit Meeting' : 'Create Meeting' }}</span>
+      </p>
+    </div>
+  </div>
+
+  <!-- Form Area -->
+  <div class="create-meeting-card" [class.loading-fade]="isLoading">
+    <!-- Meeting Title -->
+    <div class="form-group-item">
+      <label>{{ t.meetingTitleLabel }}</label>
+      <input type="text" [(ngModel)]="title" [placeholder]="t.writeHerePlaceholder" />
+    </div>
+
+    <!-- Date & Time Row -->
+    <div class="flex-fields-row">
+      <div class="form-group-item date-field">
+        <label>{{ t.meetingDateLabel }}</label>
+        <div class="date-input-wrapper">
+          <input type="date" [(ngModel)]="date" />
+        </div>
+      </div>
+
+      <div class="form-group-item time-field">
+        <label>{{ t.meetingTimeLabel }}</label>
+        <div class="time-select-wrapper">
+          <select [(ngModel)]="time">
+            <option value="09:00 am">09:00 am</option>
+            <option value="09:30 am">09:30 am</option>
+            <option value="10:00 am">10:00 am</option>
+            <option value="10:30 am">10:30 am</option>
+            <option value="11:00 am">11:00 am</option>
+            <option value="11:30 am">11:30 am</option>
+            <option value="12:00 pm">12:00 pm</option>
+            <option value="12:30 pm">12:30 pm</option>
+            <option value="01:00 pm">01:00 pm</option>
+            <option value="01:30 pm">01:30 pm</option>
+            <option value="02:00 pm">02:00 pm</option>
+            <option value="02:30 pm">02:30 pm</option>
+            <option value="03:00 pm">03:00 pm</option>
+            <option value="03:30 pm">03:30 pm</option>
+            <option value="04:00 pm">04:00 pm</option>
+          </select>
+          <span class="select-chevron">▼</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Meeting Link -->
+    <div class="form-group-item">
+      <label>{{ t.meetingLinkLabel }}</label>
+      <input type="text" [(ngModel)]="meetingLink" [placeholder]="t.writeHerePlaceholder" />
+    </div>
+
+    <!-- Description -->
+    <div class="form-group-item">
+      <label>{{ t.descriptionLabel }}</label>
+      <textarea rows="4" [(ngModel)]="description" [placeholder]="t.writeHerePlaceholder"></textarea>
+    </div>
+
+    <!-- Members Invite -->
+    <div class="form-group-item">
+      <label>{{ t.membersInviteLabel }}</label>
+      <div class="members-input-container" (click)="openMemberModal()">
+        <span class="members-placeholder" *ngIf="!invitedMembers">{{ t.noMembersSelected }}</span>
+        <span class="members-value" *ngIf="invitedMembers">{{ invitedMembers }}</span>
+        <button class="add-members-icon-btn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Attach File Section -->
+    <div class="attachments-grid-section">
+      <div class="attach-box-col">
+        <label>{{ t.attachFileLabel }}</label>
+        <div class="drag-drop-zone-wrapper" (click)="triggerFileInput(fileInput)">
+          <div class="upload-icon-circle">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3182ce" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="12" y1="18" x2="12" y2="12"></line>
+              <polyline points="9 15 12 12 15 15"></polyline>
+            </svg>
+          </div>
+          <p class="drag-title">{{ t.dragDropLabel }}</p>
+          <span class="or-separator">{{ t.orLabel }}</span>
+          <button class="upload-files-btn">{{ t.uploadBtn }}</button>
+          <span class="max-info">{{ t.filesMaxLabel }}</span>
+          <span class="types-info">{{ t.supportFormatsLabel }}</span>
+          <input type="file" #fileInput (change)="onFileSelected($event)" multiple style="display: none;" />
+        </div>
+      </div>
+
+      <div class="preview-box-col">
+        <label class="invisible-label">&nbsp;</label>
+        <div class="attachments-preview-panel">
+          <!-- Empty State -->
+          <div class="empty-preview" *ngIf="attachedFiles.length === 0">
+            <div class="doc-icon-svg red">
+              <svg width="40" height="50" viewBox="0 0 36 44" fill="none">
+                <rect width="36" height="44" rx="4" fill="#fee2e2" />
+                <path d="M12 22 L24 22 M18 16 L18 28" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <p>{{ t.noAttachmentLabel }}</p>
+          </div>
+
+          <!-- Attachments List -->
+          <div class="uploaded-files-scroll" *ngIf="attachedFiles.length > 0">
+            <div class="file-item-row" *ngFor="let file of attachedFiles; let idx = index">
+              <div class="doc-mini-svg">
+                <svg width="24" height="30" viewBox="0 0 36 44" fill="none">
+                  <rect width="36" height="44" rx="4" fill="#ebf8ff"/>
+                  <text x="18" y="28" text-anchor="middle" fill="#3182ce" font-size="8" font-weight="800">{{ file.type.toUpperCase() }}</text>
+                </svg>
+              </div>
+              <div class="file-details">
+                <span class="name" [title]="file.name">{{ file.name }}</span>
+                <span class="size">{{ file.size }}</span>
+              </div>
+              <button class="remove-file-row-btn" (click)="removeFile(idx)">✕</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions Row -->
+    <div class="form-actions-bottom">
+      <button class="submit-meeting-btn" [disabled]="isLoading" (click)="saveMeeting()">
+        <span class="check-icon">✓</span>
+        <span>{{ isEditMode ? t.saveBtn : t.createBtn }}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Members Selection Modal Overlay (Image 3) -->
+  <div class="members-modal-overlay" *ngIf="isMemberModalOpen" (click)="closeMemberModal()">
+    <div class="members-modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Invite Members:</h3>
+        <button class="close-modal-x" (click)="closeMemberModal()">✕</button>
+      </div>
+
+      <!-- Search Input -->
+      <div class="modal-search-wrapper">
+        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" [(ngModel)]="memberSearchQuery" [placeholder]="t.searchMemberPlaceholder" />
+      </div>
+
+      <!-- Members Checklist Scroll -->
+      <div class="members-checklist-scroll">
+        <label class="checklist-item-row" *ngFor="let member of filteredMembers">
+          <input type="checkbox" [(ngModel)]="member.selected" />
+          <div class="member-avatar-badge" [class]="member.avatarClass">
+            {{ getInitials(member.name) }}
+          </div>
+          <span class="member-name">{{ member.name }}</span>
+        </label>
+      </div>
+
+      <!-- Modal Actions -->
+      <div class="modal-actions-row">
+        <button class="cancel-modal-btn" (click)="closeMemberModal()">✕ {{ t.cancelBtn }}</button>
+        <button class="confirm-modal-btn" (click)="applyMembers()">✓ {{ t.inviteBtn }}</button>
+      </div>
+    </div>
+  </div>
+</div>

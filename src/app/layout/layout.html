@@ -65,7 +65,7 @@
       </a>
 
       <!-- Projects -->
-      <a href="#" class="nav-link disabled" onclick="return false;" [title]="t.menu.projects">
+      <a routerLink="/projects" class="nav-link" [class.active]="isActive('/projects')" [title]="t.menu.projects" (click)="portfolioService.isCreatePageActive = false">
         <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
           <polyline points="14 2 14 8 20 8"></polyline>
@@ -74,6 +74,15 @@
           <line x1="10" y1="9" x2="8" y2="9"></line>
         </svg>
         <span class="link-text">{{ t.menu.projects }}</span>
+      </a>
+
+      <!-- Tasks -->
+      <a routerLink="/tasks" class="nav-link" [class.active]="isActive('/tasks')" [title]="t.menu.tasks">
+        <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+          <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4z"></path>
+        </svg>
+        <span class="link-text">{{ t.menu.tasks }}</span>
       </a>
 
       <!-- Change Requests -->
@@ -128,28 +137,56 @@
     <!-- Top Header -->
     <header class="top-header">
       <div class="breadcrumb-title">
-        <div class="header-breadcrumb-container" *ngIf="currentRoute.includes('/portfolios/create') || currentRoute.includes('/portfolios/edit') || currentRoute.includes('/portfolios/details'); else normalHeaderTitle">
-          <button class="header-back-btn" (click)="goBackToPortfoliosList()">
+        <div class="header-breadcrumb-container" *ngIf="currentRoute.includes('/portfolios/create') || currentRoute.includes('/portfolios/edit') || currentRoute.includes('/portfolios/details') || currentRoute.includes('/projects/create') || currentRoute.includes('/projects/edit') || currentRoute.includes('/projects/details') || currentRoute.includes('/tasks/create') || currentRoute.includes('/tasks/edit'); else normalHeaderTitle">
+          <button class="header-back-btn" (click)="goBackList()">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#102a43" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <line x1="19" y1="12" x2="5" y2="12"></line>
               <polyline points="12 19 5 12 12 5"></polyline>
             </svg>
           </button>
           <div class="breadcrumb-meta">
-            <h2 class="breadcrumb-main">{{ isRtl ? 'المحافظ' : 'Portfolios' }}</h2>
-            <span class="breadcrumb-sub" *ngIf="currentRoute.includes('/portfolios/create')">
-              {{ isRtl ? 'المحافظ / إضافة جديد' : 'Portfolios / Create New' }}
-            </span>
-            <span class="breadcrumb-sub" *ngIf="currentRoute.includes('/portfolios/edit')">
-              {{ isRtl ? 'المحافظ / تعديل' : 'Portfolios / Edit' }}
-            </span>
-            <span class="breadcrumb-sub" *ngIf="currentRoute.includes('/portfolios/details')">
-              {{ isRtl ? 'المحافظ / تفاصيل' : 'Portfolios / Details' }}
-            </span>
+            <!-- Portfolios Breadcrumbs -->
+            <ng-container *ngIf="currentRoute.includes('/portfolios')">
+              <h2 class="breadcrumb-main">{{ isRtl ? 'المحافظ' : 'Portfolios' }}</h2>
+              <span class="breadcrumb-sub" *ngIf="currentRoute.includes('/portfolios/create')">
+                {{ isRtl ? 'المحافظ / إضافة جديد' : 'Portfolios / Create New' }}
+              </span>
+              <span class="breadcrumb-sub" *ngIf="currentRoute.includes('/portfolios/edit')">
+                {{ isRtl ? 'المحافظ / تعديل' : 'Portfolios / Edit' }}
+              </span>
+              <span class="breadcrumb-sub" *ngIf="currentRoute.includes('/portfolios/details')">
+                {{ isRtl ? 'المحافظ / تفاصيل' : 'Portfolios / Details' }}
+              </span>
+            </ng-container>
+
+            <!-- Projects Breadcrumbs -->
+            <ng-container *ngIf="currentRoute.includes('/projects')">
+              <h2 class="breadcrumb-main">{{ isRtl ? 'المشاريع' : 'Projects' }}</h2>
+              <span class="breadcrumb-sub" *ngIf="currentRoute.includes('/projects/create')">
+                {{ isRtl ? 'المشاريع / إضافة جديد' : 'Projects / Create Project' }}
+              </span>
+              <span class="breadcrumb-sub" *ngIf="currentRoute.includes('/projects/edit')">
+                {{ isRtl ? 'المشاريع / تعديل' : 'Projects / Edit Project' }}
+              </span>
+              <span class="breadcrumb-sub" *ngIf="currentRoute.includes('/projects/details')">
+                {{ isRtl ? 'المشاريع / تفاصيل' : 'Projects / Project Details' }}
+              </span>
+            </ng-container>
+
+            <!-- Tasks Breadcrumbs -->
+            <ng-container *ngIf="currentRoute.includes('/tasks')">
+              <h2 class="breadcrumb-main">{{ isRtl ? 'المهام' : 'Tasks' }}</h2>
+              <span class="breadcrumb-sub" *ngIf="currentRoute.includes('/tasks/create')">
+                {{ isRtl ? 'المهام / إضافة جديد' : 'Tasks / Create Task' }}
+              </span>
+              <span class="breadcrumb-sub" *ngIf="currentRoute.includes('/tasks/edit')">
+                {{ isRtl ? 'المهام / تعديل' : 'Tasks / Edit Task' }}
+              </span>
+            </ng-container>
           </div>
         </div>
         <ng-template #normalHeaderTitle>
-          <h2>{{ isActive('/portfolios') ? (isRtl ? 'المحافظ' : 'Portfolios') : (isRtl ? 'لوحة التحكم' : 'Dashboard') }}</h2>
+          <h2>{{ isActive('/portfolios') ? (isRtl ? 'المحافظ' : 'Portfolios') : isActive('/projects') ? (isRtl ? 'المشاريع' : 'Projects') : isActive('/tasks') ? (isRtl ? 'المهام' : 'Tasks') : (isRtl ? 'لوحة التحكم' : 'Dashboard') }}</h2>
         </ng-template>
       </div>
 
