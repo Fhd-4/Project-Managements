@@ -6,6 +6,11 @@ import { DashboardComponent } from './dashboard/dashboard';
 import { PortfoliosComponent } from './portfolios/portfolios.component';
 import { CreatePortfolioComponent } from './portfolios/create/create-portfolio';
 import { PortfolioDetailsComponent } from './portfolios/details/portfolio-details';
+import { ProjectsComponent } from './projects/projects.component';
+import { CreateProjectComponent } from './projects/create/create-project';
+import { ProjectDetailsComponent } from './projects/details/project-details';
+import { CreateTaskComponent } from './tasks/create/create-task';
+import { TasksComponent } from './tasks/tasks.component';
 
 export const routes: Routes = [
   {
@@ -44,6 +49,42 @@ export const routes: Routes = [
       {
         path: 'portfolios/details/:id',
         component: PortfolioDetailsComponent
+      },
+      {
+        path: 'projects',
+        component: ProjectsComponent
+      },
+      {
+        path: 'projects/create',
+        component: CreateProjectComponent
+      },
+      {
+        path: 'projects/edit/:id',
+        component: CreateProjectComponent
+      },
+      {
+        path: 'projects/details/:id',
+        component: ProjectDetailsComponent
+      },
+      {
+        path: 'projects/details/:projectId/tasks/create',
+        component: CreateTaskComponent
+      },
+      {
+        path: 'projects/details/:projectId/tasks/edit/:id',
+        component: CreateTaskComponent
+      },
+      {
+        path: 'tasks',
+        component: TasksComponent
+      },
+      {
+        path: 'tasks/create',
+        component: CreateTaskComponent
+      },
+      {
+        path: 'tasks/edit/:id',
+        component: CreateTaskComponent
       }
     ]
   },
