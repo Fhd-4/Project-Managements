@@ -1,34 +1,51 @@
 <div class="details-page" [dir]="isRtl ? 'rtl' : 'ltr'" *ngIf="!isLoading && program">
-  <div class="header-row">
-    <h1 class="page-title">{{ program.name }}</h1>
-    <button class="icon-btn" (click)="editProgram()" title="{{ t.edit }}">✎</button>
+  <div class="breadcrumb">
+    <button class="back-btn" (click)="goBack()"><app-icon name="chevron-left" [size]="16"></app-icon></button>
+    {{ t.breadcrumb }}
   </div>
 
-  <div class="details-grid">
-    <div class="people-card">
-      <div class="person">
-        <span class="person-role">{{ t.sponsor }}</span>
-        <span class="person-name">{{ program.sponsorName || '-' }}</span>
-      </div>
-      <div class="person">
-        <span class="person-role">{{ t.manager }}</span>
-        <span class="person-name">{{ program.managerName || '-' }}</span>
-      </div>
-      <!--
-        NOTE: the original Figma shows a per-person approval badge
-        (Approved / Pending / Refusing) next to each name. There is no
-        equivalent field anywhere in the API schema — only the single
-        overall `status: int` on the program itself. That per-person
-        approval concept has been left out rather than guessed. See
-        delivery notes for what the backend would need to add if you
-        want it back.
-      -->
+  <div class="header-card">
+    <div class="header-top">
+      <h1 class="program-title">{{ program.name }}</h1>
+      <button class="icon-btn" (click)="editProgram()" title="{{ t.edit }}"><app-icon name="edit" [size]="16"></app-icon></button>
     </div>
 
-    <div class="status-card" [ngClass]="statusMeta.cssClass">
-      <span class="status-label">{{ statusMeta.label }}</span>
-      <div class="progress-ring-wrap">
-        <span class="progress-value">{{ progress }}%</span>
+    <div class="header-body">
+      <div class="people-row">
+        <div class="person">
+          <span class="avatar-sm">{{ initials(portfolioOwnerName) }}</span>
+          <div>
+            <span class="person-name">{{ portfolioOwnerName || '-' }}</span>
+            <span class="person-role">{{ t.portfolioOwner }}</span>
+          </div>
+        </div>
+        <div class="person">
+          <span class="avatar-sm">{{ initials(program.sponsorName) }}</span>
+          <div>
+            <span class="person-name">{{ program.sponsorName || '-' }}</span>
+            <span class="person-role">{{ t.sponsor }}</span>
+          </div>
+        </div>
+        <div class="person">
+          <span class="avatar-sm">{{ initials(program.managerName) }}</span>
+          <div>
+            <span class="person-name">{{ program.managerName || '-' }}</span>
+            <span class="person-role">{{ t.manager }}</span>
+          </div>
+        </div>
+        <!--
+          Per-person approval indicator from the original Figma isn't
+          rendered — no such field exists in the API (only the single
+          overall `status` on the program itself).
+        -->
+      </div>
+
+      <div class="status-card" [ngClass]="statusMeta.cssClass">
+        <span class="status-label"><i></i>{{ statusMeta.label }}</span>
+        <div class="status-progress-bar">
+          <div class="status-progress-fill" [ngClass]="statusMeta.cssClass" [style.width.%]="progress"></div>
+        </div>
+        <span class="status-pct">{{ progress }}%</span>
       </div>
     </div>
   </div>
@@ -49,21 +66,68 @@
   </div>
 
   <div class="documents-section">
-    <span class="section-label">{{ t.documents }}:</span>
+    <span class="section-label">{{ t.documents }}</span>
     <div class="documents-list" *ngIf="program.attachedDocumentUrls?.length; else noDocs">
-      <a *ngFor="let url of program.attachedDocumentUrls" [href]="url" target="_blank" class="document-chip">
-        <span>{{ fileIcon(url) }}</span>
-        <span class="doc-name">{{ fileName(url) }}</span>
+      <a *ngFor="let url of program.attachedDocumentUrls" [href]="url" target="_blank" class="document-card">
+        <app-icon name="file" [size]="18"></app-icon>
+        <span class="document-name">{{ fileName(url) }}</span>
+        <app-icon name="download" [size]="14" class="download-icon"></app-icon>
       </a>
     </div>
-    <ng-template #noDocs>
-      <p class="hint">{{ t.noDocuments }}</p>
-    </ng-template>
+    <ng-template #noDocs><p class="hint">{{ t.noDocuments }}</p></ng-template>
   </div>
 
   <div class="description-section">
     <span class="section-label">{{ t.description }}</span>
     <p class="description-text">{{ program.description || '-' }}</p>
+  </div>
+
+  <div class="projects-section">
+    <div class="projects-header">
+      <span class="section-label">{{ t.allProjects }}</span>
+    </div>
+
+    <div class="table-card" *ngIf="!projectsLoading">
+      <table *ngIf="projects.length; else noProjects">
+        <thead>
+          <tr>
+            <th>{{ t.headers.name }}</th>
+            <th>{{ t.headers.manager }}</th>
+            <th>{{ t.headers.status }}</th>
+            <th>{{ t.headers.budget }}</th>
+            <th>{{ t.headers.start }}</th>
+            <th>{{ t.headers.end }}</th>
+            <th>{{ t.headers.tasksCount }}</th>
+            <th>{{ t.headers.membersCount }}</th>
+            <th>{{ t.headers.actions }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let proj of projects">
+            <td class="cell-strong">{{ proj.name }}</td>
+            <td>{{ proj.managerName || '-' }}</td>
+            <td>
+              <span class="status-dot" [ngClass]="projectStatusMeta(proj.status).cssClass">
+                <i></i>{{ projectStatusMeta(proj.status).label }}
+              </span>
+            </td>
+            <td>{{ formatBudget(proj.budget) }}</td>
+            <td>{{ formatDate(proj.startDate) }}</td>
+            <td>{{ formatDate(proj.endDate) }}</td>
+            <td>{{ proj.tasksCount ?? 0 }}</td>
+            <td>{{ proj.membersCount ?? 0 }}</td>
+            <td class="actions-cell">
+              <button class="icon-btn" title="View"><app-icon name="eye" [size]="16"></app-icon></button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <ng-template #noProjects>
+        <div class="empty-state"><p>{{ t.noProjects }}</p></div>
+      </ng-template>
+    </div>
+
+    <div class="loading-state" *ngIf="projectsLoading">{{ isRtl ? 'جار تحميل المشاريع...' : 'Loading projects...' }}</div>
   </div>
 </div>
 

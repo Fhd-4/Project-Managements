@@ -1,0 +1,30 @@
+// Shared design tokens for the Programs module.
+// @use 'design-tokens' as * ; in any component scss in this folder.
+
+$color-primary: #1C3766;
+$color-bg: #F7F9FC;
+$color-border: #E6EBF3;
+$color-text-primary: #1F2A44;
+$color-text-secondary: #7B8794;
+$color-white: #ffffff;
+
+// Status semantics (confirmed mapping — do not change without re-confirming)
+$color-active: #2563EB;    // In Progress
+$color-completed: #16A34A;
+$color-pending: #EA580C;
+$color-rejected: #DC2626;
+
+$radius-sm: 10px;
+$radius-md: 12px;
+$radius-lg: 14px;
+
+$shadow-soft: 0 2px 10px rgba(0, 0, 0, 0.05);
+
+$transition: 180ms ease;
+
+// 8px spacing scale
+$space-1: 8px;
+$space-2: 16px;
+$space-3: 24px;
+$space-4: 32px;
+$space-5: 40px;

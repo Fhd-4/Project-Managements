@@ -7,11 +7,10 @@ import { PortfoliosComponent } from './portfolios/portfolios.component';
 import { CreatePortfolioComponent } from './portfolios/create/create-portfolio';
 import { PortfolioDetailsComponent } from './portfolios/details/portfolio-details';
 
-// 👈 استدعاء مكونات البرامج الثلاثة الجديدة
+// Program component relative layouts imports tracking
 import { ProgramsComponent } from './programs/programs.component';
 import { ProgramCreateComponent } from './programs/create/program create.component';
 import { ProgramDetailsComponent } from './programs/details/program details.component';
-
 
 export const routes: Routes = [
   {
@@ -52,7 +51,7 @@ export const routes: Routes = [
         component: PortfolioDetailsComponent
       },
       
-      // 👈 إضافة مسارات إدارة البرامج الجديدة هنا لتظهر داخل الـ Layout
+      // Enforced Clean Programs Routing Blocks context tree
       {
         path: 'programs',
         component: ProgramsComponent
@@ -65,8 +64,9 @@ export const routes: Routes = [
         path: 'programs/edit/:id',
         component: ProgramCreateComponent
       },
+      // 🟢 Updated to match your blueprint template schema and isolated at the bottom
       {
-        path: 'programs/view/:id',
+        path: 'programs/:id',
         component: ProgramDetailsComponent
       }
     ]

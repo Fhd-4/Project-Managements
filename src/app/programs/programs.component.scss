@@ -1,255 +1,448 @@
-.programs-page { padding: 24px; font-family: inherit; }
+@use 'design_tokens' as *; // 👈 1. Single unified rule sitting correctly at line 1 with underscore naming
 
-.stats-row {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  margin-bottom: 20px;
-}
+.details-page { padding: $space-3; max-width: 1100px; background: $color-bg; }
 
-.stat-card {
-  background: #fff;
-  border: 1px solid #E5E7EB;
-  border-radius: 12px;
-  padding: 16px;
+.breadcrumb {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
+  font-size: 12px;
+  color: $color-text-secondary;
+  margin-bottom: $space-2;
 }
 
-.stat-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background: #F3F4F6;
+/* 👈 2. Duplicate @use rule removed completely from here to prevent SASS compilation blocks */
+
+.back-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid $color-border;
+  background: $color-white;
+  color: $color-text-primary;
+  cursor: pointer;
 }
 
-.stat-pending .stat-icon { background: rgba(234, 88, 12, 0.1); }
-.stat-active .stat-icon { background: rgba(37, 99, 235, 0.1); }
-.stat-completed .stat-icon { background: rgba(22, 163, 74, 0.1); }
+.header-card {
+  background: $color-white;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  box-shadow: $shadow-soft;
+  padding: $space-3;
+  margin-bottom: $space-2;
+}
 
-.stat-text { display: flex; flex-direction: column; }
-.stat-value { font-size: 22px; font-weight: 700; color: #111827; }
-.stat-label { font-size: 12px; color: #6B7280; }
-
-.toolbar {
+.header-top {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
+  justify-content: space-between;
+  margin-bottom: $space-2;
 }
+.program-title { font-size: 18px; font-weight: 700; color: $color-text-primary; }
 
-.section-title { font-size: 18px; font-weight: 700; color: #111827; flex: 1 1 auto; }
-
-.view-toggle {
-  display: flex;
-  border: 1px solid #E5E7EB;
-  border-radius: 8px;
-  overflow: hidden;
-
-  button {
-    border: none;
-    background: #fff;
-    padding: 8px 12px;
-    font-size: 13px;
-    cursor: pointer;
-    color: #6B7280;
-
-    &.active { background: #0F1E3D; color: #fff; }
-  }
-}
-
-.search-input {
-  min-width: 200px;
-  padding: 9px 14px;
-  border: 1px solid #E5E7EB;
-  border-radius: 8px;
-  font-size: 14px;
-}
-
-.status-select {
-  padding: 9px 14px;
-  border: 1px solid #E5E7EB;
-  border-radius: 8px;
-  font-size: 14px;
-  background: #fff;
-}
-
-.btn-primary {
-  background: #0F1E3D;
-  color: #fff;
+.icon-btn {
   border: none;
-  border-radius: 8px;
-  padding: 10px 18px;
-  font-size: 14px;
-  font-weight: 600;
+  background: transparent;
   cursor: pointer;
-  white-space: nowrap;
+  color: $color-text-secondary;
+  padding: 6px;
+  border-radius: 8px;
+  transition: background $transition, color $transition;
+
+  &:hover { background: $color-bg; color: $color-primary; }
 }
 
-.table-card {
-  background: #fff;
-  border: 1px solid #E5E7EB;
-  border-radius: 12px;
+.header-body {
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  gap: $space-2;
+  align-items: center;
+}
+
+.people-row { display: flex; gap: $space-3; flex-wrap: wrap; }
+
+.person {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  div { display: flex; flex-direction: column; }
+  .person-name { font-size: 13px; font-weight: 600; color: $color-text-primary; }
+  .person-role { font-size: 11px; color: $color-text-secondary; }
+}
+
+.avatar-sm {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #EDEFF3;
+  color: $color-text-secondary;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.status-card {
+  border: 1px solid $color-border;
+  border-radius: $radius-sm;
+  padding: $space-2;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  .status-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+
+    i { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+  }
+
+  &.status-active .status-label { color: $color-active; i { background: $color-active; } }
+  &.status-completed .status-label { color: $color-completed; i { background: $color-completed; } }
+  &.status-pending .status-label { color: $color-pending; i { background: $color-pending; } }
+  &.status-rejected .status-label { color: $color-rejected; i { background: $color-rejected; } }
+}
+
+.status-progress-bar {
+  height: 6px;
+  background: $color-border;
+  border-radius: 4px;
   overflow: hidden;
 }
+
+.status-progress-fill { height: 100%; }
+.status-progress-fill.status-active { background: $color-active; }
+.status-progress-fill.status-completed { background: $color-completed; }
+.status-progress-fill.status-pending { background: $color-pending; }
+.status-progress-fill.status-rejected { background: $color-rejected; }
+
+.status-pct { font-size: 12px; font-weight: 700; color: $color-text-primary; align-self: flex-end; }
+
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $space-2;
+  margin-bottom: $space-2;
+}
+
+.stat-box {
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  box-shadow: $shadow-soft;
+  padding: $space-2;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: $color-white;
+
+  .stat-label { font-size: 13px; font-weight: 600; color: $color-text-primary; }
+  .stat-value { font-size: 16px; font-weight: 700; color: $color-text-primary; }
+}
+
+.documents-section, .description-section, .projects-section {
+  background: $color-white;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  box-shadow: $shadow-soft;
+  padding: $space-2;
+  margin-bottom: $space-2;
+}
+
+.section-label { font-size: 13px; font-weight: 600; color: $color-text-primary; display: block; margin-bottom: $space-1 + 4px; }
+
+.documents-list { display: flex; gap: $space-1 + 4px; flex-wrap: wrap; }
+
+.document-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid $color-border;
+  border-radius: $radius-sm;
+  padding: 10px 12px;
+  text-decoration: none;
+  color: $color-text-primary;
+  font-size: 12px;
+  transition: background $transition;
+
+  &:hover { background: $color-bg; }
+
+  .download-icon { color: $color-text-secondary; margin-inline-start: 4px; }
+}
+
+.document-name { max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.description-text { font-size: 13px; color: $color-text-secondary; line-height: 1.6; background: $color-bg; border-radius: $radius-sm; padding: $space-2; border: 1px solid $color-border; }
+
+.hint { font-size: 13px; color: $color-text-secondary; }
+
+.projects-header { margin-bottom: $space-1; }
+
+.table-card { border: 1px solid $color-border; border-radius: $radius-sm; overflow: hidden; }
 
 table { width: 100%; border-collapse: collapse; }
 
 thead th {
   text-align: start;
-  font-size: 13px;
-  color: #6B7280;
-  padding: 14px 16px;
-  border-bottom: 1px solid #E5E7EB;
+  font-size: 12px;
+  color: $color-text-secondary;
+  padding: 12px $space-2;
+  border-bottom: 1px solid $color-border;
   font-weight: 600;
+  background: $color-bg;
 }
-
-th.sortable { cursor: pointer; user-select: none; }
-.sort-icon { opacity: 0.5; margin-inline-start: 4px; }
 
 tbody td {
-  padding: 14px 16px;
-  font-size: 14px;
-  color: #111827;
-  border-bottom: 1px solid #F3F4F6;
+  padding: 12px $space-2;
+  font-size: 13px;
+  color: $color-text-primary;
+  border-bottom: 1px solid $color-border;
 }
 
-.owner-cell { display: flex; align-items: center; gap: 8px; }
-
-.avatar-sm {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: #E5E7EB;
-  color: #374151;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 10px;
-  font-weight: 700;
-  flex-shrink: 0;
-}
+.cell-strong { font-weight: 600; }
 
 .status-dot {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 500;
 
-  i { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+  i { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
 }
 
-.status-active { color: #2563EB; i { background: #2563EB; } }
-.status-completed { color: #16A34A; i { background: #16A34A; } }
-.status-pending { color: #EA580C; i { background: #EA580C; } }
-.status-rejected { color: #DC2626; i { background: #DC2626; } }
-.status-unknown { color: #6B7280; i { background: #6B7280; } }
+.status-active { color: $color-active; i { background: $color-active; } }
+.status-completed { color: $color-completed; i { background: $color-completed; } }
+.status-pending { color: $color-pending; i { background: $color-pending; } }
+.status-rejected { color: $color-rejected; i { background: $color-rejected; } }
+.status-unknown { color: $color-text-secondary; i { background: $color-text-secondary; } }
 
-.actions-cell { display: flex; gap: 8px; }
+.actions-cell { display: flex; gap: 4px; }
 
-.icon-btn { border: none; background: transparent; cursor: pointer; font-size: 15px; padding: 4px; }
-.icon-danger { color: #DC2626; }
-
-.empty-state, .loading-state { text-align: center; padding: 48px 16px; color: #6B7280; font-size: 14px; }
-
-.pagination {
-  display: flex;
-  justify-content: center;
-  gap: 6px;
-  padding: 16px;
-
-  button {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    border: 1px solid #E5E7EB;
-    background: #fff;
-    cursor: pointer;
-    font-size: 13px;
-
-    &.active { background: #0F1E3D; color: #fff; border-color: #0F1E3D; }
-  }
-}
-
-/* Kanban */
-.kanban-board {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  align-items: start;
-}
-
-.kanban-column {
-  background: #F9FAFB;
-  border-radius: 12px;
-  padding: 12px;
-  min-height: 120px;
-}
-
-.kanban-col-header {
+.empty-state, .loading-state { text-align: center; padding: 32px 16px; color: $color-text-secondary; font-size: 13px; }
+.error-banner { padding: $space-2; text-align: center; color: $color-rejected; }
+.back-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  font-weight: 700;
-  margin-bottom: 12px;
-
-  i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-}
-
-.kanban-card {
-  background: #fff;
-  border: 1px solid #E5E7EB;
-  border-radius: 10px;
-  padding: 12px;
-  margin-bottom: 10px;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid $color-border;
+  background: $color-white;
+  color: $color-text-primary;
   cursor: pointer;
 }
 
-.kanban-card-title { font-size: 13px; font-weight: 700; color: #111827; display: block; margin-bottom: 8px; }
-
-.kanban-card-row {
-  display: flex;
-  justify-content: space-between;
-  font-size: 12px;
-  color: #6B7280;
-  margin-bottom: 4px;
+.header-card {
+  background: $color-white;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  box-shadow: $shadow-soft;
+  padding: $space-3;
+  margin-bottom: $space-2;
 }
 
-.kanban-progress-bar {
-  height: 5px;
-  background: #E5E7EB;
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $space-2;
+}
+
+.program-title { font-size: 18px; font-weight: 700; color: $color-text-primary; }
+
+.icon-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: $color-text-secondary;
+  padding: 6px;
+  border-radius: 8px;
+  transition: background $transition, color $transition;
+
+  &:hover { background: $color-bg; color: $color-primary; }
+}
+
+.header-body {
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  gap: $space-2;
+  align-items: center;
+}
+
+.people-row { display: flex; gap: $space-3; flex-wrap: wrap; }
+
+.person {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  div { display: flex; flex-direction: column; }
+  .person-name { font-size: 13px; font-weight: 600; color: $color-text-primary; }
+  .person-role { font-size: 11px; color: $color-text-secondary; }
+}
+
+.avatar-sm {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #EDEFF3;
+  color: $color-text-secondary;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.status-card {
+  border: 1px solid $color-border;
+  border-radius: $radius-sm;
+  padding: $space-2;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  .status-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+
+    i { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+  }
+
+  &.status-active .status-label { color: $color-active; i { background: $color-active; } }
+  &.status-completed .status-label { color: $color-completed; i { background: $color-completed; } }
+  &.status-pending .status-label { color: $color-pending; i { background: $color-pending; } }
+  &.status-rejected .status-label { color: $color-rejected; i { background: $color-rejected; } }
+}
+
+.status-progress-bar {
+  height: 6px;
+  background: $color-border;
   border-radius: 4px;
   overflow: hidden;
-  margin: 8px 0;
 }
 
-.kanban-progress-fill { height: 100%; }
-.kanban-progress-fill.status-active { background: #2563EB; }
-.kanban-progress-fill.status-completed { background: #16A34A; }
-.kanban-progress-fill.status-pending { background: #EA580C; }
-.kanban-progress-fill.status-rejected { background: #DC2626; }
+.status-progress-fill { height: 100%; }
+.status-progress-fill.status-active { background: $color-active; }
+.status-progress-fill.status-completed { background: $color-completed; }
+.status-progress-fill.status-pending { background: $color-pending; }
+.status-progress-fill.status-rejected { background: $color-rejected; }
 
-.kanban-card-footer { display: flex; align-items: center; justify-content: space-between; }
-.kanban-progress-pct { font-size: 11px; color: #6B7280; }
-.kanban-empty { font-size: 12px; color: #9CA3AF; text-align: center; padding: 12px 0; }
+.status-pct { font-size: 12px; font-weight: 700; color: $color-text-primary; align-self: flex-end; }
 
-.toast {
-  position: fixed;
-  top: 20px;
-  inset-inline-end: 20px;
-  padding: 12px 18px;
-  border-radius: 8px;
-  font-size: 14px;
-  z-index: 1000;
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $space-2;
+  margin-bottom: $space-2;
 }
 
-.toast-success { background: #DCFCE7; color: #166534; }
-.toast-error { background: #FEE2E2; color: #991B1B; }
+.stat-box {
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  box-shadow: $shadow-soft;
+  padding: $space-2;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: $color-white;
+
+  .stat-label { font-size: 13px; font-weight: 600; color: $color-text-primary; }
+  .stat-value { font-size: 16px; font-weight: 700; color: $color-text-primary; }
+}
+
+.documents-section, .description-section, .projects-section {
+  background: $color-white;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  box-shadow: $shadow-soft;
+  padding: $space-2;
+  margin-bottom: $space-2;
+}
+
+.section-label { font-size: 13px; font-weight: 600; color: $color-text-primary; display: block; margin-bottom: $space-1 + 4px; }
+
+.documents-list { display: flex; gap: $space-1 + 4px; flex-wrap: wrap; }
+
+.document-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid $color-border;
+  border-radius: $radius-sm;
+  padding: 10px 12px;
+  text-decoration: none;
+  color: $color-text-primary;
+  font-size: 12px;
+  transition: background $transition;
+
+  &:hover { background: $color-bg; }
+
+  .download-icon { color: $color-text-secondary; margin-inline-start: 4px; }
+}
+
+.document-name { max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.description-text { font-size: 13px; color: $color-text-secondary; line-height: 1.6; background: $color-bg; border-radius: $radius-sm; padding: $space-2; border: 1px solid $color-border; }
+
+.hint { font-size: 13px; color: $color-text-secondary; }
+
+.projects-header { margin-bottom: $space-1; }
+
+.table-card { border: 1px solid $color-border; border-radius: $radius-sm; overflow: hidden; }
+
+table { width: 100%; border-collapse: collapse; }
+
+thead th {
+  text-align: start;
+  font-size: 12px;
+  color: $color-text-secondary;
+  padding: 12px $space-2;
+  border-bottom: 1px solid $color-border;
+  font-weight: 600;
+  background: $color-bg;
+}
+
+tbody td {
+  padding: 12px $space-2;
+  font-size: 13px;
+  color: $color-text-primary;
+  border-bottom: 1px solid $color-border;
+}
+
+.cell-strong { font-weight: 600; }
+
+.status-dot {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+
+  i { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+}
+
+.status-active { color: $color-active; i { background: $color-active; } }
+.status-completed { color: $color-completed; i { background: $color-completed; } }
+.status-pending { color: $color-pending; i { background: $color-pending; } }
+.status-rejected { color: $color-rejected; i { background: $color-rejected; } }
+.status-unknown { color: $color-text-secondary; i { background: $color-text-secondary; } }
+
+.actions-cell { display: flex; gap: 4px; }
+
+.empty-state, .loading-state { text-align: center; padding: 32px 16px; color: $color-text-secondary; font-size: 13px; }
+.error-banner { padding: $space-2; text-align: center; color: $color-rejected; }
