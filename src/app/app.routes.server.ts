@@ -50,6 +50,14 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Server
   },
   {
+    path: 'projects/details/:projectId/tasks/details/:id',
+    renderMode: RenderMode.Server
+  },
+  {
+    path: 'tasks/details/:id',
+    renderMode: RenderMode.Server
+  },
+  {
     path: '**',
     renderMode: RenderMode.Prerender
   }

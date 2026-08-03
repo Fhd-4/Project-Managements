@@ -256,6 +256,12 @@
                 </td>
                 <td class="actions-cell" (click)="$event.stopPropagation()">
                   <div class="actions-menu-buttons">
+                    <button class="action-item-btn view" (click)="viewTaskDetails(t.id)" title="View Details">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>
+                    </button>
                     <button class="action-item-btn edit" (click)="editTask(t.id)" title="Edit">
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -454,6 +460,12 @@
                 </td>
                 <td class="actions-cell" (click)="$event.stopPropagation()">
                   <div class="actions-menu-buttons">
+                    <button class="action-item-btn view" (click)="navigateToMeetingDetails(m.id)" title="View Details">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>
+                    </button>
                     <button class="action-item-btn edit" (click)="router.navigate(['/projects/details/' + projectId + '/meetings/edit/' + m.id])" title="Edit">
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>

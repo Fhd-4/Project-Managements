@@ -404,6 +404,12 @@ export class ProjectDetailsComponent implements OnInit, OnDestroy {
     }
   }
 
+  viewTaskDetails(taskId: number) {
+    if (this.projectId) {
+      this.router.navigate([`/projects/details/${this.projectId}/tasks/details/${taskId}`]);
+    }
+  }
+
   deleteMeeting(meetingId: number, event: MouseEvent) {
     event.stopPropagation();
     if (confirm(this.currentLang === 'ar' ? 'هل أنت متأكد من حذف هذا الاجتماع؟' : 'Are you sure you want to delete this meeting?')) {

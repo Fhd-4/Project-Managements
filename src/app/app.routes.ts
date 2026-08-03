@@ -13,6 +13,7 @@ import { CreateTaskComponent } from './tasks/create/create-task';
 import { TasksComponent } from './tasks/tasks.component';
 import { CreateMeetingComponent } from './meetings/create/create-meeting';
 import { MeetingDetailsComponent } from './meetings/details/meeting-details';
+import { TaskDetailsComponent } from './tasks/details/task-details';
 
 export const routes: Routes = [
   {
@@ -99,6 +100,14 @@ export const routes: Routes = [
       {
         path: 'projects/details/:projectId/meetings/details/:meetingId',
         component: MeetingDetailsComponent
+      },
+      {
+        path: 'projects/details/:projectId/tasks/details/:id',
+        component: TaskDetailsComponent
+      },
+      {
+        path: 'tasks/details/:id',
+        component: TaskDetailsComponent
       }
     ]
   },

@@ -154,6 +154,11 @@ export class TasksComponent implements OnInit, OnDestroy {
     this.router.navigate([`/projects/details/${task.projectId}/tasks/edit/${task.id}`]);
   }
 
+  viewTaskDetails(task: ProjectTask, event: MouseEvent) {
+    event.stopPropagation();
+    this.router.navigate([`/tasks/details/${task.id}`]);
+  }
+
   deleteTask(id: number, event: MouseEvent) {
     event.stopPropagation();
     if (confirm(this.currentLang === 'ar' ? 'هل أنت متأكد من حذف هذه المهمة؟' : 'Are you sure you want to delete this task?')) {
