@@ -1,0 +1,268 @@
+.portfolios-container {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    animation: fadeIn 0.4s ease-out;
+    padding-bottom: 40px;
+
+    /* Top Header Section (Back Button + Breadcrumbs) */
+    .create-header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+
+        .back-btn {
+            background: white;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #102a43;
+            transition: all 0.2s ease;
+
+            &:hover {
+                background: #f1f5f9;
+                border-color: #94a3b8;
+            }
+        }
+
+        .header-titles {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+
+            h2 {
+                font-size: 1.35rem;
+                font-weight: 700;
+                color: #102a43;
+                margin: 0;
+            }
+
+            .breadcrumb {
+                font-size: 0.85rem;
+                color: #627d98;
+                font-weight: 500;
+            }
+        }
+    }
+
+    /* Main Form Card */
+    .create-page-card {
+        background: transparent; // In your Figma, it looks like blocks are placed directly on the background or inside a transparent wrapper
+        padding: 0;
+
+        .create-portfolio-form {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            width: 100%;
+
+            /* Standard Grid for Form Fields */
+            .form-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 24px 30px;
+            }
+
+            /* Input Groups */
+            .form-field-group, .form-full-field {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+
+                label {
+                    font-size: 0.95rem;
+                    font-weight: 600;
+                    color: #334155;
+                    text-align: start;
+                }
+
+                input[type="text"],
+                input[type="date"],
+                textarea,
+                select {
+                    background: #f8fafc;
+                    border: 1.5px solid #e2e8f0;
+                    padding: 12px 18px;
+                    border-radius: 12px;
+                    font-size: 0.95rem;
+                    color: #102a43;
+                    outline: none;
+                    width: 100%;
+                    box-sizing: border-box;
+                    transition: border-color 0.2s, background 0.2s;
+                    text-align: start;
+                    font-family: inherit;
+
+                    &::placeholder {
+                        color: #94a3b8;
+                    }
+
+                    &:focus {
+                        border-color: #102a43;
+                        background: white;
+                        box-shadow: 0 0 0 3px rgba(16, 42, 67, 0.08);
+                    }
+                }
+
+                textarea {
+                    resize: vertical;
+                    min-height: 100px;
+                }
+            }
+
+            /* Custom Select Wrapper */
+            .select-wrapper {
+                position: relative;
+                width: 100%;
+                display: flex;
+                align-items: center;
+
+                select {
+                    appearance: none;
+                    padding-inline-end: 40px;
+                    cursor: pointer;
+                }
+
+                .select-chevron {
+                    position: absolute;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    color: #627d98;
+                    pointer-events: none;
+                }
+            }
+
+            /* Nested Sections for Milestones & Deliverables (Light gray boxes from Figma) */
+            .nested-block-section {
+                background: #f8fafc;
+                border: 1.5px solid #e2e8f0;
+                border-radius: 12px;
+                padding: 24px;
+                display: flex;
+                flex-direction: column;
+                gap: 20px;
+                position: relative;
+                transition: border-color 0.2s;
+
+                &:hover {
+                    border-color: #cbd5e1;
+                }
+
+                .block-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+
+                    span {
+                        font-size: 0.95rem;
+                        font-weight: 700;
+                        color: #475569;
+                    }
+
+                    .delete-item-btn {
+                        background: transparent;
+                        border: none;
+                        padding: 4px;
+                        cursor: pointer;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        transition: transform 0.2s;
+
+                        &:hover {
+                            transform: scale(1.1);
+                        }
+                        
+                        svg {
+                            color: #ef4444; /* Red trash icon */
+                        }
+                    }
+                }
+            }
+
+            /* + Add Item Button */
+            .add-item-btn {
+                background: transparent;
+                border: none;
+                color: #1e3a8a;
+                font-weight: 700;
+                font-size: 0.95rem;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                align-self: flex-start;
+                padding: 8px 0;
+                transition: color 0.2s;
+
+                &:hover {
+                    color: #112b50;
+                    text-decoration: underline;
+                }
+            }
+
+            /* Form Footer (Submit Button) */
+            .form-footer-actions {
+                display: flex;
+                justify-content: flex-end;
+                border-top: 1.5px solid #e2e8f0;
+                padding-top: 25px;
+                margin-top: 15px;
+
+                .add-new-btn {
+                    background: #112b50;
+                    border: none;
+                    color: white;
+                    padding: 12px 32px;
+                    border-radius: 30px;
+                    font-weight: 700;
+                    font-size: 0.95rem;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    transition: background 0.2s;
+
+                    &:hover {
+                        background: #1a365d;
+                    }
+                }
+            }
+        }
+    }
+}
+
+/* LTR Specific layout positions */
+[dir="ltr"] {
+    .create-portfolio-form {
+        .select-wrapper {
+            .select-chevron {
+                right: 18px;
+            }
+        }
+    }
+}
+
+/* RTL Specific layout positions */
+[dir="rtl"] {
+    .create-portfolio-form {
+        .select-wrapper {
+            select {
+                padding-inline-end: 40px;
+            }
+            .select-chevron {
+                left: 18px;
+            }
+        }
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}

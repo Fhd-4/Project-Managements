@@ -14,12 +14,11 @@ import { TasksComponent } from './tasks/tasks.component';
 import { CreateMeetingComponent } from './meetings/create/create-meeting';
 import { MeetingDetailsComponent } from './meetings/details/meeting-details';
 import { TaskDetailsComponent } from './tasks/details/task-details';
-
-// 👈 استدعاء مكونات البرامج الثلاثة الجديدة
 import { ProgramsComponent } from './programs/programs.component';
 import { ProgramCreateComponent } from './programs/create/program create.component';
 import { ProgramDetailsComponent } from './programs/details/program details.component';
-
+import { PlansComponent } from './plans/plans.component';
+import { PlansCreateComponent } from './plans/create/plans-create.component';
 
 export const routes: Routes = [
   {
@@ -132,6 +131,18 @@ export const routes: Routes = [
       {
         path: 'tasks/details/:id',
         component: TaskDetailsComponent
+      },
+      {
+        path: 'plans',
+        component: PlansComponent
+      },
+      {
+        path: 'plans/create',
+        component: PlansCreateComponent
+      },
+      {
+        path: 'plans/edit/:id',
+        component: PlansCreateComponent
       }
     ]
   },

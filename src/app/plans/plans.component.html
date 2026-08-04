@@ -1,0 +1,73 @@
+<div class="portfolios-container" [dir]="isRtl ? 'rtl' : 'ltr'">
+  <div class="portfolios-content-card">
+    <div class="toolbar-row">
+      <div class="tab-title">
+        <h3>{{ isRtl ? 'جميع الخطط' : 'All Plans' }}</h3>
+      </div>
+      <div class="toolbar-actions">
+        <div class="search-box">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#627d98" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" [(ngModel)]="searchQuery" [placeholder]="isRtl ? 'ابحث عن أي شيء...' : 'Search for everything'">
+        </div>
+        <button class="create-btn" (click)="openCreatePage()">
+          <span>+</span> {{ isRtl ? 'إنشاء جديد' : 'Create New' }}
+        </button>
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      <table class="portfolios-table" *ngIf="filteredPlans.length > 0">
+        <thead>
+          <tr>
+            <th>{{ isRtl ? 'اسم الخطة' : 'Plan Name' }}</th>
+            <th>{{ isRtl ? 'المشروع' : 'Project' }}</th>
+            <th>{{ isRtl ? 'الإصدار' : 'Version' }}</th>
+            <th>{{ isRtl ? 'أنشئت بواسطة' : 'Created by' }}</th>
+            <th>{{ isRtl ? 'آخر تحديث' : 'Last Updated' }}</th>
+            <th>{{ isRtl ? 'الإجراءات' : 'Actions' }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let plan of filteredPlans">
+            <td class="name-cell">{{ plan.name }}</td>
+            <td>{{ plan.projectName || 'ERP Platform' }}</td>
+            <td>{{ plan.version || 'v1.0' }}</td>
+            <td>{{ plan.createdBy || 'Abdallah Othman' }}</td>
+            <td>{{ formatDate(plan.lastUpdated) }}</td>
+            <td class="actions-cell">
+              <button class="action-icon delete" (click)="deletePlan(plan.id!)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Empty State matching Figma -->
+      <div class="empty-state-section" *ngIf="filteredPlans.length === 0 && !isLoading">
+        <div class="empty-illustration">
+          <svg width="120" height="120" viewBox="0 0 120 120" fill="none">
+            <circle cx="60" cy="60" r="45" fill="#ebf8ff"></circle>
+            <path d="M48 35h18l12 12v38H48V35z" fill="white" stroke="#3182ce" stroke-width="2.5" stroke-linejoin="round"></path>
+            <path d="M60 35L54 52l12 14L56 85" stroke="#3182ce" stroke-width="2.5" stroke-linejoin="round"></path>
+            <path d="M66 35v12h12" stroke="#3182ce" stroke-width="2" stroke-linejoin="round"></path>
+            <circle cx="48" cy="75" r="10" fill="#1a365d"></circle>
+            <line x1="44" y1="71" x2="52" y2="79" stroke="white" stroke-width="2.2" stroke-linecap="round"></line>
+            <line x1="52" y1="71" x2="44" y2="79" stroke="white" stroke-width="2.2" stroke-linecap="round"></line>
+          </svg>
+        </div>
+        <h2 class="empty-title">{{ isRtl ? 'لا توجد بيانات حالياً' : 'No data right now' }}</h2>
+        <p class="empty-subtitle">
+          {{ isRtl ? 'يرجى الضغط على إنشاء جديد لاختيار الخيار المناسب' : 'Please click on ' }}<strong>{{ isRtl ? 'إنشاء جديد' : 'create new' }}</strong>{{ isRtl ? '' : ' to choose the suitable option' }}
+        </p>
+      </div>
+    </div>
+  </div>
+  <footer class="footer-description"><span>Footer Description</span></footer>
+</div>

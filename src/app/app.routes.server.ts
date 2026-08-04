@@ -68,6 +68,11 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Server
   },
   {
+    path: 'plans/edit/:id',
+    renderMode: RenderMode.Server
+  },
+
+  {
     path: '**',
     renderMode: RenderMode.Prerender
   }
