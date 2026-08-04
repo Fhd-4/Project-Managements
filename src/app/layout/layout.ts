@@ -6,6 +6,7 @@ import { PortfolioService } from '../portfolios/portfolio.service';
 
 type LangCode = 'ar' | 'en';
 
+
 @Component({
   selector: 'app-layout',
   standalone: true,
