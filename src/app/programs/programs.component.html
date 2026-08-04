@@ -1,33 +1,45 @@
 <div class="programs-page" [dir]="isRtl ? 'rtl' : 'ltr'">
 
-  <div class="toast toast-success" *ngIf="showSuccessToast">✔ {{ isRtl ? 'تمت العملية بنجاح' : 'Action completed successfully' }}</div>
-  <div class="toast toast-error" *ngIf="showErrorToast">✖ {{ isRtl ? 'حدث خطأ ما' : 'Something went wrong' }}</div>
+  <!-- Toast: kept colorful (green/red) per your instruction -->
+  <div class="toast toast-success" *ngIf="showSuccessToast">
+    <span class="toast-dot"></span>{{ isRtl ? 'تمت العملية بنجاح' : 'New program added successfully' }}
+  </div>
+  <div class="toast toast-error" *ngIf="showErrorToast">
+    <span class="toast-dot"></span>{{ isRtl ? 'فشل الحفظ' : 'Failed to save' }}
+  </div>
 
-  <!-- Stats -->
+  <h1 class="page-title">{{ t.title }}</h1>
+
+  <!-- Stats: icons are dark navy/grey, not full-color -->
   <div class="stats-row">
     <div class="stat-card">
-      <span class="stat-icon">📦</span>
+      <span class="stat-icon icon-mono">📦</span>
       <div class="stat-text">
         <span class="stat-value">{{ totalCount }}</span>
         <span class="stat-label">{{ t.stats.total }}</span>
       </div>
     </div>
-    <div class="stat-card stat-pending">
-      <span class="stat-icon">⏱</span>
+    <div class="stat-card">
+      <span class="stat-icon icon-mono">⏱</span>
       <div class="stat-text">
         <span class="stat-value">{{ pendingCount }}</span>
         <span class="stat-label">{{ t.stats.pending }}</span>
       </div>
     </div>
-    <div class="stat-card stat-active">
-      <span class="stat-icon">📈</span>
+    <div class="stat-card">
+      <span class="stat-icon icon-mono">📈</span>
       <div class="stat-text">
         <span class="stat-value">{{ activeCount }}</span>
         <span class="stat-label">{{ t.stats.active }}</span>
       </div>
+      <!--
+        Trend arrow ("36 Ports / month" in the Figma) intentionally left
+        out — still no confirmed metric behind it. Say the word and I'll
+        wire in a colored ↗/↘ once you tell me what it should compute.
+      -->
     </div>
-    <div class="stat-card stat-completed">
-      <span class="stat-icon">✔</span>
+    <div class="stat-card">
+      <span class="stat-icon icon-mono">✔</span>
       <div class="stat-text">
         <span class="stat-value">{{ completedCount }}</span>
         <span class="stat-label">{{ t.stats.completed }}</span>
@@ -37,14 +49,14 @@
 
   <!-- Toolbar -->
   <div class="toolbar">
-    <h2 class="section-title">{{ t.title }}</h2>
-
     <div class="view-toggle">
       <button [class.active]="viewMode === 'list'" (click)="viewMode = 'list'">☰ {{ t.listView }}</button>
       <button [class.active]="viewMode === 'kanban'" (click)="viewMode = 'kanban'">▦ {{ t.kanbanView }}</button>
     </div>
 
-    <input class="search-input" type="text" [placeholder]="t.searchPlaceholder" [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange()" />
+    <div class="search-wrap">
+      <input class="search-input" type="text" [placeholder]="t.searchPlaceholder" [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange()" />
+    </div>
 
     <select class="status-select" [(ngModel)]="statusFilter" (ngModelChange)="onStatusFilterChange()">
       <option *ngFor="let opt of statusOptions" [ngValue]="opt.value">{{ isRtl ? opt.labelAr : opt.labelEn }}</option>
@@ -61,8 +73,8 @@
       <thead>
         <tr>
           <th>{{ t.headers.name }}</th>
-          <th class="sortable" (click)="toggleSort('projects')">{{ t.headers.projects }} <span class="sort-icon">↕</span></th>
-          <th class="sortable" (click)="toggleSort('tasks')">{{ t.headers.tasks }} <span class="sort-icon">↕</span></th>
+          <th class="sortable" (click)="toggleSort('projects')">{{ t.headers.projects }} ↕</th>
+          <th class="sortable" (click)="toggleSort('tasks')">{{ t.headers.tasks }} ↕</th>
           <th>{{ t.headers.owner }}</th>
           <th>{{ t.headers.status }}</th>
           <th>{{ t.headers.actions }}</th>
@@ -70,7 +82,7 @@
       </thead>
       <tbody>
         <tr *ngFor="let p of pagedPrograms">
-          <td>{{ p.name }}</td>
+          <td class="cell-strong">{{ p.name }}</td>
           <td>{{ p.projectsCount ?? 0 }}</td>
           <td>{{ p.tasksCount ?? 0 }}</td>
           <td>
@@ -79,15 +91,17 @@
               {{ p.managerName || '-' }}
             </span>
           </td>
+          <!-- Status: kept colorful (dot + colored text) per your instruction -->
           <td>
             <span class="status-dot" [ngClass]="statusMeta(p.status).cssClass">
               <i></i>{{ statusMeta(p.status).label }}
             </span>
           </td>
+          <!-- Actions: dark navy/grey, not colorful -->
           <td class="actions-cell">
-            <button class="icon-btn" title="View" (click)="viewProgramDetails(p.id)">👁</button>
-            <button class="icon-btn" title="Edit" (click)="openEditPage(p)">✎</button>
-            <button class="icon-btn icon-danger" title="Delete" (click)="deleteProgram(p.id)">🗑</button>
+            <button class="icon-btn" title="View" (click)="viewProgramDetails(p.id)"><span class="icon-mono">👁</span></button>
+            <button class="icon-btn" title="Edit" (click)="openEditPage(p)"><span class="icon-mono">✎</span></button>
+            <button class="icon-btn" title="Delete" (click)="deleteProgram(p.id)"><span class="icon-mono">🗑</span></button>
           </td>
         </tr>
       </tbody>
@@ -110,8 +124,8 @@
       </div>
       <div class="kanban-card" *ngFor="let p of col.programs" (click)="viewProgramDetails(p.id)">
         <span class="kanban-card-title">{{ p.name }}</span>
-        <div class="kanban-card-row"><span>{{ t.headers.projects }}:</span><strong>{{ p.projectsCount ?? 0 }}</strong></div>
-        <div class="kanban-card-row"><span>{{ t.headers.tasks }}:</span><strong>{{ p.tasksCount ?? 0 }}</strong></div>
+        <div class="kanban-card-row"><span>{{ t.headers.projects }}</span><strong>{{ p.projectsCount ?? 0 }}</strong></div>
+        <div class="kanban-card-row"><span>{{ t.headers.tasks }}</span><strong>{{ p.tasksCount ?? 0 }}</strong></div>
         <div class="kanban-progress-bar">
           <div class="kanban-progress-fill" [ngClass]="col.meta.cssClass" [style.width.%]="col.meta.progress"></div>
         </div>

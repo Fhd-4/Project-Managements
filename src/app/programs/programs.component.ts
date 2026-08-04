@@ -37,10 +37,6 @@ export class ProgramsComponent implements OnInit {
   sortKey: SortKey = 'none';
   sortDir: SortDir = 'none';
 
-  // Pagination — client-side. The Swagger for GET /api/Programs only
-  // documents portfolioId/keyword/status params, no page/pageSize, so this
-  // paginates the already-fetched list rather than hitting the API per page.
-  // If the backend adds real paging params, swap this for server-side paging.
   pageSize = 8;
   currentPage = 1;
 
@@ -55,11 +51,11 @@ export class ProgramsComponent implements OnInit {
   translations = {
     ar: {
       title: 'كل البرامج',
-      searchPlaceholder: 'ابحث بالاسم...',
+      searchPlaceholder: 'ابحث عن أي شيء',
       createBtn: 'إنشاء برنامج',
-      listView: 'عرض قائمة',
-      kanbanView: 'عرض كانبان',
-      stats: { total: 'إجمالي البرامج', pending: 'قيد الانتظار', active: 'قيد التنفيذ', completed: 'مكتملة' },
+      listView: 'قائمة',
+      kanbanView: 'كانبان',
+      stats: { total: 'إجمالي البرامج', pending: 'قيد الانتظار', active: 'في المسار الصحيح', completed: 'مكتملة' },
       headers: { name: 'اسم البرنامج', projects: 'المشاريع', tasks: 'المهام', owner: 'المسؤول', status: 'الحالة', actions: 'الإجراءات' },
       noData: 'لا توجد برامج مسجلة حالياً، اضغط على إنشاء برنامج للبدء.',
       confirmDelete: 'هل أنت متأكد من رغبتك في حذف هذا البرنامج؟'
@@ -70,7 +66,7 @@ export class ProgramsComponent implements OnInit {
       createBtn: 'Create Program',
       listView: 'List',
       kanbanView: 'Kanban',
-      stats: { total: 'Total Programs', pending: 'Pending', active: 'In Progress', completed: 'Completed' },
+      stats: { total: 'Total Programs', pending: 'Pending', active: 'On Track', completed: 'Completed' },
       headers: { name: 'Program Name', projects: 'Projects', tasks: 'Tasks', owner: 'Owner', status: 'Status', actions: 'Actions' },
       noData: 'No programs found. Click Create Program to get started.',
       confirmDelete: 'Are you sure you want to delete this program?'
@@ -146,22 +142,13 @@ export class ProgramsComponent implements OnInit {
     return result;
   }
 
-  get totalPages(): number {
-    return Math.max(1, Math.ceil(this.sortedPrograms.length / this.pageSize));
-  }
-
+  get totalPages(): number { return Math.max(1, Math.ceil(this.sortedPrograms.length / this.pageSize)); }
   get pagedPrograms(): Program[] {
     const start = (this.currentPage - 1) * this.pageSize;
     return this.sortedPrograms.slice(start, start + this.pageSize);
   }
-
-  get pageNumbers(): number[] {
-    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
-  }
-
-  goToPage(p: number) {
-    if (p >= 1 && p <= this.totalPages) this.currentPage = p;
-  }
+  get pageNumbers(): number[] { return Array.from({ length: this.totalPages }, (_, i) => i + 1); }
+  goToPage(p: number) { if (p >= 1 && p <= this.totalPages) this.currentPage = p; }
 
   get kanbanColumns() {
     const statuses = [ProgramStatus.Pending, ProgramStatus.Active, ProgramStatus.Completed, ProgramStatus.Rejected];
@@ -177,7 +164,7 @@ export class ProgramsComponent implements OnInit {
   initials(name?: string): string {
     if (!name) return '?';
     const parts = name.trim().split(' ');
-    return (parts[0]?.[0] || '') + (parts[1]?.[0] || '');
+    return ((parts[0]?.[0] || '') + (parts[1]?.[0] || '')).toUpperCase();
   }
 
   openCreatePage() { this.router.navigate(['/programs/create']); }

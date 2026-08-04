@@ -5,7 +5,6 @@ import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { API_CONFIG } from '../../api.config';
 
-
 export interface AppUser {
   id: string;
   userName?: string;
@@ -15,11 +14,6 @@ export interface AppUser {
   profilePhoto?: string;
 }
 
-// NOTE: This is a minimal service scoped to what the Programs module needs
-// (populating the Manager / Sponsor dropdowns from /api/Auth/all-users).
-// If you already have a UsersService elsewhere in the app, delete this file
-// and point program-create.component.ts at that instead — this exists only
-// because it wasn't provided.
 @Injectable({
   providedIn: 'root'
 })
@@ -43,9 +37,7 @@ export class UserService {
   }
 
   getAllUsers(): Observable<AppUser[]> {
-    if (!isPlatformBrowser(this.platformId)) {
-      return of([]);
-    }
+    if (!isPlatformBrowser(this.platformId)) return of([]);
     return this.http.get<AppUser[]>(`${this.apiUrl}/all-users`, { headers: this.getHeaders() }).pipe(
       catchError(() => {
         console.warn('API Offline. Serving empty users list.');

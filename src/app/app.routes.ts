@@ -74,7 +74,7 @@ export const routes: Routes = [
         component: ProgramCreateComponent
       },
       {
-        path: 'programs/view/:id',
+        path: 'programs/details/:id',
         component: ProgramDetailsComponent
       },
       {

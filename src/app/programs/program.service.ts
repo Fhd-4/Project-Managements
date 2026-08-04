@@ -5,10 +5,6 @@ import { Observable, of, BehaviorSubject } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { API_CONFIG } from '../api.config';
 
-// ---------------------------------------------------------------------------
-// Status enum — confirmed mapping (int stored on backend, everything else is
-// derived client-side from this single field).
-// ---------------------------------------------------------------------------
 export enum ProgramStatus {
   Active = 1,   // "In Progress"
   Completed = 2,
@@ -18,9 +14,9 @@ export enum ProgramStatus {
 
 export interface StatusMeta {
   label: string;
-  color: string;   // hex, matches design spec
-  cssClass: string; // tailwind-ish class hook for templates
-  progress: number; // fallback ring/percentage when API doesn't return one
+  color: string;
+  cssClass: string;
+  progress: number;
 }
 
 export const PROGRAM_STATUS_MAP: Record<number, StatusMeta> = {
@@ -31,15 +27,9 @@ export const PROGRAM_STATUS_MAP: Record<number, StatusMeta> = {
 };
 
 export function getStatusMeta(status: number): StatusMeta {
-  return PROGRAM_STATUS_MAP[status] ?? { label: 'Unknown', color: '#6B7280', cssClass: 'status-unknown', progress: 0 };
+  return PROGRAM_STATUS_MAP[status] ?? { label: 'Unknown', color: '#7B8794', cssClass: 'status-unknown', progress: 0 };
 }
 
-// ---------------------------------------------------------------------------
-// Models — shaped from the Swagger response for GET /api/Programs (list)
-// and GET /api/Programs/{id}. NOTE: the API does not return managerId on
-// read, only managerName — see README notes at bottom of this file re: edit
-// pre-fill limitations.
-// ---------------------------------------------------------------------------
 export interface Program {
   id: number;
   name: string;
@@ -136,17 +126,15 @@ export class ProgramService {
         createdDate: '2026-05-10T00:00:00Z',
         attachedDocumentUrls: [],
         projectsCount: 50,
-        tasksCount: 50
+        tasksCount: 150
       }
     ];
   }
 
-  // Get all programs (standalone, top-level — supports keyword/status/portfolioId filters)
   getAllPrograms(filters?: ProgramFilters): Observable<Program[]> {
     if (!isPlatformBrowser(this.platformId)) {
       return of(this.getMockPrograms());
     }
-
     let params = new HttpParams();
     if (filters?.portfolioId) params = params.set('portfolioId', filters.portfolioId);
     if (filters?.keyword) params = params.set('keyword', filters.keyword);
@@ -184,10 +172,7 @@ export class ProgramService {
     return this.http.delete<any>(`${this.apiUrl}/${id}`, { headers: this.getHeaders() });
   }
 
-  // NOTE: Programs has no dedicated /upload endpoint in the Swagger doc provided.
-  // Per your instruction, this reuses Portfolios/upload — flagged as a backend
-  // TODO at the bottom of this delivery in case you'd rather have a
-  // Programs-specific storage path.
+  // No dedicated Programs upload endpoint documented — reuses Portfolios/upload.
   uploadFiles(files: FileList): Observable<any> {
     const formData = new FormData();
     for (let i = 0; i < files.length; i++) {

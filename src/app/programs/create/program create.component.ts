@@ -4,9 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProgramService, ProgramStatus } from '../program.service';
 import { PortfolioService, Portfolio } from '../../portfolios/portfolio.service';
-
 import { UserService, AppUser } from './user.service';
-
 
 type LangCode = 'ar' | 'en';
 
@@ -15,7 +13,6 @@ interface AttachedFile {
   progress: number;
   url?: string;
   raw?: File;
-  kind: 'pdf' | 'doc' | 'other';
 }
 
 @Component({
@@ -31,16 +28,13 @@ export class ProgramCreateComponent implements OnInit {
   editingId: number | null = null;
   isSaving = false;
 
-  // Form fields
   name = '';
   description = '';
   budget: number = 0;
   status: number = ProgramStatus.Pending;
   portfolioId: number | null = null;
 
-  // Program Owner: rendered as a real dropdown to match Figma, but the API
-  // has no ownerId field yet (see delivery notes) — this stays a UI-only
-  // selection and is never sent in the create/update payload.
+  // UI-only until the backend adds ownerId.
   ownerUserId: string = '';
 
   sponsorUserId: string = '';
@@ -67,7 +61,6 @@ export class ProgramCreateComponent implements OnInit {
       programName: 'اسم البرنامج',
       portfolioName: 'اسم المحفظة',
       programOwner: 'مالك البرنامج',
-      ownerComingSoon: '(قريباً - غير مفعل بعد)', 
       programManager: 'مدير البرنامج',
       programSponsor: 'راعي البرنامج',
       description: 'الوصف',
@@ -91,7 +84,6 @@ export class ProgramCreateComponent implements OnInit {
       programName: 'Program Name',
       portfolioName: 'Portfolio Name',
       programOwner: 'Program Owner',
-      ownerComingSoon: '(Coming soon - not yet wired to API)',
       programManager: 'Program Manager',
       programSponsor: 'Program Sponsor',
       description: 'Description',
@@ -150,12 +142,9 @@ export class ProgramCreateComponent implements OnInit {
         this.attachedFiles = (program.attachedDocumentUrls || []).map(url => ({
           name: url.split('/').pop() || url,
           progress: 100,
-          url,
-          kind: this.kindFromUrl(url)
+          url
         }));
 
-        // GET /api/Programs/{id} only returns managerName, not managerId —
-        // best-effort match against the users list by display name.
         const matchManager = (list: AppUser[]) => {
           const match = list.find(u => this.userService.displayName(u, this.currentLang) === program.managerName);
           if (match) this.managerId = match.id;
@@ -169,32 +158,17 @@ export class ProgramCreateComponent implements OnInit {
     });
   }
 
-  private kindFromUrl(url: string): 'pdf' | 'doc' | 'other' {
-    const ext = url.split('.').pop()?.toLowerCase();
-    if (ext === 'pdf') return 'pdf';
-    if (ext === 'doc' || ext === 'docx') return 'doc';
-    return 'other';
-  }
-
   onFilesSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     if (!input.files || !input.files.length) return;
 
     const fileList = input.files;
     for (let i = 0; i < fileList.length; i++) {
-      const f = fileList[i];
-      const ext = f.name.split('.').pop()?.toLowerCase();
-      this.attachedFiles.push({
-        name: f.name,
-        progress: 0,
-        raw: f,
-        kind: ext === 'pdf' ? 'pdf' : (ext === 'doc' || ext === 'docx') ? 'doc' : 'other'
-      });
+      this.attachedFiles.push({ name: fileList[i].name, progress: 0, raw: fileList[i] });
     }
 
     this.programService.uploadFiles(fileList).subscribe({
       next: (res) => {
-        // Adjust once you confirm Portfolios/upload's actual response shape.
         const urls: string[] = res?.urls || res?.fileUrls || [];
         this.attachedFiles.forEach((f, idx) => {
           if (!f.url && urls[idx]) { f.url = urls[idx]; f.progress = 100; }
@@ -207,9 +181,15 @@ export class ProgramCreateComponent implements OnInit {
 
   removeFile(index: number) { this.attachedFiles.splice(index, 1); }
 
+  fileKind(name: string): 'pdf' | 'doc' | 'other' {
+    const ext = name.split('.').pop()?.toLowerCase();
+    if (ext === 'pdf') return 'pdf';
+    if (ext === 'doc' || ext === 'docx') return 'doc';
+    return 'other';
+  }
+
   save() {
     this.errorMessage = '';
-
     if (!this.name || this.budget <= 0 || (!this.isEditMode && !this.portfolioId) || !this.managerId) {
       this.errorMessage = this.t.validationError;
       this.programService.triggerErrorToast();

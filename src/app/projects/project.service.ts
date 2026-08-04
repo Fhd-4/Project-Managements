@@ -54,7 +54,55 @@ export interface ProjectMeeting {
   projectName?: string;
   createdDate?: string;
 }
+export interface ProjectStatusMeta {
+  label: string;
+  cssClass: string;
+}
 
+export function getProjectStatusMeta(status: string): ProjectStatusMeta {
+  const s = (status || '').toLowerCase().replace(/[\s_-]/g, '');
+
+  if (s.includes('pending')) {
+    return {
+      label: status,
+      cssClass: 'status-pending'
+    };
+  }
+
+  if (
+    s.includes('progress') ||
+    s.includes('active') ||
+    s.includes('ontrack')
+  ) {
+    return {
+      label: status,
+      cssClass: 'status-active'
+    };
+  }
+
+  if (s.includes('complete')) {
+    return {
+      label: status,
+      cssClass: 'status-completed'
+    };
+  }
+
+  if (
+    s.includes('reject') ||
+    s.includes('cancel') ||
+    s.includes('hold')
+  ) {
+    return {
+      label: status,
+      cssClass: 'status-rejected'
+    };
+  }
+
+  return {
+    label: status || 'Unknown',
+    cssClass: 'status-unknown'
+  };
+}
 @Injectable({
   providedIn: 'root'
 })
@@ -121,7 +169,9 @@ export class ProjectService {
       })
     );
   }
-
+  getProjectsByProgram(programId: number): Observable<Project[]> {
+  return this.getProjects(undefined, programId);
+}
   getProjectDetails(id: number): Observable<Project> {
     if (!isPlatformBrowser(this.platformId)) {
       return of({} as Project);
