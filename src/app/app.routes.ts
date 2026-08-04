@@ -19,6 +19,10 @@ import { ProgramCreateComponent } from './programs/create/program create.compone
 import { ProgramDetailsComponent } from './programs/details/program details.component';
 import { PlansComponent } from './plans/plans.component';
 import { PlansCreateComponent } from './plans/create/plans-create.component';
+import { ChangeRequestsComponent } from './change-requests/change-requests.component';
+import { CreateChangeRequestComponent } from './change-requests/create/create-change-request';
+import { ChangeRequestDetailsComponent } from './change-requests/details/change-request-details';
+
 
 export const routes: Routes = [
   {
@@ -143,6 +147,21 @@ export const routes: Routes = [
       {
         path: 'plans/edit/:id',
         component: PlansCreateComponent
+      },
+      { path: 'change-requests',
+        component: ChangeRequestsComponent
+      },
+      {
+        path: 'change-requests/create',
+        component: CreateChangeRequestComponent
+      },
+      {
+        path: 'change-requests/edit/:id',
+        component: CreateChangeRequestComponent
+      },
+      {
+        path: 'change-requests/details/:id',
+        component: ChangeRequestDetailsComponent
       }
     ]
   },

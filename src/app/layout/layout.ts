@@ -138,7 +138,9 @@ export class LayoutComponent implements OnInit {
 
   goBackList() {
     this.portfolioService.isCreatePageActive = false;
-    if (this.currentRoute.includes('/projects')) {
+    if (this.currentRoute.includes('/change-requests')) {
+      this.router.navigate(['/change-requests']);
+    } else if (this.currentRoute.includes('/projects')) {
       this.router.navigate(['/projects']);
     } else if (this.currentRoute.includes('/tasks')) {
       this.router.navigate(['/tasks']);

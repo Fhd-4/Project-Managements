@@ -1,0 +1,238 @@
+<div class="create-change-request-wrapper" [dir]="isRtl ? 'rtl' : 'ltr'">
+  <!-- Header Breadcrumbs Row -->
+  <div class="header-trace-row">
+    <button class="back-circle-btn" (click)="goBack()">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+      </svg>
+    </button>
+    <div class="trace-titles">
+      <h2>{{ isEditMode ? t.editTitle : t.createTitle }}</h2>
+      <p class="breadcrumbs">
+        <span>Change Requests</span> / 
+        <span class="active-node">{{ isEditMode ? 'Edit Change Request' : 'Create Change Request' }}</span>
+      </p>
+    </div>
+  </div>
+
+  <!-- Form Fields Panel -->
+  <form (submit)="onSubmit()" class="request-form-card">
+    <div class="form-grid-layout">
+      <!-- Request Title -->
+      <div class="form-field-wrapper">
+        <label>{{ t.lblTitle }}</label>
+        <input type="text" [(ngModel)]="title" name="title" required placeholder="Write Here">
+      </div>
+
+      <!-- Change Type -->
+      <div class="form-field-wrapper">
+        <label>{{ t.lblChangeType }}</label>
+        <select [(ngModel)]="changeType" name="changeType">
+          <option value="Digital Product">Digital Product</option>
+          <option value="Budget Change">Budget Change</option>
+          <option value="Scope Change">Scope Change</option>
+          <option value="Timeline Change">Timeline Change</option>
+        </select>
+      </div>
+
+      <!-- Project Name (Dropdown Selector) -->
+      <div class="form-field-wrapper">
+        <label>{{ t.lblProject }}</label>
+        <select [(ngModel)]="projectId" name="projectId" required (change)="onProjectChange()">
+          <option [value]="null" disabled selected>Choose Project</option>
+          <option *ngFor="let p of projects" [value]="p.id">{{ p.name }}</option>
+        </select>
+      </div>
+
+      <!-- Portfolio Name (Dropdown) -->
+      <div class="form-field-wrapper">
+        <label>{{ t.lblPortfolio }}</label>
+        <select [(ngModel)]="portfolioName" name="portfolioName">
+          <option value="">Choose Portfolio</option>
+          <option *ngFor="let p of portfoliosList" [value]="p.nameEn">{{ p.nameEn }}</option>
+        </select>
+      </div>
+
+      <!-- Program Name (Dropdown) -->
+      <div class="form-field-wrapper">
+        <label>{{ t.lblProgram }}</label>
+        <select [(ngModel)]="programName" name="programName">
+          <option value="">Choose Program</option>
+          <option *ngFor="let pr of programsList" [value]="pr.name">{{ pr.name }}</option>
+        </select>
+      </div>
+
+      <!-- Priority -->
+      <div class="form-field-wrapper">
+        <label>{{ t.lblPriority }}</label>
+        <select [(ngModel)]="priority" name="priority">
+          <option value="Low">Low</option>
+          <option value="Medium">Medium</option>
+          <option value="High">High</option>
+          <option value="Critical">Critical</option>
+        </select>
+      </div>
+
+      <!-- Program Owner -->
+      <div class="form-field-wrapper">
+        <label>Program Owner</label>
+        <select [(ngModel)]="programOwner" name="programOwner">
+          <option *ngFor="let m of membersList" [value]="m">{{ m }}</option>
+        </select>
+      </div>
+
+      <!-- Program Manager -->
+      <div class="form-field-wrapper">
+        <label>Program Manager</label>
+        <select [(ngModel)]="programManager" name="programManager">
+          <option *ngFor="let m of membersList" [value]="m">{{ m }}</option>
+        </select>
+      </div>
+
+      <!-- Program Sponsor -->
+      <div class="form-field-wrapper">
+        <label>Program Sponsor</label>
+        <select [(ngModel)]="programSponsor" name="programSponsor">
+          <option *ngFor="let m of membersList" [value]="m">{{ m }}</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Change Reason Textarea -->
+    <div class="form-field-wrapper textarea-field full-width">
+      <label>{{ t.lblReason }}</label>
+      <textarea [(ngModel)]="reason" name="reason" required placeholder="Write Here" rows="3"></textarea>
+    </div>
+
+    <!-- Current VS Proposed Section -->
+    <div class="vs-section-container">
+      <h3 class="section-title">{{ t.sectionVs }}</h3>
+      
+      <div class="vs-grid-layout">
+        <!-- Current State block -->
+        <div class="vs-block current-block">
+          <h4 class="block-header">{{ t.lblCurrent }}</h4>
+          
+          <div class="meta-row">
+            <span class="meta-badge budget">{{ t.lblBudget }}</span>
+            <span class="meta-text font-bold">{{ currentBudget | number }} ﷼</span>
+          </div>
+
+          <div class="meta-row">
+            <span class="meta-badge deadline">{{ t.lblDeadline }}</span>
+            <span class="meta-text font-bold">{{ currentDeadline || 'N/A' }}</span>
+          </div>
+
+          <div class="meta-row">
+            <span class="meta-badge scope">{{ t.lblScope }}</span>
+            <span class="meta-text font-bold">{{ currentScope || 'N/A' }}</span>
+          </div>
+
+          <div class="meta-row">
+            <span class="meta-badge resources">{{ t.lblResources }}</span>
+            <span class="meta-text font-bold">{{ currentResources || 'N/A' }}</span>
+          </div>
+        </div>
+
+        <!-- Proposed State block -->
+        <div class="vs-block proposed-block">
+          <h4 class="block-header">{{ t.lblProposed }}</h4>
+          
+          <div class="proposed-field">
+            <label>{{ t.lblBudget }}</label>
+            <input type="number" [(ngModel)]="proposedBudget" name="proposedBudget" placeholder="Write Here">
+          </div>
+
+          <div class="proposed-field">
+            <label>{{ t.lblDeadline }}</label>
+            <input type="date" [(ngModel)]="proposedDeadline" name="proposedDeadline">
+          </div>
+
+          <div class="proposed-field">
+            <label>{{ t.lblScope }}</label>
+            <input type="text" [(ngModel)]="proposedScope" name="proposedScope" placeholder="Write Here">
+          </div>
+
+          <div class="proposed-field">
+            <label>{{ t.lblResources }}</label>
+            <input type="text" [(ngModel)]="proposedResources" name="proposedResources" placeholder="Write Here">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Impact Analysis description textarea -->
+    <div class="form-field-wrapper textarea-field full-width">
+      <label>{{ t.lblDescription }}</label>
+      <textarea [(ngModel)]="description" name="description" placeholder="Write Here" rows="4"></textarea>
+    </div>
+
+    <!-- Attachments File Upload Dropzone -->
+    <div class="attachments-section-card">
+      <h3 class="section-title">{{ t.sectionAttach }}</h3>
+
+      <div class="file-dropzone-wrapper"
+           [class.dragging]="isDragging"
+           (dragover)="onDragOver($event)"
+           (dragleave)="onDragLeave()"
+           (drop)="onDrop($event)"
+           (click)="fileInput.click()">
+        
+        <input type="file" #fileInput multiple style="display: none" (change)="onFileSelected($event)">
+        
+        <div class="dropzone-inner">
+          <div class="dropzone-icon">
+            <!-- Icon matching paper plus -->
+            <svg width="36" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="12" y1="18" x2="12" y2="12"></line>
+              <line x1="9" y1="15" x2="15" y2="15"></line>
+            </svg>
+          </div>
+          <p>{{ t.dragText }}</p>
+        </div>
+      </div>
+
+      <!-- File Attachment uploading list display -->
+      <div class="attached-files-mini-list" *ngIf="attachedFiles.length > 0">
+        <div class="attached-file-row" *ngFor="let file of attachedFiles; let i = index">
+          <div class="file-icon-type">
+            <svg width="24" height="30" viewBox="0 0 36 44" fill="none">
+              <rect width="36" height="44" rx="4" [attr.fill]="getFileColor(file.type)"/>
+              <text x="18" y="28" text-anchor="middle" fill="white" font-size="8" font-weight="800">{{ file.type ? file.type.toUpperCase() : 'FILE' }}</text>
+            </svg>
+          </div>
+          <div class="file-details">
+            <span class="file-name" [title]="file.name">{{ file.name }}</span>
+            <div class="file-upload-progress-wrapper">
+              <div class="progress-bar-bg">
+                <div class="progress-bar-fill" [style.width.%]="file.progress"></div>
+              </div>
+              <span class="progress-pct-text">{{ file.progress }}%</span>
+            </div>
+          </div>
+          <button type="button" class="btn-remove-attachment" (click)="removeFile(i, $event)" title="Delete File">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              <line x1="10" y1="11" x2="10" y2="17"></line>
+              <line x1="14" y1="11" x2="14" y2="17"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="empty-attached-files-box" *ngIf="attachedFiles.length === 0">
+        <p>{{ t.noFileText }}</p>
+      </div>
+    </div>
+
+    <!-- Submit actions bar -->
+    <div class="form-actions-bar">
+      <button type="button" class="btn-cancel-action" (click)="goBack()">{{ t.btnCancel }}</button>
+      <button type="submit" class="btn-submit-action">{{ t.btnSend }}</button>
+    </div>
+  </form>
+</div>
