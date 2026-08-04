@@ -1,7 +1,7 @@
 import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, of, BehaviorSubject } from 'rxjs';
+import { Observable, of, BehaviorSubject, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { API_CONFIG } from '../api.config';
 
@@ -53,6 +53,33 @@ export interface ProjectMeeting {
   projectId: number;
   projectName?: string;
   createdDate?: string;
+}
+
+export interface ChangeRequest {
+  id: number;
+  title: string;
+  description: string;
+  reason: string;
+  impactCost: number;
+  impactTimeDays: number;
+  status: number; // 1 = Pending, 2 = Approved, 3 = Rejected
+  projectId: number;
+  projectName?: string;
+  requestedById: string;
+  requestedByUserName?: string;
+  approvedById?: string;
+  approvedByUserName?: string;
+  requestDate: string;
+  actionDate?: string;
+  attachedFiles?: string;
+}
+export interface ChangeRequestComment {
+  id: number;
+  changeRequestId: number;
+  userId: string;
+  userName: string;
+  text: string;
+  createdDate: string;
 }
 export interface ProjectStatusMeta {
   label: string;
@@ -110,6 +137,7 @@ export class ProjectService {
   private readonly projectsUrl = `${API_CONFIG.baseUrl}/Projects`;
   private readonly tasksUrl = `${API_CONFIG.baseUrl}/ProjectTasks`;
   private readonly meetingsUrl = `${API_CONFIG.baseUrl}/ProjectMeetings`;
+  private readonly changeRequestsUrl = `${API_CONFIG.baseUrl}/ChangeRequests`;
 
   isCreatePageActive: boolean = false;
   successToast$ = new BehaviorSubject<boolean>(false);
@@ -324,5 +352,253 @@ export class ProjectService {
       ...(token ? { Authorization: `Bearer ${token}` } : {})
     });
     return this.http.post<any>(`${this.meetingsUrl}/upload`, formData, { headers });
+  }
+
+  // --- CHANGE REQUESTS API ---
+
+  private getLocalRequests(): ChangeRequest[] {
+    if (typeof window === 'undefined' || !window.localStorage) return [];
+    const data = localStorage.getItem('local_change_requests');
+    if (!data) {
+      const defaults: ChangeRequest[] = [
+        {
+          id: 101,
+          title: 'Database Server Hardware Upgrade',
+          description: `Type: Digital Product
+Priority: High
+PortfolioName: Digital Products Portfolio
+ProgramName: Smart Systems Program
+ProgramOwner: Faisal Al-Otaibi
+ProgramManager: Mahmoud Salah
+ProgramSponsor: Omar Al-Harbi
+CurrentBudget: 150000
+ProposedBudget: 220000
+CurrentDeadline: 2026-09-30
+ProposedDeadline: 2026-10-15
+CurrentScope: Standard migration to shared database host.
+ProposedScope: Dedicated SSD server infrastructure with load balancing.
+CurrentResources: 2 Engineers part-time
+ProposedResources: 4 Engineers full-time
+Description: Upgrading memory and hosting storage capacity to handle peak transactional load.`,
+          reason: 'Current server is constantly hitting CPU thresholds causing timeouts.',
+          impactCost: 70000,
+          impactTimeDays: 15,
+          status: 1, // Pending
+          requestDate: '2026-08-04T12:00:00Z',
+          projectId: 1,
+          requestedById: 'user-pmo',
+          requestedByUserName: 'Salman Ahmed',
+          attachedFiles: '[]'
+        }
+      ];
+      localStorage.setItem('local_change_requests', JSON.stringify(defaults));
+      return defaults;
+    }
+    return JSON.parse(data);
+  }
+
+  private saveLocalRequests(list: ChangeRequest[]) {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.setItem('local_change_requests', JSON.stringify(list));
+    }
+  }
+
+  getChangeRequests(projectId?: number, keyword?: string): Observable<ChangeRequest[]> {
+    if (!isPlatformBrowser(this.platformId)) {
+      return of([]);
+    }
+    let url = `${this.changeRequestsUrl}/all`;
+    const params: string[] = [];
+    if (projectId) params.push(`projectId=${projectId}`);
+    if (keyword) params.push(`keyword=${encodeURIComponent(keyword)}`);
+
+    if (params.length > 0) {
+      url += `?${params.join('&')}`;
+    }
+
+    return this.http.get<ChangeRequest[]>(url, { headers: this.getHeaders() }).pipe(
+      catchError(err => {
+        console.warn('ChangeRequests API failed, loading from LocalStorage instead.', err);
+        let list = this.getLocalRequests();
+        if (projectId) {
+          list = list.filter(r => r.projectId === projectId);
+        }
+        if (keyword) {
+          const kw = keyword.toLowerCase();
+          list = list.filter(r => r.title.toLowerCase().includes(kw) || r.reason.toLowerCase().includes(kw));
+        }
+        return of(list);
+      })
+    );
+  }
+
+  getChangeRequestDetails(id: number): Observable<ChangeRequest> {
+    if (!isPlatformBrowser(this.platformId)) {
+      return of({} as ChangeRequest);
+    }
+    return this.http.get<ChangeRequest>(`${this.changeRequestsUrl}/details/${id}`, { headers: this.getHeaders() }).pipe(
+      catchError(err => {
+        console.warn('ChangeRequests API details failed, loading from LocalStorage fallback.', err);
+        const list = this.getLocalRequests();
+        const found = list.find(r => r.id === id);
+        if (found) {
+          return of(found);
+        }
+        return throwError(() => err);
+      })
+    );
+  }
+
+  createChangeRequest(req: any): Observable<any> {
+    return this.http.post<any>(`${this.changeRequestsUrl}/create`, req, { headers: this.getHeaders() }).pipe(
+      catchError(err => {
+        console.warn('ChangeRequests API create failed, saving to LocalStorage instead.', err);
+        const list = this.getLocalRequests();
+        const newId = list.length > 0 ? Math.max(...list.map(r => r.id || 0)) + 1 : 101;
+        const newReq: ChangeRequest = {
+          id: newId,
+          title: req.title,
+          description: req.description,
+          reason: req.reason,
+          impactCost: req.impactCost || 0,
+          impactTimeDays: req.impactTimeDays || 0,
+          status: 1, // Pending
+          requestDate: new Date().toISOString(),
+          projectId: req.projectId,
+          requestedById: 'user-pmo',
+          requestedByUserName: 'Salman Ahmed',
+          attachedFiles: req.attachedFiles || '[]'
+        };
+        list.push(newReq);
+        this.saveLocalRequests(list);
+        return of(newReq);
+      })
+    );
+  }
+
+  updateChangeRequest(id: number, req: any): Observable<any> {
+    return this.http.put<any>(`${this.changeRequestsUrl}/update/${id}`, req, { headers: this.getHeaders() }).pipe(
+      catchError(err => {
+        console.warn('ChangeRequests API update failed, saving to LocalStorage instead.', err);
+        const list = this.getLocalRequests();
+        const index = list.findIndex(r => r.id === id);
+        if (index !== -1) {
+          list[index].title = req.title;
+          list[index].description = req.description;
+          list[index].reason = req.reason;
+          list[index].attachedFiles = req.attachedFiles || '[]';
+          list[index].projectId = req.projectId;
+          this.saveLocalRequests(list);
+          return of(list[index]);
+        }
+        return throwError(() => err);
+      })
+    );
+  }
+
+  approveChangeRequest(id: number, approvedById?: string): Observable<any> {
+    let url = `${this.changeRequestsUrl}/approve/${id}`;
+    if (approvedById) url += `?approvedById=${approvedById}`;
+    return this.http.post<any>(url, {}, { headers: this.getHeaders() }).pipe(
+      catchError(err => {
+        console.warn('ChangeRequests API approve failed, saving status to LocalStorage instead.', err);
+        const list = this.getLocalRequests();
+        const index = list.findIndex(r => r.id === id);
+        if (index !== -1) {
+          list[index].status = 2; // Approved
+          this.saveLocalRequests(list);
+          return of(list[index]);
+        }
+        return throwError(() => err);
+      })
+    );
+  }
+
+  rejectChangeRequest(id: number, approvedById?: string): Observable<any> {
+    let url = `${this.changeRequestsUrl}/reject/${id}`;
+    if (approvedById) url += `?approvedById=${approvedById}`;
+    return this.http.post<any>(url, {}, { headers: this.getHeaders() }).pipe(
+      catchError(err => {
+        console.warn('ChangeRequests API reject failed, saving status to LocalStorage instead.', err);
+        const list = this.getLocalRequests();
+        const index = list.findIndex(r => r.id === id);
+        if (index !== -1) {
+          list[index].status = 3; // Rejected
+          this.saveLocalRequests(list);
+          return of(list[index]);
+        }
+        return throwError(() => err);
+      })
+    );
+  }
+
+  deleteChangeRequest(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.changeRequestsUrl}/delete/${id}`, { headers: this.getHeaders() }).pipe(
+      catchError(err => {
+        console.warn('ChangeRequests API delete failed, deleting from LocalStorage instead.', err);
+        let list = this.getLocalRequests();
+        list = list.filter(r => r.id !== id);
+        this.saveLocalRequests(list);
+        return of({ success: true });
+      })
+    );
+  }
+
+  uploadChangeRequestFiles(files: FileList): Observable<any> {
+    const formData = new FormData();
+    for (let i = 0; i < files.length; i++) {
+      formData.append('files', files[i]);
+    }
+    let token: string | null = null;
+    if (typeof window !== 'undefined' && window.localStorage) {
+      token = localStorage.getItem('auth_token');
+    }
+    const headers = new HttpHeaders({
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    });
+    return this.http.post<any>(`${this.changeRequestsUrl}/upload`, formData, { headers });
+  }
+
+  getComments(requestId: number): Observable<ChangeRequestComment[]> {
+    return this.http.get<ChangeRequestComment[]>(`${this.changeRequestsUrl}/${requestId}/comments`, { headers: this.getHeaders() }).pipe(
+      catchError(err => {
+        console.warn('Comments API failed, loading from LocalStorage instead.', err);
+        const list = this.getLocalComments(requestId);
+        return of(list);
+      })
+    );
+  }
+
+  addComment(requestId: number, text: string): Observable<ChangeRequestComment> {
+    const payload = { changeRequestId: requestId, text };
+    return this.http.post<ChangeRequestComment>(`${this.changeRequestsUrl}/comments`, payload, { headers: this.getHeaders() }).pipe(
+      catchError(err => {
+        console.warn('Comments add API failed, saving to LocalStorage instead.', err);
+        const list = this.getLocalComments(requestId);
+        const newComment: ChangeRequestComment = {
+          id: list.length > 0 ? Math.max(...list.map(c => c.id)) + 1 : 1,
+          changeRequestId: requestId,
+          userId: 'current-user',
+          userName: 'Abdallah Othman',
+          text,
+          createdDate: new Date().toISOString()
+        };
+        list.push(newComment);
+        this.saveLocalComments(requestId, list);
+        return of(newComment);
+      })
+    );
+  }
+
+  private getLocalComments(requestId: number): ChangeRequestComment[] {
+    if (typeof window === 'undefined' || !window.localStorage) return [];
+    const data = localStorage.getItem(`local_comments_${requestId}`);
+    return data ? JSON.parse(data) : [];
+  }
+
+  private saveLocalComments(requestId: number, list: ChangeRequestComment[]) {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.setItem(`local_comments_${requestId}`, JSON.stringify(list));
+    }
   }
 }

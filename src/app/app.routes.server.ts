@@ -68,6 +68,22 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Server
   },
   {
+    path: 'change-requests',
+    renderMode: RenderMode.Server
+  },
+  {
+    path: 'change-requests/create',
+    renderMode: RenderMode.Server
+  },
+  {
+    path: 'change-requests/edit/:id',
+    renderMode: RenderMode.Server
+  },
+  {
+    path: 'change-requests/details/:id',
+    renderMode: RenderMode.Server
+  },
+  {
     path: '**',
     renderMode: RenderMode.Prerender
   }

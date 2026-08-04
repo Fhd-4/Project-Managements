@@ -19,6 +19,9 @@ import { TaskDetailsComponent } from './tasks/details/task-details';
 import { ProgramsComponent } from './programs/programs.component';
 import { ProgramCreateComponent } from './programs/create/program create.component';
 import { ProgramDetailsComponent } from './programs/details/program details.component';
+import { ChangeRequestsComponent } from './change-requests/change-requests.component';
+import { CreateChangeRequestComponent } from './change-requests/create/create-change-request';
+import { ChangeRequestDetailsComponent } from './change-requests/details/change-request-details';
 
 
 export const routes: Routes = [
@@ -132,6 +135,22 @@ export const routes: Routes = [
       {
         path: 'tasks/details/:id',
         component: TaskDetailsComponent
+      },
+      {
+        path: 'change-requests',
+        component: ChangeRequestsComponent
+      },
+      {
+        path: 'change-requests/create',
+        component: CreateChangeRequestComponent
+      },
+      {
+        path: 'change-requests/edit/:id',
+        component: CreateChangeRequestComponent
+      },
+      {
+        path: 'change-requests/details/:id',
+        component: ChangeRequestDetailsComponent
       }
     ]
   },

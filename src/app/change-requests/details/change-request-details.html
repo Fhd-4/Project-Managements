@@ -1,0 +1,268 @@
+<div class="change-request-details-wrapper" [dir]="isRtl ? 'rtl' : 'ltr'">
+  <!-- Header Breadcrumbs Row -->
+  <div class="header-trace-row">
+    <button class="back-circle-btn" (click)="goBack()">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+      </svg>
+    </button>
+    <div class="trace-titles">
+      <h2>{{ project?.name || 'ERP Platform' }}</h2>
+      <p class="breadcrumbs">
+        <span>Change Requests</span> / 
+        <span class="active-node">Requests Details</span>
+      </p>
+    </div>
+
+    <!-- Save Updates Button -->
+    <button class="btn-save-updates" (click)="saveUpdates()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+      <span>Save Updates</span>
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-panel" *ngIf="isLoading">
+    <p>Loading request details...</p>
+  </div>
+
+  <!-- Main content details -->
+  <div class="details-content-inner" *ngIf="!isLoading && request">
+    
+    <!-- Change Information Card -->
+    <div class="card-details-panel change-info-card">
+      <div class="card-header-bar">
+        <h3>{{ t.sectionInfo }}</h3>
+        <span class="date-badge">📅 {{ t.lblDate }} {{ request.requestDate | date:'yyyy-M-dd' }}</span>
+      </div>
+
+      <div class="info-grid-layout">
+        <!-- Change Type -->
+        <div class="info-item">
+          <span class="info-label">{{ t.lblType }}</span>
+          <span class="info-val font-bold">{{ changeType }}</span>
+        </div>
+
+        <!-- Requested By -->
+        <div class="info-item profile">
+          <span class="info-label">{{ t.lblRequestedBy }}</span>
+          <div class="profile-meta-val">
+            <span class="avatar-badge MS">MS</span>
+            <span class="info-val font-bold">{{ request.requestedByUserName || 'Abdallah Othman' }}</span>
+          </div>
+        </div>
+
+        <!-- Request ID -->
+        <div class="info-item">
+          <span class="info-label">{{ t.lblRequestId }}</span>
+          <span class="info-val font-bold">CR-{{ request.id }}</span>
+        </div>
+
+        <!-- Priority Select Dropdown -->
+        <div class="info-item dropdown-select-card">
+          <span class="info-label">{{ t.lblPriority }}</span>
+          <div class="custom-dropdown-select" [class]="priority.toLowerCase()">
+            <select [(ngModel)]="priority" name="priority">
+              <option value="Low" class="color-low">● Low</option>
+              <option value="Medium" class="color-medium">● Medium</option>
+              <option value="High" class="color-high">● High</option>
+              <option value="Critical" class="color-critical">● Critical</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Status Select Dropdown -->
+        <div class="info-item dropdown-select-card">
+          <span class="info-label">{{ t.lblStatus }}</span>
+          <div class="custom-dropdown-select" [class]="getStatusLabel(statusVal).toLowerCase()">
+            <select [(ngModel)]="statusVal" name="statusVal">
+              <option value="1" class="color-pending">● Pending</option>
+              <option value="2" class="color-approved">● Approved</option>
+              <option value="3" class="color-rejected">● Rejected</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Change Reason Card -->
+    <div class="card-details-panel">
+      <h3>{{ t.sectionReason }}</h3>
+      <div class="text-description-box">
+        <p>{{ request.reason }}</p>
+      </div>
+    </div>
+
+    <!-- Reviewer Approval Flow Grid (Image 4) -->
+    <div class="card-details-panel">
+      <h3>{{ t.sectionApproval }}</h3>
+      <p class="section-subtext">Click on any box to simulate changing reviewer approval status.</p>
+      
+      <div class="approval-reviewers-grid">
+        <div class="reviewer-card" *ngFor="let r of reviewers; let idx = index" (click)="toggleReviewerStatus(idx)">
+          <div class="reviewer-avatar-role">
+            <span class="avatar-badge" [class]="r.avatar">{{ r.avatar }}</span>
+            <div class="reviewer-meta-text">
+              <h5>{{ r.name }}</h5>
+              <p>{{ r.role }}</p>
+            </div>
+          </div>
+          <div class="reviewer-status-date">
+            <span class="reviewer-status-pill" [class]="r.status.toLowerCase()">
+              {{ r.status }}
+            </span>
+            <span class="reviewer-date">{{ r.date }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Current VS Proposed Section -->
+    <div class="vs-section-wrapper">
+      <h3 class="vs-section-title">{{ t.sectionVs }}</h3>
+      
+      <div class="vs-grid-layout">
+        <!-- Current State block -->
+        <div class="vs-block current-block">
+          <h4 class="block-header">{{ t.lblCurrent }}</h4>
+          
+          <div class="meta-row">
+            <span class="meta-badge budget">{{ t.lblBudget }}</span>
+            <span class="meta-text font-bold">{{ currentBudget | number }} ﷼</span>
+          </div>
+
+          <div class="meta-row">
+            <span class="meta-badge deadline">{{ t.lblDeadline }}</span>
+            <span class="meta-text font-bold">{{ currentDeadline || 'N/A' }}</span>
+          </div>
+
+          <div class="meta-row flex-col">
+            <span class="meta-badge scope">{{ t.lblScope }}</span>
+            <p class="meta-paragraph">{{ currentScope || 'N/A' }}</p>
+          </div>
+
+          <div class="meta-row">
+            <span class="meta-badge resources">{{ t.lblResources }}</span>
+            <span class="meta-text font-bold">{{ currentResources || 'N/A' }}</span>
+          </div>
+        </div>
+
+        <!-- Proposed State block -->
+        <div class="vs-block proposed-block">
+          <h4 class="block-header">{{ t.lblProposed }}</h4>
+          
+          <div class="meta-row">
+            <span class="meta-badge budget">{{ t.lblBudget }}</span>
+            <span class="meta-text font-bold">{{ proposedBudget | number }} ﷼</span>
+          </div>
+
+          <div class="meta-row">
+            <span class="meta-badge deadline">{{ t.lblDeadline }}</span>
+            <span class="meta-text font-bold">{{ proposedDeadline || 'N/A' }}</span>
+          </div>
+
+          <div class="meta-row flex-col">
+            <span class="meta-badge scope">{{ t.lblScope }}</span>
+            <p class="meta-paragraph">{{ proposedScope || 'N/A' }}</p>
+          </div>
+
+          <div class="meta-row">
+            <span class="meta-badge resources">{{ t.lblResources }}</span>
+            <span class="meta-text font-bold">{{ proposedResources || 'N/A' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Impact Analysis description card -->
+    <div class="card-details-panel">
+      <h3>{{ t.sectionImpact }}</h3>
+      <div class="text-description-box">
+        <p>{{ actualDescription || 'No description/impact analysis details provided.' }}</p>
+      </div>
+    </div>
+
+    <!-- Attachments download list cards -->
+    <div class="card-details-panel attachments-panel">
+      <div class="attachments-header-row">
+        <h3>{{ t.sectionAttach }}</h3>
+        <!-- Add Attachment button trigger -->
+        <button class="add-attachment-circle-btn" (click)="fileInput.click()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </button>
+        <input type="file" #fileInput (change)="onFileSelected($event)" style="display: none;" multiple>
+      </div>
+      
+      <div class="documents-mini-grid" *ngIf="attachedFiles.length > 0">
+        <div class="file-mini-card" *ngFor="let file of attachedFiles" (click)="downloadFile(file.path)">
+          <div class="file-type-icon-wrapper">
+            <svg width="24" height="30" viewBox="0 0 36 44" fill="none">
+              <rect width="36" height="44" rx="4" [attr.fill]="getFileColor(file.type)"/>
+              <text x="18" y="28" text-anchor="middle" fill="white" font-size="8" font-weight="800">{{ file.type ? file.type.toUpperCase() : 'FILE' }}</text>
+            </svg>
+          </div>
+          <span class="file-name" [title]="file.name">{{ file.name }}</span>
+        </div>
+      </div>
+
+      <div class="empty-documents-box" *ngIf="attachedFiles.length === 0">
+        <p>No attachments for this request.</p>
+      </div>
+    </div>
+
+    <!-- Comments / Discussion Box (Image 5) -->
+    <div class="card-details-panel comments-section">
+      <h3>{{ t.sectionComment }}</h3>
+
+      <!-- Comments List Stack -->
+      <div class="comments-list-stack" *ngIf="comments.length > 0">
+        <div class="comment-item-card" *ngFor="let c of comments">
+          <div class="comment-user-header">
+            <div class="user-meta">
+              <span class="avatar-badge" [class]="c.avatar">{{ c.avatar }}</span>
+              <div class="user-meta-text">
+                <span class="username font-bold">{{ c.author }}</span>
+                <span class="user-role">{{ c.role }}</span>
+              </div>
+            </div>
+            <span class="comment-date">📅 {{ c.date }}</span>
+          </div>
+          <p class="comment-content">{{ c.content }}</p>
+        </div>
+      </div>
+
+      <!-- Empty State matching screenshot exactly! -->
+      <div class="empty-comments-state" *ngIf="comments.length === 0">
+        <div class="empty-state-icon">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#9fb3c8" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="8" y1="12" x2="16" y2="12"></line>
+            <line x1="12" y1="8" x2="12" y2="16"></line>
+          </svg>
+        </div>
+        <p class="empty-state-text">No comments write now</p>
+      </div>
+
+      <!-- Add New Comment Row -->
+      <div class="comment-composer-bar">
+        <input type="text" 
+               [(ngModel)]="newCommentText" 
+               name="newCommentText" 
+               (keyup.enter)="addComment()"
+               placeholder="Write Here">
+        <button class="btn-send-comment" (click)="addComment()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
