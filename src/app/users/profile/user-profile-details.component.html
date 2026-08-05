@@ -1,0 +1,414 @@
+<div class="user-profile-container" [dir]="isRtl ? 'rtl' : 'ltr'">
+  <!-- Success Toast Alert -->
+  <div class="toast-alert success" *ngIf="showSuccessToast">
+    <div class="toast-content">
+      <div class="toast-circle-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </div>
+      <span>{{ isRtl ? 'تم حفظ التعديلات بنجاح.' : 'Edits saved successfully.' }}</span>
+    </div>
+  </div>
+
+  <!-- Error Toast Alert -->
+  <div class="toast-alert error" *ngIf="showErrorToast">
+    <div class="toast-content">
+      <div class="toast-circle-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </div>
+      <span>{{ isRtl ? 'فشل حفظ التعديلات.' : 'Failed to save edits.' }}</span>
+    </div>
+  </div>
+  <!-- Breadcrumbs & Header -->
+  <div class="breadcrumb-header-row">
+    <button class="back-circle-btn" (click)="goBack()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+      </svg>
+    </button>
+    <div class="breadcrumbs-meta">
+      <h2 class="form-title">{{ t.profileTitle }}</h2>
+      <div class="breadcrumbs-trail">
+        <a routerLink="/users">{{ t.breadcrumbsUsers }}</a>
+        <span class="separator">/</span>
+        <span class="current-crumb">{{ t.breadcrumbsProfile }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-overlay" *ngIf="isLoading">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Profile View & Content -->
+  <div class="profile-layout-stack" *ngIf="!isLoading && profile">
+    <!-- Top Summary Card -->
+    <div class="profile-summary-card">
+      <div class="summary-left-group">
+        <span class="profile-avatar-badge">{{ getUserInitials(isRtl ? profile.nameAr : profile.nameEn) }}</span>
+        
+        <div class="user-main-info">
+          <h3 class="user-fullname font-bold">{{ isRtl ? profile.nameAr || profile.userName : profile.nameEn || profile.userName }}</h3>
+          
+          <div class="meta-info-grid">
+            <div class="meta-item">
+              <span class="meta-label">{{ t.lblRole }}:</span>
+              <span class="meta-value font-bold">{{ profile.role }}</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">{{ t.lblAddTime }}:</span>
+              <span class="meta-value font-semibold">{{ profile.createdDate | date:'yyyy-M-d' }}</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">{{ t.lblState }}:</span>
+              <span class="state-dot-label" [class.active]="profile.isActive" [class.inactive]="!profile.isActive">
+                <span class="dot"></span>
+                {{ profile.isActive ? t.lblActive : t.lblUnactive }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="summary-right-group">
+        <div class="contact-item">
+          <svg class="contact-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+            <polyline points="22,6 12,13 2,6"></polyline>
+          </svg>
+          <div class="contact-text">
+            <span class="contact-label">{{ t.lblEmail }}</span>
+            <span class="contact-value font-semibold">{{ profile.email }}</span>
+          </div>
+        </div>
+
+        <div class="contact-item">
+          <svg class="contact-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+          </svg>
+          <div class="contact-text">
+            <span class="contact-label">{{ t.lblPhone }}</span>
+            <span class="contact-value font-semibold">{{ profile.phoneNumber }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs Bar -->
+    <div class="profile-tabs-navigation">
+      <button class="tab-nav-btn" [class.active]="activeTab === 'personal'" (click)="switchTab('personal')">
+        {{ t.tabPersonal }}
+      </button>
+      <button class="tab-nav-btn" [class.active]="activeTab === 'portfolios'" (click)="switchTab('portfolios')">
+        {{ t.tabPortfolios }}
+      </button>
+      <button class="tab-nav-btn" [class.active]="activeTab === 'programs'" (click)="switchTab('programs')">
+        {{ t.tabPrograms }}
+      </button>
+      <button class="tab-nav-btn" [class.active]="activeTab === 'projects'" (click)="switchTab('projects')">
+        {{ t.tabProjects }}
+      </button>
+    </div>
+
+    <!-- Tab Panels Container -->
+    <div class="profile-tab-content-panel">
+      <!-- 1. Personal Informations Panel -->
+      <div class="personal-info-tab-panel" *ngIf="activeTab === 'personal'">
+        <form (ngSubmit)="savePersonalEdits()" class="personal-form">
+          <div class="form-fields-grid">
+            <!-- Username -->
+            <div class="form-field-group">
+              <label>{{ t.lblUsername }}</label>
+              <div class="input-with-icon-wrapper">
+                <input type="text" [(ngModel)]="username" name="username" required>
+              </div>
+            </div>
+
+            <!-- Email -->
+            <div class="form-field-group">
+              <label>{{ t.lblEmail }}</label>
+              <div class="input-with-icon-wrapper">
+                <input type="email" [(ngModel)]="email" name="email" required>
+                <span class="edit-icon-pencil">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                  </svg>
+                </span>
+              </div>
+            </div>
+
+            <!-- Phone Number -->
+            <div class="form-field-group">
+              <label>{{ t.lblPhone }}</label>
+              <div class="input-with-icon-wrapper">
+                <input type="text" [(ngModel)]="phoneNumber" name="phoneNumber" required>
+                <span class="edit-icon-pencil">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                  </svg>
+                </span>
+              </div>
+            </div>
+
+            <!-- Role -->
+            <div class="form-field-group">
+              <label>{{ t.lblRole }}</label>
+              <select name="role" [(ngModel)]="role" required class="select-dropdown">
+                <option *ngFor="let r of rolesList" [value]="r.value">{{ r.label }}</option>
+              </select>
+            </div>
+
+            <!-- Assigned Portfolio -->
+            <div class="form-field-group">
+              <label>{{ t.lblPortfolio }}</label>
+              <select name="assignedPortfolioId" [(ngModel)]="assignedPortfolioId" class="select-dropdown">
+                <option [ngValue]="null">None</option>
+                <option *ngFor="let p of portfoliosList" [ngValue]="p.id">{{ p.name }}</option>
+              </select>
+            </div>
+
+            <!-- Assigned Program -->
+            <div class="form-field-group">
+              <label>{{ t.lblProgram }}</label>
+              <select name="assignedProgramId" [(ngModel)]="assignedProgramId" class="select-dropdown">
+                <option [ngValue]="null">None</option>
+                <option *ngFor="let pr of programsList" [ngValue]="pr.id">{{ pr.name }}</option>
+              </select>
+            </div>
+
+            <!-- Assigned Project -->
+            <div class="form-field-group">
+              <label>{{ t.lblProject }}</label>
+              <select name="assignedProjectId" [(ngModel)]="assignedProjectId" class="select-dropdown">
+                <option [ngValue]="null">None</option>
+                <option *ngFor="let proj of projectsList" [ngValue]="proj.id">{{ proj.name }}</option>
+              </select>
+            </div>
+
+            <!-- State -->
+            <div class="form-field-group">
+              <label>{{ t.lblState }}</label>
+              <select name="isActive" [(ngModel)]="isActive" required class="select-dropdown">
+                <option [ngValue]="true">{{ t.lblActive }}</option>
+                <option [ngValue]="false">{{ t.lblUnactive }}</option>
+              </select>
+            </div>
+
+            <!-- Password -->
+            <div class="form-field-group">
+              <label>{{ t.lblPassword }}</label>
+              <input type="password" [(ngModel)]="password" name="password" placeholder="********">
+            </div>
+
+            <!-- Extra Arabic Name -->
+            <div class="form-field-group">
+              <label>الاسم الكامل (العربية)</label>
+              <input type="text" name="nameAr" [(ngModel)]="nameAr">
+            </div>
+
+            <!-- Extra English Name -->
+            <div class="form-field-group">
+              <label>Full Name (English)</label>
+              <input type="text" name="nameEn" [(ngModel)]="nameEn">
+            </div>
+
+            <!-- Extra Arabic Title -->
+            <div class="form-field-group">
+              <label>المسمى الوظيفي (العربية)</label>
+              <input type="text" name="titleAr" [(ngModel)]="titleAr">
+            </div>
+
+            <!-- Extra English Title -->
+            <div class="form-field-group">
+              <label>Professional Title (English)</label>
+              <input type="text" name="titleEn" [(ngModel)]="titleEn">
+            </div>
+          </div>
+
+          <!-- Bottom Footer Edit buttons -->
+          <div class="form-actions-footer">
+            <button type="button" class="btn-cancel" (click)="cancelEdits()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+              {{ t.btnCancel }}
+            </button>
+            <button type="submit" class="btn-submit">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              {{ t.btnSave }}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- 2. Portfolios Tab Panel -->
+      <div class="relations-tab-panel" *ngIf="activeTab === 'portfolios'">
+        <div class="table-responsive-wrapper" *ngIf="profile.portfolios.length > 0">
+          <table class="relations-data-table">
+            <thead>
+              <tr>
+                <th>{{ t.colPortfolioName }}</th>
+                <th>{{ t.colCategory }}</th>
+                <th>{{ t.colPrograms }}</th>
+                <th>{{ t.colProjects }}</th>
+                <th>{{ t.colProgress }}</th>
+                <th>{{ t.colStatus }}</th>
+                <th class="actions-header">{{ t.colActions }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of profile.portfolios">
+                <td class="font-bold text-dark">{{ item.name }}</td>
+                <td><span class="category-badge">{{ item.category }}</span></td>
+                <td class="font-semibold">{{ item.programsCount }}</td>
+                <td class="font-semibold">{{ item.projectsCount }}</td>
+                <td>
+                  <div class="progress-bar-container">
+                    <div class="progress-bar-fill" [style.width.%]="item.progress"></div>
+                    <span class="progress-percentage-label">{{ item.progress }}%</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="status-badge active">{{ item.status }}</span>
+                </td>
+                <td class="actions-cell">
+                  <button class="action-btn btn-delete" (click)="removeRelation('portfolio', item.id)" title="Remove user from portfolio">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="3 6 5 6 21 6"></polyline>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                  </button>
+                  <button class="action-btn btn-view" (click)="viewDetail('portfolio', item.id)" title="View Portfolio details">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="empty-relation-state" *ngIf="profile.portfolios.length === 0">
+          <p>No portfolios assigned to this user.</p>
+        </div>
+      </div>
+
+      <!-- 3. Programs Tab Panel -->
+      <div class="relations-tab-panel" *ngIf="activeTab === 'programs'">
+        <div class="table-responsive-wrapper" *ngIf="profile.programs.length > 0">
+          <table class="relations-data-table">
+            <thead>
+              <tr>
+                <th>{{ t.colProgramName }}</th>
+                <th>{{ t.colCategory }}</th>
+                <th>{{ t.colProjects }}</th>
+                <th>{{ t.colProgress }}</th>
+                <th>{{ t.colStatus }}</th>
+                <th class="actions-header">{{ t.colActions }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of profile.programs">
+                <td class="font-bold text-dark">{{ item.name }}</td>
+                <td><span class="category-badge">{{ item.category }}</span></td>
+                <td class="font-semibold">{{ item.projectsCount }}</td>
+                <td>
+                  <div class="progress-bar-container">
+                    <div class="progress-bar-fill" [style.width.%]="item.progress"></div>
+                    <span class="progress-percentage-label">{{ item.progress }}%</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="status-badge active">{{ item.status }}</span>
+                </td>
+                <td class="actions-cell">
+                  <button class="action-btn btn-delete" (click)="removeRelation('program', item.id)" title="Remove user from program">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="3 6 5 6 21 6"></polyline>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                  </button>
+                  <button class="action-btn btn-view" (click)="viewDetail('program', item.id)" title="View Program details">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="empty-relation-state" *ngIf="profile.programs.length === 0">
+          <p>No programs assigned to this user.</p>
+        </div>
+      </div>
+
+      <!-- 4. Projects Tab Panel -->
+      <div class="relations-tab-panel" *ngIf="activeTab === 'projects'">
+        <div class="table-responsive-wrapper" *ngIf="profile.projects.length > 0">
+          <table class="relations-data-table">
+            <thead>
+              <tr>
+                <th>{{ t.colProjectName }}</th>
+                <th>{{ t.colCategory }}</th>
+                <th>{{ t.colTasks }}</th>
+                <th>{{ t.colProgress }}</th>
+                <th>{{ t.colStatus }}</th>
+                <th class="actions-header">{{ t.colActions }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of profile.projects">
+                <td class="font-bold text-dark">{{ item.name }}</td>
+                <td><span class="category-badge">{{ item.category }}</span></td>
+                <td class="font-semibold">{{ item.tasksCount }}</td>
+                <td>
+                  <div class="progress-bar-container">
+                    <div class="progress-bar-fill" [style.width.%]="item.progress"></div>
+                    <span class="progress-percentage-label">{{ item.progress }}%</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="status-badge active">{{ item.status }}</span>
+                </td>
+                <td class="actions-cell">
+                  <button class="action-btn btn-delete" (click)="removeRelation('project', item.id)" title="Remove user from project">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="3 6 5 6 21 6"></polyline>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                  </button>
+                  <button class="action-btn btn-view" (click)="viewDetail('project', item.id)" title="View Project details">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="empty-relation-state" *ngIf="profile.projects.length === 0">
+          <p>No projects assigned to this user.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

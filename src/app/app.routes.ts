@@ -22,6 +22,9 @@ import { PlansCreateComponent } from './plans/create/plans-create.component';
 import { ChangeRequestsComponent } from './change-requests/change-requests.component';
 import { CreateChangeRequestComponent } from './change-requests/create/create-change-request';
 import { ChangeRequestDetailsComponent } from './change-requests/details/change-request-details';
+import { UsersComponent } from './users/users.component';
+import { CreateUserComponent } from './users/create/create-user.component';
+import { UserProfileDetailsComponent } from './users/profile/user-profile-details.component';
 
 
 export const routes: Routes = [
@@ -162,6 +165,18 @@ export const routes: Routes = [
       {
         path: 'change-requests/details/:id',
         component: ChangeRequestDetailsComponent
+      },
+      {
+        path: 'users',
+        component: UsersComponent
+      },
+      {
+        path: 'users/create',
+        component: CreateUserComponent
+      },
+      {
+        path: 'users/profile/:id',
+        component: UserProfileDetailsComponent
       }
     ]
   },

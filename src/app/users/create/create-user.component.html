@@ -1,0 +1,159 @@
+<div class="create-user-container" [dir]="isRtl ? 'rtl' : 'ltr'">
+  <!-- Breadcrumbs & Title header bar -->
+  <div class="breadcrumb-header-row">
+    <button class="back-circle-btn" (click)="cancel()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+      </svg>
+    </button>
+    <div class="breadcrumbs-meta">
+      <h2 class="form-title">{{ isEditMode ? t.editUserTitle : t.addUserTitle }}</h2>
+      <div class="breadcrumbs-trail">
+        <a routerLink="/users">{{ t.breadcrumbsUsers }}</a>
+        <span class="separator">/</span>
+        <span class="current-crumb">{{ isEditMode ? t.breadcrumbsEdit : t.breadcrumbsAdd }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading spinner -->
+  <div class="loading-overlay" *ngIf="isLoading">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Form card wrapper -->
+  <form (ngSubmit)="saveUser()" #userForm="ngForm" class="create-user-form-card" *ngIf="!isLoading">
+    <div class="form-fields-grid">
+      <!-- User Name -->
+      <div class="form-field-group">
+        <label for="username">{{ t.lblUsername }}</label>
+        <input type="text" 
+               id="username" 
+               name="username" 
+               [(ngModel)]="username" 
+               required 
+               [disabled]="isEditMode"
+               [placeholder]="t.writeHere">
+      </div>
+
+      <!-- Email -->
+      <div class="form-field-group">
+        <label for="email">{{ t.lblEmail }}</label>
+        <input type="email" 
+               id="email" 
+               name="email" 
+               [(ngModel)]="email" 
+               required 
+               placeholder="name@example.com">
+      </div>
+
+      <!-- Phone Number -->
+      <div class="form-field-group">
+        <label for="phoneNumber">{{ t.lblPhone }}</label>
+        <input type="text" 
+               id="phoneNumber" 
+               name="phoneNumber" 
+               [(ngModel)]="phoneNumber" 
+               required 
+               [placeholder]="t.writeHere">
+      </div>
+
+      <!-- Role -->
+      <div class="form-field-group">
+        <label for="role">{{ t.lblRole }}</label>
+        <select id="role" name="role" [(ngModel)]="role" required class="select-dropdown">
+          <option *ngFor="let r of rolesList" [value]="r.value">{{ r.label }}</option>
+        </select>
+      </div>
+
+      <!-- Assigned Portfolio -->
+      <div class="form-field-group">
+        <label for="assignedPortfolioId">{{ t.lblPortfolio }}</label>
+        <select id="assignedPortfolioId" name="assignedPortfolioId" [(ngModel)]="assignedPortfolioId" class="select-dropdown">
+          <option [ngValue]="null">None</option>
+          <option *ngFor="let p of portfolios" [ngValue]="p.id">{{ p.name }}</option>
+        </select>
+      </div>
+
+      <!-- Assigned Program -->
+      <div class="form-field-group">
+        <label for="assignedProgramId">{{ t.lblProgram }}</label>
+        <select id="assignedProgramId" name="assignedProgramId" [(ngModel)]="assignedProgramId" class="select-dropdown">
+          <option [ngValue]="null">None</option>
+          <option *ngFor="let pr of programs" [ngValue]="pr.id">{{ pr.name }}</option>
+        </select>
+      </div>
+
+      <!-- Assigned Project -->
+      <div class="form-field-group">
+        <label for="assignedProjectId">{{ t.lblProject }}</label>
+        <select id="assignedProjectId" name="assignedProjectId" [(ngModel)]="assignedProjectId" class="select-dropdown">
+          <option [ngValue]="null">None</option>
+          <option *ngFor="let proj of projects" [ngValue]="proj.id">{{ proj.name }}</option>
+        </select>
+      </div>
+
+      <!-- User State -->
+      <div class="form-field-group">
+        <label for="isActive">{{ t.lblState }}</label>
+        <select id="isActive" name="isActive" [(ngModel)]="isActive" required class="select-dropdown">
+          <option [ngValue]="true">{{ t.lblActive }}</option>
+          <option [ngValue]="false">{{ t.lblUnactive }}</option>
+        </select>
+      </div>
+
+      <!-- Password -->
+      <div class="form-field-group">
+        <label for="password">{{ t.lblPassword }}</label>
+        <input type="password" 
+               id="password" 
+               name="password" 
+               [(ngModel)]="password" 
+               [required]="!isEditMode"
+               placeholder="********">
+      </div>
+
+      <!-- Arabic Full Name -->
+      <div class="form-field-group">
+        <label for="nameAr">الاسم الكامل (العربية)</label>
+        <input type="text" id="nameAr" name="nameAr" [(ngModel)]="nameAr" placeholder="مثال: فيصل العتيبي">
+      </div>
+
+      <!-- English Full Name -->
+      <div class="form-field-group">
+        <label for="nameEn">Full Name (English)</label>
+        <input type="text" id="nameEn" name="nameEn" [(ngModel)]="nameEn" placeholder="Example: Faisal Al-Otaibi">
+      </div>
+
+      <!-- Arabic Role Title -->
+      <div class="form-field-group">
+        <label for="titleAr">المسمى الوظيفي (العربية)</label>
+        <input type="text" id="titleAr" name="titleAr" [(ngModel)]="titleAr" placeholder="مثال: مدير محفظة">
+      </div>
+
+      <!-- English Role Title -->
+      <div class="form-field-group">
+        <label for="titleEn">Professional Title (English)</label>
+        <input type="text" id="titleEn" name="titleEn" [(ngModel)]="titleEn" placeholder="Example: Portfolio Manager">
+      </div>
+    </div>
+
+    <!-- Actions Footer buttons row -->
+    <div class="form-actions-footer">
+      <button type="button" class="btn-cancel" (click)="cancel()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+        {{ t.btnCancel }}
+      </button>
+      <button type="submit" class="btn-submit" [disabled]="!userForm.form.valid">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+        {{ isEditMode ? t.btnSave : t.btnAdd }}
+      </button>
+    </div>
+  </form>
+</div>

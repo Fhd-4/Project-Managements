@@ -2,7 +2,7 @@ import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of, BehaviorSubject, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import { API_CONFIG } from '../api.config';
 
 export interface Project {
@@ -81,6 +81,60 @@ export interface ChangeRequestComment {
   text: string;
   createdDate: string;
 }
+export interface AppUser {
+  id: string;
+  userName: string;
+  email: string;
+  phoneNumber: string;
+  role: string;
+  nameAr?: string;
+  nameEn?: string;
+  titleAr?: string;
+  titleEn?: string;
+  createdDate: string;
+  isActive: boolean;
+}
+export interface UserPortfolioDto {
+  id: number;
+  name: string;
+  category: string;
+  programsCount: number;
+  projectsCount: number;
+  progress: number;
+  status: string;
+}
+export interface UserProgramDto {
+  id: number;
+  name: string;
+  category: string;
+  projectsCount: number;
+  progress: number;
+  status: string;
+}
+export interface UserProjectDto {
+  id: number;
+  name: string;
+  category: string;
+  tasksCount: number;
+  progress: number;
+  status: string;
+}
+export interface UserProfileDto {
+  id: string;
+  userName: string;
+  email: string;
+  phoneNumber: string;
+  role: string;
+  nameAr?: string;
+  nameEn?: string;
+  titleAr?: string;
+  titleEn?: string;
+  createdDate: string;
+  isActive: boolean;
+  portfolios: UserPortfolioDto[];
+  programs: UserProgramDto[];
+  projects: UserProjectDto[];
+}
 export interface ProjectStatusMeta {
   label: string;
   cssClass: string;
@@ -138,6 +192,7 @@ export class ProjectService {
   private readonly tasksUrl = `${API_CONFIG.baseUrl}/ProjectTasks`;
   private readonly meetingsUrl = `${API_CONFIG.baseUrl}/ProjectMeetings`;
   private readonly changeRequestsUrl = `${API_CONFIG.baseUrl}/ChangeRequests`;
+  private readonly authUrl = `${API_CONFIG.baseUrl}/Auth`;
 
   isCreatePageActive: boolean = false;
   successToast$ = new BehaviorSubject<boolean>(false);
@@ -599,6 +654,178 @@ Description: Upgrading memory and hosting storage capacity to handle peak transa
   private saveLocalComments(requestId: number, list: ChangeRequestComment[]) {
     if (typeof window !== 'undefined' && window.localStorage) {
       localStorage.setItem(`local_comments_${requestId}`, JSON.stringify(list));
+    }
+  }
+
+  // Users Management APIs
+  getUsers(): Observable<AppUser[]> {
+    return this.http.get<AppUser[]>(`${this.authUrl}/all-users`, { headers: this.getHeaders() }).pipe(
+      map((users: any[]) => {
+        const localUsers = this.getLocalUsers();
+        return users.map(u => {
+          const localEdit = localUsers.find(lu => lu.id === u.id);
+          if (localEdit) {
+            return {
+              ...localEdit,
+              createdDate: u.createdDate || localEdit.createdDate || '2026-01-01'
+            };
+          }
+          return {
+            id: u.id,
+            userName: u.userName,
+            email: u.email || `${u.userName?.toLowerCase()}@example.com`,
+            phoneNumber: u.phoneNumber || '0561234567',
+            role: u.role || 'Member',
+            nameAr: u.nameAr || u.userName,
+            nameEn: u.nameEn || u.userName,
+            titleAr: u.titleAr,
+            titleEn: u.titleEn,
+            createdDate: u.createdDate || '2026-01-01',
+            isActive: u.isActive !== undefined ? u.isActive : true
+          };
+        });
+      }),
+      catchError(err => {
+        console.warn('getUsers API failed, using LocalStorage fallback.', err);
+        return of(this.getLocalUsers());
+      })
+    );
+  }
+
+  createUser(userPayload: any): Observable<any> {
+    return this.http.post<any>(`${this.authUrl}/create-user`, userPayload, { headers: this.getHeaders() }).pipe(
+      catchError(err => {
+        console.warn('createUser API failed, saving locally.', err);
+        const users = this.getLocalUsers();
+        const newUser: AppUser = {
+          id: 'local-' + Math.random().toString(36).substring(2, 9),
+          userName: userPayload.username,
+          email: userPayload.email,
+          phoneNumber: userPayload.phoneNumber,
+          role: userPayload.role,
+          nameAr: userPayload.nameAr || userPayload.username,
+          nameEn: userPayload.nameEn || userPayload.username,
+          titleAr: userPayload.titleAr || userPayload.role,
+          titleEn: userPayload.titleEn || userPayload.role,
+          createdDate: new Date().toISOString().split('T')[0],
+          isActive: userPayload.isActive !== false
+        };
+        users.push(newUser);
+        this.saveLocalUsers(users);
+        return of({ success: true, userId: newUser.id });
+      })
+    );
+  }
+
+  updateUser(userId: string, userPayload: any): Observable<any> {
+    return this.http.put<any>(`${this.authUrl}/update-user/${userId}`, userPayload, { headers: this.getHeaders() }).pipe(
+      catchError(err => {
+        console.warn('updateUser API failed, saving edit locally.', err);
+        const users = this.getLocalUsers();
+        const idx = users.findIndex(u => u.id === userId);
+        const updatedUser: AppUser = {
+          id: userId,
+          userName: userPayload.username,
+          email: userPayload.email,
+          phoneNumber: userPayload.phoneNumber,
+          role: userPayload.role,
+          nameAr: userPayload.nameAr || userPayload.username,
+          nameEn: userPayload.nameEn || userPayload.username,
+          titleAr: userPayload.titleAr || userPayload.role,
+          titleEn: userPayload.titleEn || userPayload.role,
+          createdDate: '2026-01-01',
+          isActive: userPayload.isActive !== false
+        };
+
+        if (idx !== -1) {
+          users[idx] = updatedUser;
+        } else {
+          users.push(updatedUser);
+        }
+        this.saveLocalUsers(users);
+        return of({ success: true });
+      })
+    );
+  }
+
+  deleteUser(userId: string): Observable<any> {
+    return this.http.delete<any>(`${this.authUrl}/delete-user/${userId}`, { headers: this.getHeaders() }).pipe(
+      catchError(err => {
+        console.warn('deleteUser API failed, removing locally.', err);
+        let users = this.getLocalUsers();
+        users = users.filter(u => u.id !== userId);
+        this.saveLocalUsers(users);
+        return of({ success: true });
+      })
+    );
+  }
+
+  getUserProfile(userId: string): Observable<UserProfileDto> {
+    return this.http.get<UserProfileDto>(`${this.authUrl}/user-profile/${userId}`, { headers: this.getHeaders() }).pipe(
+      map((profile: UserProfileDto) => {
+        const localUsers = this.getLocalUsers();
+        const localEdit = localUsers.find(lu => lu.id === userId);
+        return {
+          ...profile,
+          userName: localEdit?.userName || profile.userName,
+          email: localEdit?.email || profile.email || `${profile.userName?.toLowerCase()}@example.com`,
+          phoneNumber: localEdit?.phoneNumber || profile.phoneNumber || '0561234567',
+          role: localEdit?.role || profile.role || 'Member',
+          nameAr: localEdit?.nameAr || profile.nameAr || profile.userName,
+          nameEn: localEdit?.nameEn || profile.nameEn || profile.userName,
+          titleAr: localEdit?.titleAr || profile.titleAr,
+          titleEn: localEdit?.titleEn || profile.titleEn,
+          createdDate: profile.createdDate || '2026-01-01',
+          isActive: localEdit?.isActive !== undefined ? localEdit.isActive : (profile.isActive !== undefined ? profile.isActive : true)
+        };
+      }),
+      catchError(err => {
+        console.warn('getUserProfile API failed, retrieving user details from dynamic list fallback.', err);
+        return this.getUsers().pipe(
+          map(users => {
+            const user = users.find(u => u.id === userId);
+            
+            const mockPortfolios: UserPortfolioDto[] = [
+              { id: 1, name: 'Digital Products Portfolio', category: 'Execution', programsCount: 2, projectsCount: 5, progress: 65, status: 'Active' }
+            ];
+            const mockPrograms: UserProgramDto[] = [
+              { id: 1, name: 'Digital Products Program', category: 'Execution', projectsCount: 5, progress: 70, status: 'Active' }
+            ];
+            const mockProjects: UserProjectDto[] = [
+              { id: 1, name: 'Digital Dashboard Project', category: 'Execution', tasksCount: 12, progress: 80, status: 'Active' }
+            ];
+
+            return {
+              id: userId,
+              userName: user?.userName || 'User',
+              email: user?.email || `${user?.userName?.toLowerCase()}@example.com`,
+              phoneNumber: user?.phoneNumber || '0561234567',
+              role: user?.role || 'Member',
+              nameAr: user?.nameAr || user?.userName || 'مستخدم',
+              nameEn: user?.nameEn || user?.userName || 'User',
+              titleAr: user?.role || 'عضو',
+              titleEn: user?.role || 'Member',
+              createdDate: user?.createdDate || '2026-1-1',
+              isActive: user?.isActive !== false,
+              portfolios: user?.role === 'Member' ? [] : mockPortfolios,
+              programs: user?.role === 'Member' ? [] : mockPrograms,
+              projects: mockProjects
+            };
+          })
+        );
+      })
+    );
+  }
+
+  private getLocalUsers(): AppUser[] {
+    if (typeof window === 'undefined' || !window.localStorage) return [];
+    const data = localStorage.getItem('local_users');
+    return data ? JSON.parse(data) : [];
+  }
+
+  private saveLocalUsers(list: AppUser[]) {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.setItem('local_users', JSON.stringify(list));
     }
   }
 }

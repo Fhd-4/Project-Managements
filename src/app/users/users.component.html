@@ -1,0 +1,176 @@
+<div class="users-dashboard-container" [dir]="isRtl ? 'rtl' : 'ltr'">
+  <!-- Success Toast Alert -->
+  <div class="toast-alert success" *ngIf="showSuccessToast">
+    <div class="toast-content">
+      <div class="toast-circle-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </div>
+      <span>{{ isRtl ? 'تمت العملية بنجاح.' : 'Operation completed successfully.' }}</span>
+    </div>
+  </div>
+
+  <!-- Error Toast Alert -->
+  <div class="toast-alert error" *ngIf="showErrorToast">
+    <div class="toast-content">
+      <div class="toast-circle-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </div>
+      <span>{{ isRtl ? 'حدث خطأ أثناء تنفيذ العملية.' : 'An error occurred during operation.' }}</span>
+    </div>
+  </div>
+  <!-- Top Metrics Cards -->
+  <div class="metrics-grid">
+    <div class="metric-card card-total">
+      <div class="card-inner">
+        <span class="metric-label">{{ t.totalUsers }}</span>
+        <div class="metric-value-row">
+          <svg class="metric-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          <span class="value-text">{{ totalUsersCount }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="metric-card card-active">
+      <div class="card-inner">
+        <span class="metric-label">{{ t.activeUsers }}</span>
+        <div class="metric-value-row">
+          <span class="state-dot dot-green"></span>
+          <span class="value-text">{{ activeUsersCount }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="metric-card card-unactive">
+      <div class="card-inner">
+        <span class="metric-label">{{ t.unactiveUsers }}</span>
+        <div class="metric-value-row">
+          <span class="state-dot dot-red"></span>
+          <span class="value-text">{{ unactiveUsersCount }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter & Search Controls bar -->
+  <div class="dashboard-table-card">
+    <div class="table-header-controls">
+      <h3>{{ t.title }}</h3>
+      
+      <div class="controls-right-stack">
+        <!-- Search Input -->
+        <div class="search-input-wrapper">
+          <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" 
+                 [(ngModel)]="searchQuery" 
+                 (ngModelChange)="applyFilters()" 
+                 [placeholder]="t.searchPlaceholder">
+        </div>
+
+        <!-- Status Filter -->
+        <select class="status-select-filter" [(ngModel)]="selectedStatus" (change)="applyFilters()">
+          <option value="">{{ t.statusAll }}</option>
+          <option value="active">{{ t.statusActive }}</option>
+          <option value="unactive">{{ t.statusUnactive }}</option>
+        </select>
+
+        <!-- Add User button -->
+        <button class="btn-add-user" (click)="navigateToAddUser()">
+          {{ t.addUserBtn }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading spinner -->
+    <div class="loading-overlay" *ngIf="isLoading">
+      <div class="spinner"></div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="table-responsive-wrapper" *ngIf="!isLoading && filteredUsers.length > 0">
+      <table class="users-data-table">
+        <thead>
+          <tr>
+            <th>{{ t.colUsername }}</th>
+            <th>{{ t.colRole }}</th>
+            <th>{{ t.colEmail }}</th>
+            <th>{{ t.colPhone }}</th>
+            <th>{{ t.colAddTime }}</th>
+            <th>{{ t.colState }}</th>
+            <th class="actions-header">{{ t.colActions }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of filteredUsers" (click)="viewProfile(user.id)" class="clickable-row">
+            <td>
+              <div class="user-profile-meta">
+                <span class="avatar-badge">{{ getUserInitials(isRtl ? user.nameAr : user.nameEn) }}</span>
+                <span class="username-text font-bold">{{ isRtl ? user.nameAr || user.userName : user.nameEn || user.userName }}</span>
+              </div>
+            </td>
+            <td>
+              <span class="role-text font-medium">{{ user.role }}</span>
+            </td>
+            <td>
+              <span class="email-text">{{ user.email }}</span>
+            </td>
+            <td>
+              <span class="phone-text font-semibold">{{ user.phoneNumber }}</span>
+            </td>
+            <td>
+              <span class="date-text">{{ user.createdDate | date:'yyyy-M-d' }}</span>
+            </td>
+            <td>
+              <span class="state-badge" [class.active]="user.isActive" [class.inactive]="!user.isActive">
+                <span class="badge-dot"></span>
+                {{ user.isActive ? t.statusActive : t.statusUnactive }}
+              </span>
+            </td>
+            <td class="table-actions-cell" (click)="$event.stopPropagation()">
+              <button class="action-btn btn-view" (click)="viewProfile(user.id)" title="View Profile">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </button>
+              <button class="action-btn btn-delete" (click)="deleteUser(user.id, $event)" title="Delete User">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  <line x1="10" y1="11" x2="10" y2="17"></line>
+                  <line x1="14" y1="11" x2="14" y2="17"></line>
+                </svg>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-dashboard-state" *ngIf="!isLoading && filteredUsers.length === 0">
+      <div class="empty-state-icon-wrapper">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#a0aec0" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="9" y1="15" x2="15" y2="15"></line>
+          <line x1="12" y1="12" x2="12" y2="18"></line>
+        </svg>
+      </div>
+      <h4>{{ t.emptyTitle }}</h4>
+      <p>{{ t.emptySubtitle }}</p>
+    </div>
+  </div>
+</div>

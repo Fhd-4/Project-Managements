@@ -88,6 +88,18 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Server
   },
   {
+    path: 'users',
+    renderMode: RenderMode.Server
+  },
+  {
+    path: 'users/create',
+    renderMode: RenderMode.Server
+  },
+  {
+    path: 'users/profile/:id',
+    renderMode: RenderMode.Server
+  },
+  {
     path: '**',
     renderMode: RenderMode.Prerender
   }

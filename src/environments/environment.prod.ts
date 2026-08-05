@@ -1,6 +1,6 @@
 export const environment = {
-  production: false,
-  apiUrl: 'https://localhost:44319/api',
+  production: true,
+  apiUrl: 'https://prosync-swagger.runasp.net/api',
   endpoints: {
     auth: {
       login: '/Auth/login',
