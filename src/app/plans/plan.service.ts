@@ -33,7 +33,7 @@ export interface Plan {
   providedIn: 'root'
 })
 export class PlanService {
-  private apiUrl = 'https://localhost:44319/api/Plans';
+  private apiUrl = 'https://localhost:7130/api/Plans';
 
   public successToast$ = new BehaviorSubject<boolean>(false);
   public errorToast$ = new BehaviorSubject<boolean>(false);

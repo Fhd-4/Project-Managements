@@ -72,6 +72,14 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Server
   },
   {
+    path: 'plans',
+    renderMode: RenderMode.Server
+  },
+  {
+    path: 'plans/create',
+    renderMode: RenderMode.Server
+  },
+  {
     path: 'change-requests',
     renderMode: RenderMode.Server
   },
