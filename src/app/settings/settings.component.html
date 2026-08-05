@@ -1,0 +1,154 @@
+<div class="settings-page">
+  
+  <!-- Main Page Title -->
+  <h1 class="page-title">Setting</h1>
+
+  <!-- The White Card Container (Just like Portfolios) -->
+  <div class="portfolios-content-card">
+    
+    <!-- Tabs Section -->
+    <div class="tabs-header">
+      <button class="tab-link" [class.active]="activeTab === 'roles'" (click)="switchTab('roles')">Roles</button>
+      <button class="tab-link" [class.active]="activeTab === 'categories'" (click)="switchTab('categories')">Categories</button>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar-row">
+      <div class="tab-title">
+        <h3 *ngIf="activeTab === 'roles'">All Roles</h3>
+        <h3 *ngIf="activeTab === 'categories'">All Categories</h3>
+      </div>
+
+      <div class="toolbar-actions">
+        <div class="search-box">
+          <input type="text" placeholder="Search for everything" [(ngModel)]="searchQuery" (ngModelChange)="onSearch()" />
+        </div>
+        <button class="create-btn" (click)="openCreateModal()">+ Create New</button>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state-section" *ngIf="(activeTab === 'roles' && roles.length === 0) || (activeTab === 'categories' && categories.length === 0)">
+      <img src="assets/images/empty-data.svg" alt="No data" class="empty-img" style="width: 120px; margin-bottom: 16px;" />
+      <div class="empty-title" style="font-size: 18px; font-weight: 700; color: #0B1C33; margin-bottom: 8px;">No data right now</div>
+      <p style="color: #6B7280; font-size: 13px;">Please click on <strong>create new</strong> to choose the suitable option</p>
+    </div>
+
+    <!-- ROLES TABLE -->
+    <div class="table-wrapper" *ngIf="activeTab === 'roles' && roles.length > 0">
+      <table class="portfolios-table">
+        <thead>
+          <tr>
+            <th>Role Name</th>
+            <th>Users</th>
+            <th>Access</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let role of roles">
+            <td class="name-cell">{{ role.name }}</td>
+            <td>{{ role.usersCount || 0 }}</td>
+            <td>{{ role.access || '-' }}</td>
+            <td class="actions-cell">
+              <button class="action-icon" title="View">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- CATEGORIES TABLE -->
+    <div class="table-wrapper" *ngIf="activeTab === 'categories' && categories.length > 0">
+      <table class="portfolios-table">
+        <thead>
+          <tr>
+            <th>Category Name</th>
+            <th>Assign to</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let cat of categories">
+            <td class="name-cell">{{ cat.name }}</td>
+            <td>{{ cat.assignTo }}</td>
+            <td class="actions-cell">
+              <button class="action-icon delete" title="Delete" (click)="confirmDeleteCategory(cat.id!)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              </button>
+              <button class="action-icon" title="View">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              </button>
+              <button class="action-icon" title="Settings">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1.05 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modals (Add Role, Add Category, Delete Category) remain the exact same below this line -->
+<!-- Add Role Modal -->
+<div class="modal-overlay" *ngIf="isAddRoleModalOpen">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>← Add Role</h2>
+      <p class="breadcrumb">Setting / Roles / Add Role</p>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Role Name</label>
+        <input type="text" placeholder="Write Here" [(ngModel)]="newRoleName">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" (click)="isAddRoleModalOpen = false">✕ Cancel</button>
+      <button class="btn-primary" (click)="saveRole()">+ Add New</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Category Modal -->
+<div class="modal-overlay" *ngIf="isAddCategoryModalOpen">
+  <div class="modal-content modal-wide">
+    <div class="modal-header">
+      <h2>← Add Category</h2>
+      <p class="breadcrumb">Setting / Categories / Category Details</p>
+    </div>
+    <div class="modal-body flex-row">
+      <div class="form-group flex-1">
+        <label>Category Name</label>
+        <input type="text" placeholder="e.g. Smart Systems" [(ngModel)]="newCategoryName">
+      </div>
+      <div class="form-group flex-1">
+        <label>Assign to</label>
+        <select [(ngModel)]="newCategoryAssignTo">
+          <option value="" disabled selected>Select option</option>
+          <option *ngFor="let opt of assignToOptions" [value]="opt">{{ opt }}</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" (click)="isAddCategoryModalOpen = false">✕ Cancel</button>
+      <button class="btn-primary" (click)="saveCategory()">+ Add</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Category Modal -->
+<div class="modal-overlay" *ngIf="isDeleteCategoryModalOpen">
+  <div class="modal-content modal-small center-content">
+    <div class="delete-icon-large">🗑️</div>
+    <h3>Delete Category?</h3>
+    <div class="modal-footer justify-center">
+      <button class="btn-cancel text-red" (click)="isDeleteCategoryModalOpen = false">✕ Cancel</button>
+      <button class="btn-danger" (click)="deleteCategory()">🗑️ Delete</button>
+    </div>
+  </div>
+</div>

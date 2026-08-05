@@ -25,6 +25,7 @@ import { ChangeRequestDetailsComponent } from './change-requests/details/change-
 import { UsersComponent } from './users/users.component';
 import { CreateUserComponent } from './users/create/create-user.component';
 import { UserProfileDetailsComponent } from './users/profile/user-profile-details.component';
+import { SettingsComponent } from './settings/settings.component';
 
 
 export const routes: Routes = [
@@ -177,6 +178,10 @@ export const routes: Routes = [
       {
         path: 'users/profile/:id',
         component: UserProfileDetailsComponent
+      },
+      {
+        path: 'settings',
+        component: SettingsComponent
       }
     ]
   },
