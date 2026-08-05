@@ -1,103 +1,123 @@
 <div class="create-page" [dir]="isRtl ? 'rtl' : 'ltr'">
-  <div class="breadcrumb">{{ t.breadcrumb }}</div>
-  <h1 class="page-title">{{ isEditMode ? t.titleEdit : t.titleCreate }}</h1>
-
-  <div class="form-grid">
-    <div class="form-field">
-      <label>{{ t.programName }} *</label>
-      <input type="text" [(ngModel)]="name" [placeholder]="t.writeHere" />
-    </div>
-
-    <div class="form-field" *ngIf="!isEditMode">
-      <label>{{ t.portfolioName }} *</label>
-      <select [(ngModel)]="portfolioId">
-        <option [ngValue]="null">{{ t.selectPlaceholder }}</option>
-        <option *ngFor="let p of portfolios" [ngValue]="p.id">{{ isRtl ? p.nameAr : p.nameEn }}</option>
-      </select>
-    </div>
-
-    <div class="form-field">
-      <label>{{ t.programOwner }}</label>
-      <select [(ngModel)]="ownerUserId">
-        <option value="">{{ t.selectPlaceholder }}</option>
-        <option *ngFor="let u of users" [value]="u.id">{{ userLabel(u) }}</option>
-      </select>
-    </div>
-
-    <div class="form-field">
-      <label>{{ t.programManager }} *</label>
-      <select [(ngModel)]="managerId">
-        <option value="">{{ t.selectPlaceholder }}</option>
-        <option *ngFor="let u of users" [value]="u.id">{{ userLabel(u) }}</option>
-      </select>
-    </div>
-
-    <div class="form-field">
-      <label>{{ t.programSponsor }}</label>
-      <select [(ngModel)]="sponsorUserId">
-        <option value="">{{ t.selectPlaceholder }}</option>
-        <option *ngFor="let u of users" [value]="u.id">{{ userLabel(u) }}</option>
-      </select>
-    </div>
-
-    <div class="form-field">
-      <label>{{ t.budget }} *</label>
-      <input type="number" [(ngModel)]="budget" min="0" />
-    </div>
-
-    <div class="form-field">
-      <label>{{ t.status }}</label>
-      <select [(ngModel)]="status">
-        <option *ngFor="let opt of statusOptions" [ngValue]="opt.value">{{ isRtl ? opt.labelAr : opt.labelEn }}</option>
-      </select>
-    </div>
-  </div>
-
-  <div class="form-field full-width">
-    <label>{{ t.description }}</label>
-    <textarea rows="4" [(ngModel)]="description" [placeholder]="t.writeHere"></textarea>
-  </div>
-
-  <div class="attach-section">
-    <label class="section-label">{{ t.attachFile }}</label>
-    <div class="attach-grid">
-      <div class="dropzone">
-        <span class="upload-glyph icon-mono">⬆</span>
-        <p>{{ t.dragDrop }}</p>
-        <label class="upload-btn">
-          {{ t.upload }}
-          <input type="file" multiple hidden (change)="onFilesSelected($event)" />
-        </label>
-        <p class="hint">JPG, PNG, SVG, ZIP — up to 5 files</p>
+  <div class="portfolios-content-card">
+    
+    <!-- Top Toolbar Header -->
+    <div class="toolbar-row">
+      <div class="tab-title">
+        <div class="breadcrumb">{{ t.breadcrumb }}</div>
+        <h3>{{ isEditMode ? t.titleEdit : t.titleCreate }}</h3>
       </div>
+    </div>
 
-      <div class="file-panel">
-        <span class="file-panel-title">{{ t.fileAttached }}</span>
-        <div class="file-list" *ngIf="attachedFiles.length; else emptyFiles">
-          <div class="file-item" *ngFor="let f of attachedFiles; let i = index">
-            <!-- File-type icon: kept colorful ("files loaded" exception) -->
-            <span class="file-icon" [ngClass]="fileKind(f.name)">
-              {{ fileKind(f.name) === 'pdf' ? '📕' : fileKind(f.name) === 'doc' ? '📘' : '📄' }}
-            </span>
-            <div class="file-info">
-              <span class="file-name">{{ f.name }}</span>
-              <div class="progress-bar"><div class="progress-fill" [style.width.%]="f.progress"></div></div>
-            </div>
-            <span class="file-pct">{{ f.progress }}%</span>
-            <button class="remove-btn" (click)="removeFile(i)"><span class="icon-mono">🗑</span></button>
-          </div>
+    <!-- Form Content Body -->
+    <div class="form-body">
+      <div class="form-grid">
+        <div class="form-field">
+          <label>{{ t.programName }} *</label>
+          <input type="text" [(ngModel)]="name" [placeholder]="t.writeHere" />
         </div>
-        <ng-template #emptyFiles>
-          <p class="hint">{{ isRtl ? 'لا توجد ملفات مرفقة بعد' : 'No files attached yet' }}</p>
-        </ng-template>
+
+        <div class="form-field" *ngIf="!isEditMode">
+          <label>{{ t.portfolioName }} *</label>
+          <select [(ngModel)]="portfolioId">
+            <option [ngValue]="null">{{ t.selectPlaceholder }}</option>
+            <option *ngFor="let p of portfolios" [ngValue]="p.id">{{ isRtl ? p.nameAr : p.nameEn }}</option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label>{{ t.programOwner }}</label>
+          <select [(ngModel)]="ownerUserId">
+            <option value="">{{ t.selectPlaceholder }}</option>
+            <option *ngFor="let u of users" [value]="u.id">{{ userLabel(u) }}</option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label>{{ t.programManager }} *</label>
+          <select [(ngModel)]="managerId">
+            <option value="">{{ t.selectPlaceholder }}</option>
+            <option *ngFor="let u of users" [value]="u.id">{{ userLabel(u) }}</option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label>{{ t.programSponsor }}</label>
+          <select [(ngModel)]="sponsorUserId">
+            <option value="">{{ t.selectPlaceholder }}</option>
+            <option *ngFor="let u of users" [value]="u.id">{{ userLabel(u) }}</option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label>{{ t.budget }} *</label>
+          <input type="number" [(ngModel)]="budget" min="0" />
+        </div>
+
+        <div class="form-field">
+          <label>{{ t.status }}</label>
+          <select [(ngModel)]="status">
+            <option *ngFor="let opt of statusOptions" [ngValue]="opt.value">{{ isRtl ? opt.labelAr : opt.labelEn }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-field full-width">
+        <label>{{ t.description }}</label>
+        <textarea rows="4" [(ngModel)]="description" [placeholder]="t.writeHere"></textarea>
+      </div>
+
+      <div class="attach-section">
+        <label class="section-label">{{ t.attachFile }}</label>
+        <div class="attach-grid">
+          
+          <!-- Dropzone with vibrant blue styling -->
+          <div class="dropzone">
+            <div class="upload-glyph-box">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+            </div>
+            <p>{{ t.dragDrop }}</p>
+            <span class="or-text">OR</span>
+            <label class="upload-btn">
+              {{ t.upload }}
+              <input type="file" multiple hidden (change)="onFilesSelected($event)" />
+            </label>
+            <p class="hint">You can upload up to 5 files max<br>Only support .jpg, .png and .svg and zip files</p>
+          </div>
+
+          <!-- File Panel with vibrant progress bars -->
+          <div class="file-panel">
+            <span class="file-panel-title">{{ t.fileAttached }}</span>
+            <div class="file-list" *ngIf="attachedFiles.length; else emptyFiles">
+              <div class="file-item" *ngFor="let f of attachedFiles; let i = index">
+                <span class="file-icon" [ngClass]="fileKind(f.name)">
+                  {{ fileKind(f.name) === 'pdf' ? '📕' : fileKind(f.name) === 'doc' ? '📘' : '📄' }}
+                </span>
+                <div class="file-info">
+                  <span class="file-name">{{ f.name }}</span>
+                  <div class="progress-bar"><div class="progress-fill" [style.width.%]="f.progress"></div></div>
+                </div>
+                <span class="file-pct">{{ f.progress }}%</span>
+                <button class="remove-btn" (click)="removeFile(i)">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                </button>
+              </div>
+            </div>
+            <ng-template #emptyFiles>
+              <p class="hint empty-hint">{{ isRtl ? 'لا توجد ملفات مرفقة بعد' : 'No files attached yet' }}</p>
+            </ng-template>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="error-banner" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+      <div class="actions-row">
+        <button class="btn-secondary" (click)="cancel()">✕ {{ t.cancel }}</button>
+        <button class="btn-primary" [disabled]="isSaving" (click)="save()">+ {{ isSaving ? t.saving : t.addNew }}</button>
       </div>
     </div>
-  </div>
 
-  <div class="error-banner" *ngIf="errorMessage">{{ errorMessage }}</div>
-
-  <div class="actions-row">
-    <button class="btn-secondary" (click)="cancel()">✕ {{ t.cancel }}</button>
-    <button class="btn-primary" [disabled]="isSaving" (click)="save()">+ {{ isSaving ? t.saving : t.addNew }}</button>
   </div>
 </div>

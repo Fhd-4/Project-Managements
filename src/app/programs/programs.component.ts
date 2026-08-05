@@ -1,44 +1,44 @@
-import { Component, ChangeDetectorRef, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ProgramService, Program, getStatusMeta, ProgramStatus } from './program.service';
+import { Subscription } from 'rxjs';
+import { ProgramService, Program, getStatusMeta, StatusMeta } from './program.service';
 
-type LangCode = 'ar' | 'en';
-type SortDir = 'asc' | 'desc' | 'none';
-type SortKey = 'projects' | 'tasks' | 'none';
-type ViewMode = 'list' | 'kanban';
+interface Translations {
+  title: string;
+  listView: string;
+  kanbanView: string;
+  searchPlaceholder: string;
+  createBtn: string;
+  noData: string;
+  stats: { total: string; pending: string; active: string; completed: string };
+  headers: { name: string; projects: string; tasks: string; owner: string; status: string; actions: string };
+}
 
 @Component({
   selector: 'app-programs',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './programs.component.html',
-  styleUrl: './programs.component.scss'
+  styleUrls: ['./programs.component.scss']
 })
-export class ProgramsComponent implements OnInit {
-  currentLang: LangCode = 'ar';
-  searchQuery: string = '';
-  viewMode: ViewMode = 'list';
-
+export class ProgramsComponent implements OnInit, OnDestroy {
   programs: Program[] = [];
-  isLoading: boolean = true;
-  errorMessage: string = '';
+  pagedPrograms: Program[] = [];
+  isLoading = true;
 
+  viewMode: 'list' | 'kanban' = 'list';
+  searchQuery = '';
   statusFilter: number | null = null;
-  readonly statusOptions = [
-    { value: null as number | null, labelAr: 'كل الحالات', labelEn: 'All Status' },
-    { value: ProgramStatus.Pending, labelAr: 'قيد الانتظار', labelEn: 'Pending' },
-    { value: ProgramStatus.Active, labelAr: 'قيد التنفيذ', labelEn: 'In Progress' },
-    { value: ProgramStatus.Completed, labelAr: 'مكتمل', labelEn: 'Completed' },
-    { value: ProgramStatus.Rejected, labelAr: 'مرفوض', labelEn: 'Rejected' }
-  ];
 
-  sortKey: SortKey = 'none';
-  sortDir: SortDir = 'none';
-
-  pageSize = 8;
   currentPage = 1;
+  pageSize = 10;
+  totalPages = 1;
+  pageNumbers: number[] = [];
+
+  sortColumn: string = '';
+  sortDirection: 'asc' | 'desc' = 'asc';
 
   totalCount = 0;
   pendingCount = 0;
@@ -47,136 +47,197 @@ export class ProgramsComponent implements OnInit {
 
   showSuccessToast = false;
   showErrorToast = false;
+  private subs = new Subscription();
 
-  translations = {
-    ar: {
-      title: 'كل البرامج',
-      searchPlaceholder: 'ابحث عن أي شيء',
-      createBtn: 'إنشاء برنامج',
-      listView: 'قائمة',
-      kanbanView: 'كانبان',
-      stats: { total: 'إجمالي البرامج', pending: 'قيد الانتظار', active: 'في المسار الصحيح', completed: 'مكتملة' },
-      headers: { name: 'اسم البرنامج', projects: 'المشاريع', tasks: 'المهام', owner: 'المسؤول', status: 'الحالة', actions: 'الإجراءات' },
-      noData: 'لا توجد برامج مسجلة حالياً، اضغط على إنشاء برنامج للبدء.',
-      confirmDelete: 'هل أنت متأكد من رغبتك في حذف هذا البرنامج؟'
-    },
+  isRtl = false;
+
+  statusOptions = [
+    { value: null, labelEn: 'All Status', labelAr: 'جميع الحالات' },
+    { value: 1, labelEn: 'In Progress', labelAr: 'قيد التنفيذ' },
+    { value: 2, labelEn: 'Completed', labelAr: 'مكتملة' },
+    { value: 3, labelEn: 'Pending', labelAr: 'قيد الانتظار' },
+    { value: 4, labelEn: 'Rejected', labelAr: 'مرفوضة' }
+  ];
+
+  translations: Record<'en' | 'ar', Translations> = {
     en: {
       title: 'All Programs',
-      searchPlaceholder: 'Search for everything',
-      createBtn: 'Create Program',
       listView: 'List',
       kanbanView: 'Kanban',
-      stats: { total: 'Total Programs', pending: 'Pending', active: 'On Track', completed: 'Completed' },
-      headers: { name: 'Program Name', projects: 'Projects', tasks: 'Tasks', owner: 'Owner', status: 'Status', actions: 'Actions' },
-      noData: 'No programs found. Click Create Program to get started.',
-      confirmDelete: 'Are you sure you want to delete this program?'
+      searchPlaceholder: 'Search for everything',
+      createBtn: 'Create Program',
+      noData: 'No programs found.',
+      stats: { total: 'Total Programs', pending: 'Pending', active: 'In Progress', completed: 'Completed' },
+      headers: { name: 'Program Name', projects: 'Projects', tasks: 'Tasks', owner: 'Owner', status: 'Status', actions: 'Actions' }
+    },
+    ar: {
+      title: 'كل البرامج',
+      listView: 'قائمة',
+      kanbanView: 'كانبان',
+      searchPlaceholder: 'ابحث عن أي شيء',
+      createBtn: 'إنشاء برنامج',
+      noData: 'لا توجد برامج متاحة.',
+      stats: { total: 'إجمالي البرامج', pending: 'قيد الانتظار', active: 'في المسار الصحيح', completed: 'مكتملة' },
+      headers: { name: 'اسم البرنامج', projects: 'المشاريع', tasks: 'المهام', owner: 'المسؤول', status: 'الحالة', actions: 'الإجراءات' }
     }
   };
 
-  constructor(
-    public programService: ProgramService,
-    private cdr: ChangeDetectorRef,
-    private router: Router
-  ) {
-    if (typeof window !== 'undefined' && window.localStorage) {
-      const savedLang = localStorage.getItem('preferred_lang') as LangCode;
-      if (savedLang) this.currentLang = savedLang;
+  get t(): Translations {
+    return this.isRtl ? this.translations.ar : this.translations.en;
+  }
+
+  kanbanColumns: { status: number; meta: StatusMeta; programs: Program[] }[] = [];
+
+  constructor(private programService: ProgramService, private router: Router) {}
+
+  ngOnInit(): void {
+    // Check initial language preference from localStorage or HTML dir
+    if (typeof window !== 'undefined') {
+      const savedLang = localStorage.getItem('app_lang');
+      this.isRtl = savedLang === 'ar' || document.documentElement.dir === 'rtl';
     }
-  }
 
-  ngOnInit() {
+    this.subs.add(
+      this.programService.successToast$.subscribe(val => this.showSuccessToast = val)
+    );
+    this.subs.add(
+      this.programService.errorToast$.subscribe(val => this.showErrorToast = val)
+    );
+
     this.loadPrograms();
-    this.programService.successToast$.subscribe(val => { this.showSuccessToast = val; this.cdr.detectChanges(); });
-    this.programService.errorToast$.subscribe(val => { this.showErrorToast = val; this.cdr.detectChanges(); });
   }
 
-  get t() { return this.translations[this.currentLang]; }
-  get isRtl(): boolean { return this.currentLang === 'ar'; }
+  ngOnDestroy(): void {
+    this.subs.unsubscribe();
+  }
 
-  loadPrograms() {
+  loadPrograms(): void {
     this.isLoading = true;
-    this.programService.getAllPrograms({
-      keyword: this.searchQuery?.trim() || undefined,
-      status: this.statusFilter ?? undefined
-    }).subscribe({
-      next: (list) => {
-        this.programs = list;
+    const filters = {
+      keyword: this.searchQuery.trim() || undefined,
+      status: this.statusFilter !== null ? Number(this.statusFilter) : undefined
+    };
+
+    this.programService.getAllPrograms(filters).subscribe({
+      next: (data) => {
+        this.programs = data || [];
         this.calculateStats();
-        this.currentPage = 1;
+        this.applySortingAndPagination();
+        this.buildKanbanColumns();
         this.isLoading = false;
-        this.cdr.detectChanges();
       },
       error: () => {
-        this.errorMessage = this.t.noData;
+        this.programs = [];
+        this.calculateStats();
+        this.applySortingAndPagination();
+        this.buildKanbanColumns();
         this.isLoading = false;
-        this.cdr.detectChanges();
       }
     });
   }
 
-  onSearchChange() { this.loadPrograms(); }
-  onStatusFilterChange() { this.loadPrograms(); }
-
-  calculateStats() {
+  calculateStats(): void {
     this.totalCount = this.programs.length;
-    this.pendingCount = this.programs.filter(p => p.status === ProgramStatus.Pending).length;
-    this.activeCount = this.programs.filter(p => p.status === ProgramStatus.Active).length;
-    this.completedCount = this.programs.filter(p => p.status === ProgramStatus.Completed).length;
+    this.pendingCount = this.programs.filter(p => p.status === 3).length;
+    this.activeCount = this.programs.filter(p => p.status === 1).length;
+    this.completedCount = this.programs.filter(p => p.status === 2).length;
   }
 
-  toggleSort(key: 'projects' | 'tasks') {
-    if (this.sortKey !== key) { this.sortKey = key; this.sortDir = 'desc'; }
-    else if (this.sortDir === 'desc') { this.sortDir = 'asc'; }
-    else { this.sortKey = 'none'; this.sortDir = 'none'; }
+  onSearchChange(): void {
+    this.currentPage = 1;
+    this.loadPrograms();
   }
 
-  get sortedPrograms(): Program[] {
+  onStatusFilterChange(): void {
+    this.currentPage = 1;
+    this.loadPrograms();
+  }
+
+  toggleSort(column: string): void {
+    if (this.sortColumn === column) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortColumn = column;
+      this.sortDirection = 'asc';
+    }
+    this.applySortingAndPagination();
+  }
+
+  applySortingAndPagination(): void {
     let result = [...this.programs];
-    if (this.sortKey !== 'none' && this.sortDir !== 'none') {
-      const field = this.sortKey === 'projects' ? 'projectsCount' : 'tasksCount';
+
+    if (this.sortColumn) {
       result.sort((a, b) => {
-        const av = a[field] ?? 0, bv = b[field] ?? 0;
-        return this.sortDir === 'asc' ? av - bv : bv - av;
+        let valA = 0;
+        let valB = 0;
+        if (this.sortColumn === 'projects') {
+          valA = a.projectsCount ?? 0;
+          valB = b.projectsCount ?? 0;
+        } else if (this.sortColumn === 'tasks') {
+          valA = a.tasksCount ?? 0;
+          valB = b.tasksCount ?? 0;
+        }
+        return this.sortDirection === 'asc' ? valA - valB : valB - valA;
       });
     }
-    return result;
+
+    this.totalPages = Math.ceil(result.length / this.pageSize) || 1;
+    if (this.currentPage > this.totalPages) this.currentPage = this.totalPages;
+
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    this.pagedPrograms = result.slice(startIndex, startIndex + this.pageSize);
+
+    this.pageNumbers = Array.from({ length: this.totalPages }, (_, i) => i + 1);
   }
 
-  get totalPages(): number { return Math.max(1, Math.ceil(this.sortedPrograms.length / this.pageSize)); }
-  get pagedPrograms(): Program[] {
-    const start = (this.currentPage - 1) * this.pageSize;
-    return this.sortedPrograms.slice(start, start + this.pageSize);
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.applySortingAndPagination();
+    }
   }
-  get pageNumbers(): number[] { return Array.from({ length: this.totalPages }, (_, i) => i + 1); }
-  goToPage(p: number) { if (p >= 1 && p <= this.totalPages) this.currentPage = p; }
 
-  get kanbanColumns() {
-    const statuses = [ProgramStatus.Pending, ProgramStatus.Active, ProgramStatus.Completed, ProgramStatus.Rejected];
-    return statuses.map(status => ({
-      status,
-      meta: getStatusMeta(status),
-      programs: this.sortedPrograms.filter(p => p.status === status)
+  buildKanbanColumns(): void {
+    const statuses = [3, 1, 2, 4]; // Pending, In Progress, Completed, Rejected
+    this.kanbanColumns = statuses.map(st => ({
+      status: st,
+      meta: getStatusMeta(st),
+      programs: this.programs.filter(p => p.status === st)
     }));
   }
 
-  statusMeta(status: number) { return getStatusMeta(status); }
-
-  initials(name?: string): string {
-    if (!name) return '?';
-    const parts = name.trim().split(' ');
-    return ((parts[0]?.[0] || '') + (parts[1]?.[0] || '')).toUpperCase();
+  statusMeta(status: number): StatusMeta {
+    return getStatusMeta(status);
   }
 
-  openCreatePage() { this.router.navigate(['/programs/create']); }
-  openEditPage(program: Program) { this.router.navigate(['/programs/edit', program.id]); }
-  viewProgramDetails(id: number) { this.router.navigate(['/programs/details', id]); }
+  initials(name?: string): string {
+    if (!name) return 'U';
+    return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+  }
 
-  deleteProgram(id: number) {
-    if (confirm(this.t.confirmDelete)) {
-      this.isLoading = true;
+  openCreatePage(): void {
+    this.router.navigate(['/programs/create']);
+  }
+
+  openEditPage(p: Program): void {
+    this.router.navigate([`/programs/edit/${p.id}`]);
+  }
+
+  viewProgramDetails(id: number): void {
+    this.router.navigate([`/programs/details/${id}`]);
+  }
+
+  deleteProgram(id: number): void {
+    const msg = this.isRtl ? 'هل أنت متأكد من حذف هذا البرنامج؟' : 'Are you sure you want to delete this program?';
+    if (confirm(msg)) {
       this.programService.deleteProgram(id).subscribe({
-        next: () => { this.programService.triggerSuccessToast(); this.loadPrograms(); },
-        error: () => { this.isLoading = false; this.programService.triggerErrorToast(); this.cdr.detectChanges(); }
+        next: () => {
+          this.programService.triggerSuccessToast();
+          this.loadPrograms();
+        },
+        error: () => {
+          this.programService.triggerErrorToast();
+        }
       });
     }
   }

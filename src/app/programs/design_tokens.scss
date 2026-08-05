@@ -2,24 +2,24 @@
 // programs/programs.component.scss  -> @use 'design_tokens' as *;
 // programs/create/*.scss, programs/details/*.scss -> @use '../design_tokens' as *;
 
-$color-primary: #1C3766;
+$color-primary: #112b50;
 $color-bg: #F7F9FC;
 $color-border: #E6EBF3;
-$color-text-primary: #1F2A44;
-$color-text-secondary: #7B8794;
+$color-text-primary: #102a43;
+$color-text-secondary: #627d98;
 $color-white: #ffffff;
 
 // Status semantics (confirmed mapping for Program's int status)
-$color-active: #2563EB;    // In Progress
+$color-active: #0284c7;    // In Progress
 $color-completed: #16A34A;
-$color-pending: #EA580C;
+$color-pending: #D97706;
 $color-rejected: #DC2626;
 
 $radius-sm: 10px;
-$radius-md: 12px;
-$radius-lg: 14px;
+$radius-md: 16px;
+$radius-lg: 20px;
 
-$shadow-soft: 0 2px 10px rgba(0, 0, 0, 0.05);
+$shadow-soft: 0 4px 15px rgba(0, 0, 0, 0.01);
 
 $transition: 180ms ease;
 

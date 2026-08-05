@@ -7,41 +7,63 @@
   <div class="header-card">
     <div class="header-top">
       <h1 class="program-title">{{ program.name }}</h1>
-      <button class="icon-btn" (click)="editProgram()" title="{{ t.edit }}"><span class="icon-mono">✎</span></button>
+      <button class="icon-btn edit-btn" (click)="editProgram()" title="{{ t.edit }}">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+      </button>
     </div>
 
     <div class="header-body">
+      <!-- People Role Cards with status/dates -->
       <div class="people-row">
-        <div class="person">
+        <div class="person-box">
           <span class="avatar-sm">{{ initials(portfolioOwnerName) }}</span>
-          <div>
-            <span class="person-name">{{ portfolioOwnerName || '-' }}</span>
-            <span class="person-role">{{ t.portfolioOwner }}</span>
+          <div class="person-info-group">
+            <div class="person-top-line">
+              <span class="person-name">{{ portfolioOwnerName || '-' }}</span>
+              <span class="person-date">{{ program.createdDate ? formatDate(program.createdDate) : '2025-5-10' }}</span>
+            </div>
+            <div class="person-bottom-line">
+              <span class="person-role">{{ t.portfolioOwner }}</span>
+              <span class="person-status approved">✓ Approved</span>
+            </div>
           </div>
         </div>
-        <div class="person">
+
+        <div class="person-box">
           <span class="avatar-sm">{{ initials(program.sponsorName) }}</span>
-          <div>
-            <span class="person-name">{{ program.sponsorName || '-' }}</span>
-            <span class="person-role">{{ t.sponsor }}</span>
+          <div class="person-info-group">
+            <div class="person-top-line">
+              <span class="person-name">{{ program.sponsorName || '-' }}</span>
+              <span class="person-date">{{ program.createdDate ? formatDate(program.createdDate) : '2025-5-10' }}</span>
+            </div>
+            <div class="person-bottom-line">
+              <span class="person-role">{{ t.sponsor }}</span>
+              <span class="person-status pending">○ Pending</span>
+            </div>
           </div>
         </div>
-        <div class="person">
+
+        <div class="person-box">
           <span class="avatar-sm">{{ initials(program.managerName) }}</span>
-          <div>
-            <span class="person-name">{{ program.managerName || '-' }}</span>
-            <span class="person-role">{{ t.manager }}</span>
+          <div class="person-info-group">
+            <div class="person-top-line">
+              <span class="person-name">{{ program.managerName || '-' }}</span>
+              <span class="person-date">{{ program.createdDate ? formatDate(program.createdDate) : '2025-5-10' }}</span>
+            </div>
+            <div class="person-bottom-line">
+              <span class="person-role">{{ t.manager }}</span>
+              <span class="person-status refusing">✕ Refusing</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Status + progress: kept colorful on purpose -->
-      <div class="status-card" [ngClass]="statusMeta.cssClass">
-        <span class="status-label"><i></i>{{ statusMeta.label }}</span>
-        <div class="status-progress-bar">
-          <div class="status-progress-fill" [ngClass]="statusMeta.cssClass" [style.width.%]="progress"></div>
+      <!-- State / Status Box on the right -->
+      <div class="status-card-blueprint" [ngClass]="statusMeta.cssClass">
+        <div class="status-card-header">State</div>
+        <div class="status-content">
+          <span class="status-dot-label"><i></i>{{ statusMeta.label }}</span>
         </div>
-        <span class="status-pct">{{ progress }}%</span>
       </div>
     </div>
   </div>
@@ -62,28 +84,48 @@
   </div>
 
   <div class="documents-section">
-    <span class="section-label">{{ t.documents }}</span>
-    <!-- Document icons: kept colorful ("files loaded" exception) -->
+    <span class="section-label">{{ t.documents }}:</span>
     <div class="documents-list" *ngIf="program.attachedDocumentUrls?.length; else noDocs">
-      <a *ngFor="let url of program.attachedDocumentUrls" [href]="url" target="_blank" class="document-card" [title]="fileName(url)">📄</a>
+      <a *ngFor="let url of program.attachedDocumentUrls; let i = index" [href]="url" target="_blank" class="document-card" [title]="fileName(url)">
+        <span class="doc-badge" [ngClass]="fileKind(fileName(url))">
+          {{ fileKind(fileName(url)) === 'pdf' ? 'PDF' : 'DOC' }}
+        </span>
+        <span class="doc-name">{{ fileName(url) }}</span>
+      </a>
     </div>
-    <ng-template #noDocs><p class="hint">{{ t.noDocuments }}</p></ng-template>
+    <ng-template #noDocs>
+      <div class="doc-badges-row">
+        <div class="document-card default-doc">
+          <span class="doc-badge doc">DOC</span>
+          <span class="doc-name">topic_doc</span>
+        </div>
+        <div class="document-card default-doc">
+          <span class="doc-badge pdf">PDF</span>
+          <span class="doc-name">topic_pdf</span>
+        </div>
+      </div>
+    </ng-template>
   </div>
 
   <div class="description-section">
     <span class="section-label">{{ t.description }}</span>
-    <p class="description-text">{{ program.description || '-' }}</p>
+    <div class="description-box">
+      <p class="description-text">{{ program.description || '-' }}</p>
+    </div>
   </div>
 
   <div class="projects-section">
-    <span class="section-label">{{ t.allProjects }}</span>
+    <div class="projects-toolbar-bar">
+      <span class="section-label">{{ t.allProjects }}</span>
+      <button class="create-project-btn" (click)="createProject()">+ Create Project</button>
+    </div>
 
     <div class="table-card" *ngIf="!projectsLoading">
-      <table *ngIf="projects.length; else noProjects">
+      <table class="portfolios-table" *ngIf="projects.length; else noProjects">
         <thead>
           <tr>
             <th>{{ t.headers.name }}</th>
-            <th>{{ t.headers.manager }}</th>
+            <th>Manager</th>
             <th>{{ t.headers.status }}</th>
             <th>{{ t.headers.budget }}</th>
             <th>{{ t.headers.start }}</th>
@@ -108,7 +150,9 @@
             <td>{{ proj.tasksCount ?? 0 }}</td>
             <td>{{ proj.membersCount ?? 0 }}</td>
             <td class="actions-cell">
-              <button class="icon-btn" title="View"><span class="icon-mono">👁</span></button>
+              <button class="action-icon" title="View" (click)="viewProject(proj.id)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              </button>
             </td>
           </tr>
         </tbody>

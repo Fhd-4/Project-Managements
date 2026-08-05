@@ -16,7 +16,7 @@ type LangCode = 'ar' | 'en';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './program details.component.html',
-  styleUrl: './program details.component.scss'
+  styleUrls: ['./program details.component.scss']
 })
 export class ProgramDetailsComponent implements OnInit {
   currentLang: LangCode = 'ar';
@@ -82,7 +82,12 @@ export class ProgramDetailsComponent implements OnInit {
 
   ngOnInit() {
     const id = Number(this.route.snapshot.paramMap.get('id'));
-    if (!id) { this.errorMessage = 'Invalid program id.'; this.isLoading = false; return; }
+    if (!id) { 
+      this.errorMessage = 'Invalid program id.'; 
+      this.isLoading = false; 
+      this.cdr.detectChanges();
+      return; 
+    }
 
     this.programService.getProgramDetails(id).subscribe({
       next: (program) => {
@@ -90,29 +95,47 @@ export class ProgramDetailsComponent implements OnInit {
         this.isLoading = false;
         this.cdr.detectChanges();
 
-        this.portfolioLookup.getPortfolio(program.portfolioId).subscribe(p => {
-          this.portfolioOwnerName = p.ownerName || null;
-          this.cdr.detectChanges();
-        });
+        if (program?.portfolioId) {
+          this.portfolioLookup.getPortfolio(program.portfolioId).subscribe({
+            next: (p) => {
+              this.portfolioOwnerName = p?.ownerName || null;
+              this.cdr.detectChanges();
+            },
+            error: () => {
+              this.portfolioOwnerName = null;
+            }
+          });
+        }
 
         this.projectsLoading = true;
-        this.projectService.getProjectsByProgram(id).subscribe(list => {
-          this.projects = list;
-          this.projectsLoading = false;
-          this.cdr.detectChanges();
+        this.projectService.getProjectsByProgram(id).subscribe({
+          next: (list) => {
+            this.projects = list || [];
+            this.projectsLoading = false;
+            this.cdr.detectChanges();
+          },
+          error: () => {
+            this.projects = [];
+            this.projectsLoading = false;
+            this.cdr.detectChanges();
+          }
         });
       },
-      error: () => { this.errorMessage = 'Failed to load program.'; this.isLoading = false; this.cdr.detectChanges(); }
+      error: () => { 
+        this.errorMessage = 'Failed to load program.'; 
+        this.isLoading = false; 
+        this.cdr.detectChanges(); 
+      }
     });
   }
 
   get statusMeta() { return this.program ? getStatusMeta(this.program.status) : getStatusMeta(0); }
   get progress(): number { return this.program?.progressPercentage ?? this.statusMeta.progress; }
 
-  projectStatusMeta(status: string) {
+  projectStatusMeta(status: string | number) {
     return {
-      label: status,
-      cssClass: 'status-' + (status || '').toLowerCase()
+      label: String(status),
+      cssClass: 'status-' + String(status || '').toLowerCase()
     };
   }
 
@@ -133,5 +156,18 @@ export class ProgramDetailsComponent implements OnInit {
     if (!dateStr) return '-';
     const date = new Date(dateStr);
     return date.toLocaleDateString(this.isRtl ? 'ar-SA' : 'en-US', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+  fileKind(filename: string): string {
+    const ext = filename.split('.').pop()?.toLowerCase();
+    if (ext === 'pdf') return 'pdf';
+    return 'doc';
+  }
+
+  createProject() {
+    this.router.navigate(['/projects/create'], { queryParams: { programId: this.program?.id } });
+  }
+
+  viewProject(projectId: number) {
+    this.router.navigate([`/projects/details/${projectId}`]);
   }
 }
