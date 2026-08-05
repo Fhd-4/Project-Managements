@@ -1,180 +1,176 @@
-<div class="programs-page" [dir]="isRtl ? 'rtl' : 'ltr'">
+<div class="programs-dashboard" [dir]="isRtl ? 'rtl' : 'ltr'">
 
   <!-- Toast Notifications -->
   <div class="toast toast-success" *ngIf="showSuccessToast">
-    <span class="toast-dot"></span>{{ isRtl ? 'تمت العملية بنجاح' : 'New program added successfully' }}
+    <span class="toast-dot"></span>{{ isRtl ? 'تمت العملية بنجاح' : 'Operation successful' }}
   </div>
   <div class="toast toast-error" *ngIf="showErrorToast">
     <span class="toast-dot"></span>{{ isRtl ? 'فشل الحفظ' : 'Failed to save' }}
   </div>
 
-  <h1 class="page-title">{{ t.title }}</h1>
-
-  <!-- Stats Row with Green Trend Arrows -->
-  <div class="stats-row">
-    <div class="stat-card">
-      <div class="stat-icon-box">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-      </div>
-      <div class="stat-text">
-        <span class="stat-value">{{ totalCount }}</span>
-        <span class="stat-label">{{ t.stats.total }}</span>
-        <span class="stat-trend"><span class="trend-arrow">↗</span> 36 Ports / month</span>
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon-box">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-      </div>
-      <div class="stat-text">
-        <span class="stat-value">{{ pendingCount }}</span>
-        <span class="stat-label">{{ t.stats.pending }}</span>
-        <span class="stat-trend"><span class="trend-arrow">↗</span> 36 Ports / month</span>
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon-box">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
-      </div>
-      <div class="stat-text">
-        <span class="stat-value">{{ activeCount }}</span>
-        <span class="stat-label">{{ t.stats.active }}</span>
-        <span class="stat-trend"><span class="trend-arrow">↗</span> 36 Ports / month</span>
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon-box">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-      </div>
-      <div class="stat-text">
-        <span class="stat-value">{{ completedCount }}</span>
-        <span class="stat-label">{{ t.stats.completed }}</span>
-        <span class="stat-trend"><span class="trend-arrow">↗</span> 36 Ports / month</span>
-      </div>
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="title-group">
+      <h1>{{ t.title }}</h1>
+      <p>{{ t.subtitle }}</p>
     </div>
   </div>
 
-  <div class="portfolios-content-card">
-    
-    <!-- Toolbar / Header Row inside Card -->
-    <div class="toolbar-row">
-      <div class="tab-title">
-        <h3>{{ t.title }}</h3>
+  <!-- Stats Grid -->
+  <div class="stats-grid">
+    <div class="stat-card active-card">
+      <div class="stat-header">
+        <span class="stat-title">{{ t.stats.total }}</span>
       </div>
-
-      <div class="toolbar-actions">
-        <div class="view-toggle">
-          <button [class.active]="viewMode === 'list'" (click)="viewMode = 'list'">☰ {{ t.listView }}</button>
-          <button [class.active]="viewMode === 'kanban'" (click)="viewMode = 'kanban'">▦ {{ t.kanbanView }}</button>
-        </div>
-
-        <div class="search-box">
-          <input type="text" [placeholder]="t.searchPlaceholder" [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange()" />
-        </div>
-
-        <select class="status-select" [(ngModel)]="statusFilter" (ngModelChange)="onStatusFilterChange()">
-          <option *ngFor="let opt of statusOptions" [ngValue]="opt.value">{{ isRtl ? opt.labelAr : opt.labelEn }}</option>
-        </select>
-
-        <button class="create-btn" (click)="openCreatePage()">+ {{ t.createBtn }}</button>
-      </div>
+      <div class="stat-value">{{ totalCount }}</div>
+      <div class="stat-trend trend-neutral">↗ 30 Portfolio / month</div>
     </div>
 
-    <div class="loading-state" *ngIf="isLoading">{{ isRtl ? 'جار التحميل...' : 'Loading...' }}</div>
-
-    <!-- LIST VIEW -->
-    <div class="table-wrapper" *ngIf="!isLoading && viewMode === 'list'">
-      <table class="portfolios-table" *ngIf="pagedPrograms.length">
-        <thead>
-          <tr>
-            <th>{{ t.headers.name }}</th>
-            <th class="sortable" (click)="toggleSort('projects')">{{ t.headers.projects }} ↕</th>
-            <th class="sortable" (click)="toggleSort('tasks')">{{ t.headers.tasks }} ↕</th>
-            <th>{{ t.headers.owner }}</th>
-            <th>{{ t.headers.status }}</th>
-            <th>{{ t.headers.actions }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let p of pagedPrograms">
-            <td class="name-cell">{{ p.name }}</td>
-            <td>{{ p.projectsCount ?? 0 }}</td>
-            <td>{{ p.tasksCount ?? 0 }}</td>
-            <td>
-              <span class="owner-cell">
-                <span class="avatar-sm">{{ initials(p.managerName) }}</span>
-                {{ p.managerName || '-' }}
-              </span>
-            </td>
-            <td>
-              <span class="status-dot" [ngClass]="statusMeta(p.status).cssClass">
-                <i></i>{{ statusMeta(p.status).label }}
-              </span>
-            </td>
-            <td class="actions-cell">
-              <button class="action-icon" title="View" (click)="viewProgramDetails(p.id)">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-              </button>
-              <button class="action-icon" title="Edit" (click)="openEditPage(p)">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-              </button>
-              <button class="action-icon delete" title="Delete" (click)="deleteProgram(p.id)">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-      <div class="empty-state-section" *ngIf="!pagedPrograms.length">
-        <div class="empty-title">{{ t.noData }}</div>
+    <div class="stat-card">
+      <div class="stat-header">
+        <span class="stat-title">{{ t.stats.active }}</span>
       </div>
-
-      <div class="pagination" *ngIf="totalPages > 1">
-        <button *ngFor="let n of pageNumbers" [class.active]="n === currentPage" (click)="goToPage(n)">{{ n }}</button>
-      </div>
+      <div class="stat-value text-green">{{ activeCount }}</div>
+      <div class="stat-trend trend-positive">↗ 35 On Track / month</div>
     </div>
 
-    <!-- KANBAN VIEW (Upgraded with Blueprint card styling) -->
-    <div class="kanban-board" *ngIf="!isLoading && viewMode === 'kanban'">
-      <div class="kanban-column" *ngFor="let col of kanbanColumns">
-        <div class="kanban-col-header">
-          <span class="col-dot" [ngClass]="col.meta.cssClass"></span>
-          {{ col.meta.label }}
+    <div class="stat-card">
+      <div class="stat-header">
+        <span class="stat-title">{{ t.stats.pending }}</span>
+      </div>
+      <div class="stat-value text-yellow">{{ pendingCount }}</div>
+      <div class="stat-trend trend-positive">↗ 15 Pending / month</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-header">
+        <span class="stat-title">{{ t.stats.rejected }}</span>
+      </div>
+      <div class="stat-value text-red">{{ rejectedCount }}</div>
+      <div class="stat-trend trend-positive">↗ 36 Need Action / month</div>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="view-toggles">
+      <button class="toggle-btn" [class.active]="viewMode === 'list'" (click)="viewMode = 'list'">
+        <span class="icon">☷</span> {{ t.listView }}
+      </button>
+      <button class="toggle-btn" [class.active]="viewMode === 'kanban'" (click)="viewMode = 'kanban'">
+        <span class="icon">◫</span> {{ t.kanbanView }}
+      </button>
+      <button class="toggle-btn" [class.active]="viewMode === 'gantt'" (click)="viewMode = 'gantt'">
+        <span class="icon">◤</span> {{ t.ganttView }}
+      </button>
+    </div>
+
+    <div class="toolbar-actions">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" [placeholder]="t.searchPlaceholder" [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange()">
+      </div>
+      
+      <select class="status-dropdown" [(ngModel)]="statusFilter" (ngModelChange)="onStatusFilterChange()">
+        <option *ngFor="let opt of statusOptions" [ngValue]="opt.value">{{ isRtl ? opt.labelAr : opt.labelEn }}</option>
+      </select>
+
+      <button class="btn-create" (click)="openCreatePage()">{{ t.createBtn }}</button>
+    </div>
+  </div>
+
+  <div class="loading-state" *ngIf="isLoading">{{ isRtl ? 'جار التحميل...' : 'Loading...' }}</div>
+
+  <!-- LIST VIEW -->
+  <div class="list-view-container" *ngIf="!isLoading && viewMode === 'list'">
+    <table class="programs-table" *ngIf="pagedPrograms.length">
+      <thead>
+        <tr>
+          <th>{{ t.headers.name }} ↕</th>
+          <th>{{ t.headers.description }} ↕</th>
+          <th class="sortable" (click)="toggleSort('projects')">{{ t.headers.projects }} ↕</th>
+          <th class="sortable" (click)="toggleSort('tasks')">{{ t.headers.tasks }} ↕</th>
+          <th>{{ t.headers.progress }} ↕</th>
+          <th>{{ t.headers.owner }} ↕</th>
+          <th>{{ t.headers.status }} ↕</th>
+          <th>{{ t.headers.actions }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let p of pagedPrograms">
+          <td class="name-cell">
+            <span class="alert-icon" *ngIf="p.status === 4">!</span>
+            {{ p.name }}
+          </td>
+          <td class="desc-cell">{{ p.description || '-' }}</td>
+          <td>{{ p.projectsCount ?? 0 }}</td>
+          <td>{{ p.tasksCount ?? 0 }}</td>
+          
+          <td class="progress-cell">
+            <div class="progress-bar-container">
+              <div class="progress-fill" [ngClass]="statusMeta(p.status).cssClass" [style.width.%]="statusMeta(p.status).progress || 0"></div>
+            </div>
+            <span class="progress-text" [ngClass]="statusMeta(p.status).cssClass">{{ statusMeta(p.status).progress || 0 }} %</span>
+          </td>
+          
+          <td class="owner-cell">
+            <div class="avatar"><span class="avatar-sm">{{ initials(p.managerName) }}</span></div> 
+            {{ p.managerName || '-' }}
+          </td>
+          
+          <td>
+            <span class="status-text" [ngClass]="statusMeta(p.status).cssClass">{{ statusMeta(p.status).label }}</span>
+          </td>
+          
+          <td class="actions-cell">
+            <button class="btn-dots" (click)="viewProgramDetails(p.id)">•••</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="empty-state-section" *ngIf="!pagedPrograms.length">
+      <div class="empty-title">{{ t.noData }}</div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination" *ngIf="totalPages > 1">
+      <button *ngFor="let n of pageNumbers" [class.active]="n === currentPage" (click)="goToPage(n)">{{ n }}</button>
+    </div>
+  </div>
+
+  <!-- KANBAN VIEW -->
+  <div class="kanban-view-container" *ngIf="!isLoading && viewMode === 'kanban'">
+    <div class="kanban-col" *ngFor="let col of kanbanColumns">
+      <div class="col-header">
+        <span class="col-title" [ngClass]="col.meta.cssClass">{{ col.meta.label }}</span>
+        <span class="col-count">{{ col.programs.length }}</span>
+        <button class="btn-dots">⋮</button>
+      </div>
+
+      <div class="kanban-card" *ngFor="let p of col.programs" [ngClass]="{'border-red': p.status === 4}" (click)="viewProgramDetails(p.id)">
+        <div class="card-title" [ngClass]="col.meta.cssClass">
+          <span class="alert-icon-fill" *ngIf="p.status === 4">!</span> 
+          <span *ngIf="p.status !== 4">&lt;/&gt;</span> 
+          {{ p.name }}
         </div>
         
-        <div class="kanban-card" *ngFor="let p of col.programs" (click)="viewProgramDetails(p.id)">
-          <div class="kanban-card-top-title">{{ p.name }}</div>
-          
-          <div class="kanban-card-row">
-            <span class="row-label-group">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-              {{ t.headers.projects }}:
-            </span>
-            <strong>{{ p.projectsCount ?? 0 }}</strong>
-          </div>
-          
-          <div class="kanban-card-row">
-            <span class="row-label-group">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-              {{ t.headers.tasks }}:
-            </span>
-            <strong>{{ p.tasksCount ?? 0 }}</strong>
-          </div>
-
-          <div class="kanban-progress-bar">
-            <div class="kanban-progress-fill" [ngClass]="col.meta.cssClass" [style.width.%]="col.meta.progress"></div>
-          </div>
-
-          <div class="kanban-card-footer">
-            <span class="avatar-sm">{{ initials(p.managerName) }}</span>
-            <span class="kanban-progress-pct">{{ col.meta.progress }}%</span>
+        <div class="card-stats" [ngClass]="{'text-red': p.status === 4}">
+          <span>☰ {{ p.projectsCount ?? 0 }} {{ t.headers.projects }}</span>
+          <span>☁ {{ p.tasksCount ?? 0 }} {{ t.headers.tasks }}</span>
+        </div>
+        
+        <div class="card-progress" [ngClass]="{'text-red': p.status === 4}">
+          <span>⏱ {{ col.meta.progress || 0 }}%</span>
+          <span class="status-review" *ngIf="p.status === 4">Review</span>
+          <div class="kanban-avatars" *ngIf="p.status !== 4">
+             <span class="avatar-sm">{{ initials(p.managerName) }}</span>
           </div>
         </div>
-
-        <div class="kanban-empty" *ngIf="!col.programs.length">{{ isRtl ? 'لا يوجد' : 'None' }}</div>
       </div>
+      
+      <div class="kanban-empty" *ngIf="!col.programs.length">{{ isRtl ? 'لا يوجد' : 'None' }}</div>
     </div>
-
   </div>
+
 </div>

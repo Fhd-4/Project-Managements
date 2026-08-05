@@ -7,13 +7,15 @@ import { ProgramService, Program, getStatusMeta, StatusMeta } from './program.se
 
 interface Translations {
   title: string;
+  subtitle: string;
   listView: string;
   kanbanView: string;
+  ganttView: string;
   searchPlaceholder: string;
   createBtn: string;
   noData: string;
-  stats: { total: string; pending: string; active: string; completed: string };
-  headers: { name: string; projects: string; tasks: string; owner: string; status: string; actions: string };
+  stats: { total: string; pending: string; active: string; completed: string; rejected: string };
+  headers: { name: string; description: string; projects: string; tasks: string; progress: string; owner: string; status: string; actions: string };
 }
 
 @Component({
@@ -28,7 +30,7 @@ export class ProgramsComponent implements OnInit, OnDestroy {
   pagedPrograms: Program[] = [];
   isLoading = true;
 
-  viewMode: 'list' | 'kanban' = 'list';
+  viewMode: 'list' | 'kanban' | 'gantt' = 'list';
   searchQuery = '';
   statusFilter: number | null = null;
 
@@ -44,6 +46,7 @@ export class ProgramsComponent implements OnInit, OnDestroy {
   pendingCount = 0;
   activeCount = 0;
   completedCount = 0;
+  rejectedCount = 0; // Added for the "Need Action" card
 
   showSuccessToast = false;
   showErrorToast = false;
@@ -61,24 +64,28 @@ export class ProgramsComponent implements OnInit, OnDestroy {
 
   translations: Record<'en' | 'ar', Translations> = {
     en: {
-      title: 'All Programs',
+      title: 'Programs',
+      subtitle: 'monitor a strategic collection of programs and projects',
       listView: 'List',
       kanbanView: 'Kanban',
-      searchPlaceholder: 'Search for everything',
-      createBtn: 'Create Program',
+      ganttView: 'Gantt',
+      searchPlaceholder: 'Search for Programs...',
+      createBtn: 'Create',
       noData: 'No programs found.',
-      stats: { total: 'Total Programs', pending: 'Pending', active: 'In Progress', completed: 'Completed' },
-      headers: { name: 'Program Name', projects: 'Projects', tasks: 'Tasks', owner: 'Owner', status: 'Status', actions: 'Actions' }
+      stats: { total: 'All Programs', active: 'On Track', pending: 'Pending', completed: 'Completed', rejected: 'Need Action' },
+      headers: { name: 'Program Name', description: 'Description', projects: 'Projects', tasks: 'Tasks', progress: 'Progress', owner: 'Owner', status: 'Status', actions: 'Actions' }
     },
     ar: {
-      title: 'كل البرامج',
+      title: 'البرامج',
+      subtitle: 'مراقبة مجموعة استراتيجية من البرامج والمشاريع',
       listView: 'قائمة',
       kanbanView: 'كانبان',
-      searchPlaceholder: 'ابحث عن أي شيء',
-      createBtn: 'إنشاء برنامج',
+      ganttView: 'جانت',
+      searchPlaceholder: 'ابحث عن البرامج...',
+      createBtn: 'إنشاء',
       noData: 'لا توجد برامج متاحة.',
-      stats: { total: 'إجمالي البرامج', pending: 'قيد الانتظار', active: 'في المسار الصحيح', completed: 'مكتملة' },
-      headers: { name: 'اسم البرنامج', projects: 'المشاريع', tasks: 'المهام', owner: 'المسؤول', status: 'الحالة', actions: 'الإجراءات' }
+      stats: { total: 'كل البرامج', active: 'في المسار الصحيح', pending: 'قيد الانتظار', completed: 'مكتملة', rejected: 'بحاجة لإجراء' },
+      headers: { name: 'اسم البرنامج', description: 'الوصف', projects: 'المشاريع', tasks: 'المهام', progress: 'التقدم', owner: 'المسؤول', status: 'الحالة', actions: 'الإجراءات' }
     }
   };
 
@@ -91,7 +98,6 @@ export class ProgramsComponent implements OnInit, OnDestroy {
   constructor(private programService: ProgramService, private router: Router) {}
 
   ngOnInit(): void {
-    // Check initial language preference from localStorage or HTML dir
     if (typeof window !== 'undefined') {
       const savedLang = localStorage.getItem('app_lang');
       this.isRtl = savedLang === 'ar' || document.documentElement.dir === 'rtl';
@@ -138,9 +144,10 @@ export class ProgramsComponent implements OnInit, OnDestroy {
 
   calculateStats(): void {
     this.totalCount = this.programs.length;
-    this.pendingCount = this.programs.filter(p => p.status === 3).length;
     this.activeCount = this.programs.filter(p => p.status === 1).length;
     this.completedCount = this.programs.filter(p => p.status === 2).length;
+    this.pendingCount = this.programs.filter(p => p.status === 3).length;
+    this.rejectedCount = this.programs.filter(p => p.status === 4).length;
   }
 
   onSearchChange(): void {
@@ -198,7 +205,7 @@ export class ProgramsComponent implements OnInit, OnDestroy {
   }
 
   buildKanbanColumns(): void {
-    const statuses = [3, 1, 2, 4]; // Pending, In Progress, Completed, Rejected
+    const statuses = [1, 2, 3, 4]; // Active, Completed, Pending, Rejected
     this.kanbanColumns = statuses.map(st => ({
       status: st,
       meta: getStatusMeta(st),
