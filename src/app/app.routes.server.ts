@@ -67,8 +67,18 @@ export const serverRoutes: ServerRoute[] = [
     path: 'tasks/details/:id',
     renderMode: RenderMode.Server
   },
+  //comment 
+  
   {
     path: 'plans/edit/:id',
+    renderMode: RenderMode.Server
+  },
+  {
+    path: 'plans',
+    renderMode: RenderMode.Server
+  },
+  {
+    path: 'plans/create',
     renderMode: RenderMode.Server
   },
   {

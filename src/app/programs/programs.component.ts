@@ -91,7 +91,6 @@ export class ProgramsComponent implements OnInit, OnDestroy {
   constructor(private programService: ProgramService, private router: Router) {}
 
   ngOnInit(): void {
-    // Check initial language preference from localStorage or HTML dir
     if (typeof window !== 'undefined') {
       const savedLang = localStorage.getItem('app_lang');
       this.isRtl = savedLang === 'ar' || document.documentElement.dir === 'rtl';

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface Milestone {
   id?: number;
@@ -33,7 +34,7 @@ export interface Plan {
   providedIn: 'root'
 })
 export class PlanService {
-  private apiUrl = 'https://localhost:44319/api/Plans';
+  private apiUrl = `${environment.apiUrl}/Plans`;
 
   public successToast$ = new BehaviorSubject<boolean>(false);
   public errorToast$ = new BehaviorSubject<boolean>(false);
