@@ -91,11 +91,6 @@ export class ProgramsComponent implements OnInit, OnDestroy {
   constructor(private programService: ProgramService, private router: Router) {}
 
   ngOnInit(): void {
-    if (typeof window !== 'undefined') {
-      const savedLang = localStorage.getItem('app_lang');
-      this.isRtl = savedLang === 'ar' || document.documentElement.dir === 'rtl';
-    }
-
     this.subs.add(
       this.programService.successToast$.subscribe(val => this.showSuccessToast = val)
     );
@@ -103,7 +98,11 @@ export class ProgramsComponent implements OnInit, OnDestroy {
       this.programService.errorToast$.subscribe(val => this.showErrorToast = val)
     );
 
-    this.loadPrograms();
+    if (typeof window !== 'undefined') {
+      const savedLang = localStorage.getItem('app_lang');
+      this.isRtl = savedLang === 'ar' || document.documentElement.dir === 'rtl';
+      this.loadPrograms();
+    }
   }
 
   ngOnDestroy(): void {
