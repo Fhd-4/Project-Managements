@@ -1,9 +1,10 @@
 $color-navy: #153259; 
 $color-gray-text: #6B7280;
 $color-gray-border: #E5E7EB;
-$color-bg: #F4F6F8; /* Restored the App's gray background */
+$color-bg: #F4F6F8;
 $color-red: #EF4444;
 
+/* ================= MAIN LAYOUT ================= */
 .settings-page {
   padding: 24px 32px;
 }
@@ -22,7 +23,7 @@ $color-red: #EF4444;
   box-shadow: 0 2px 10px rgba(0,0,0,0.02);
 }
 
-/* Tabs */
+/* ================= TABS ================= */
 .tabs-header {
   display: flex;
   gap: 24px;
@@ -54,7 +55,7 @@ $color-red: #EF4444;
   }
 }
 
-/* Toolbar */
+/* ================= TOOLBAR ================= */
 .toolbar-row {
   display: flex;
   justify-content: space-between;
@@ -79,7 +80,6 @@ $color-red: #EF4444;
       border-radius: 20px;
       font-size: 13px;
       outline: none;
-      /* Adds the magnifying glass icon */
       background: #fff url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="%239CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>') no-repeat 12px center;
       width: 250px;
       &:focus { border-color: $color-navy; }
@@ -99,7 +99,7 @@ $color-red: #EF4444;
   }
 }
 
-/* Table */
+/* ================= TABLE ================= */
 .table-wrapper {
   width: 100%;
   overflow-x: auto;
@@ -166,7 +166,7 @@ $color-red: #EF4444;
   padding: 60px 0;
 }
 
-/* Modals */
+/* ================= STANDARD MODALS ================= */
 .modal-overlay {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
   background: rgba(0, 0, 0, 0.4);
@@ -214,4 +214,93 @@ $color-red: #EF4444;
   background: $color-red; color: white; border: none; padding: 9px 20px;
   border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer;
 }
-.delete-icon-large { font-size: 40px; color: $color-red; margin-bottom: 16px; }
+
+/* ================= TOAST NOTIFICATIONS ================= */
+.toast-container {
+  position: fixed;
+  top: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.toast {
+  padding: 12px 24px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 500;
+  font-size: 14px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  animation: slideDown 0.3s ease-out forwards;
+
+  &.success {
+    background-color: #ECFDF5;
+    color: #10B981;
+    border: 1px solid #A7F3D0;
+  }
+
+  &.error {
+    background-color: #FEF2F2;
+    color: #EF4444;
+    border: 1px solid #FECACA;
+  }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ================= DELETE CATEGORY MODAL (FIGMA) ================= */
+.delete-modal {
+  padding: 40px 24px 24px !important; 
+  position: relative;
+  text-align: center;
+  width: 360px !important;
+  border-radius: 16px !important;
+}
+
+.delete-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  background: #FEF2F2;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0 4px 10px rgba(239, 68, 68, 0.15);
+}
+
+.delete-title {
+  color: #EF4444;
+  font-size: 18px;
+  font-weight: 700;
+  margin-top: 8px;
+  margin-bottom: 24px;
+}
+
+.delete-actions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+
+  button {
+    padding: 10px 0;
+    font-size: 14px;
+    width: 130px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    border-radius: 24px;
+  }
+}

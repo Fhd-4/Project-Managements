@@ -67,6 +67,16 @@ export class PlansComponent implements OnInit {
     this.router.navigate(['/plans/create']);
   }
 
+  viewPlanDetails(id: string | number) {
+    // Navigates to the Read-Only Details page
+    this.router.navigate(['/plans/details', id]);
+  }
+
+  editPlan(id: string | number) {
+    // Navigates to the Create form, passing the ID in the URL for editing
+    this.router.navigate(['/plans/edit', id]);
+  }
+
   deletePlan(id: number) {
     if (confirm(this.isRtl ? 'هل أنت متأكد من حذف هذه الخطة؟' : 'Are you sure you want to delete this plan?')) {
       this.planService.deletePlan(id).subscribe(() => this.loadPlans());

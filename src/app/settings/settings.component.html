@@ -1,9 +1,21 @@
 <div class="settings-page">
   
+  <!-- TOAST NOTIFICATIONS (Matches Figma perfectly) -->
+  <div class="toast-container" *ngIf="successMessage || errorMessage">
+    <div class="toast success" *ngIf="successMessage">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+      <span>{{ successMessage }}</span>
+    </div>
+    <div class="toast error" *ngIf="errorMessage">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+      <span>{{ errorMessage }}</span>
+    </div>
+  </div>
+
   <!-- Main Page Title -->
   <h1 class="page-title">Setting</h1>
 
-  <!-- The White Card Container (Just like Portfolios) -->
+  <!-- The White Card Container -->
   <div class="portfolios-content-card">
     
     <!-- Tabs Section -->
@@ -89,12 +101,12 @@
         </tbody>
       </table>
     </div>
-
   </div>
 </div>
 
-<!-- Modals (Add Role, Add Category, Delete Category) remain the exact same below this line -->
-<!-- Add Role Modal -->
+<!-- ================= MODALS ================= -->
+
+<!-- Add Role Modal (unchanged) -->
 <div class="modal-overlay" *ngIf="isAddRoleModalOpen">
   <div class="modal-content">
     <div class="modal-header">
@@ -114,7 +126,7 @@
   </div>
 </div>
 
-<!-- Add Category Modal -->
+<!-- Add Category Modal (unchanged) -->
 <div class="modal-overlay" *ngIf="isAddCategoryModalOpen">
   <div class="modal-content modal-wide">
     <div class="modal-header">
@@ -141,14 +153,24 @@
   </div>
 </div>
 
-<!-- Delete Category Modal -->
+<!-- Delete Category Modal (Matches Figma!) -->
 <div class="modal-overlay" *ngIf="isDeleteCategoryModalOpen">
-  <div class="modal-content modal-small center-content">
-    <div class="delete-icon-large">🗑️</div>
-    <h3>Delete Category?</h3>
-    <div class="modal-footer justify-center">
-      <button class="btn-cancel text-red" (click)="isDeleteCategoryModalOpen = false">✕ Cancel</button>
-      <button class="btn-danger" (click)="deleteCategory()">🗑️ Delete</button>
+  <div class="modal-content delete-modal">
+    <!-- Floating Icon -->
+    <div class="delete-icon-wrapper">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+    </div>
+    
+    <h3 class="delete-title">Delete Category?</h3>
+    
+    <div class="delete-actions">
+      <button class="btn-cancel text-red" (click)="isDeleteCategoryModalOpen = false">
+        ✕ Cancel
+      </button>
+      <button class="btn-danger" (click)="deleteCategory()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+        Delete
+      </button>
     </div>
   </div>
 </div>
