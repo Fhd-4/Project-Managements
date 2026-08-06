@@ -205,7 +205,12 @@
             <!-- Password -->
             <div class="form-field-group">
               <label>{{ t.lblPassword }}</label>
-              <input type="password" [(ngModel)]="password" name="password" placeholder="********">
+              <div class="input-with-icon-wrapper" style="display: flex; gap: 10px; align-items: center; width: 100%;">
+                <input type="text" value="********" readonly class="disabled-input" style="flex: 1; background: #edf2f7; color: #718096; border: 1px solid #cbd5e0; padding: 10px 14px; border-radius: 8px; cursor: not-allowed;">
+                <button type="button" (click)="goToChangePassword()" style="background: #1a2b4c; color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; white-space: nowrap; transition: background-color 0.2s;">
+                  {{ isRtl ? 'تغيير كلمة المرور' : 'Change Password' }}
+                </button>
+              </div>
             </div>
 
             <!-- Extra Arabic Name -->

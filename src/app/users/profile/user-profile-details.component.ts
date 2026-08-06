@@ -219,6 +219,10 @@ export class UserProfileDetailsComponent implements OnInit {
     });
   }
 
+  goToChangePassword() {
+    this.router.navigate(['/auth/change-password'], { queryParams: { phone: this.phoneNumber } });
+  }
+
   switchTab(tab: ProfileTab) {
     this.activeTab = tab;
     this.cdr.detectChanges();

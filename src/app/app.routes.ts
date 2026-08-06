@@ -26,6 +26,7 @@ import { UsersComponent } from './users/users.component';
 import { CreateUserComponent } from './users/create/create-user.component';
 import { UserProfileDetailsComponent } from './users/profile/user-profile-details.component';
 import { SettingsComponent } from './settings/settings.component';
+import { ChangePasswordComponent } from './auth/change-password/change-password';
 
 
 export const routes: Routes = [
@@ -41,6 +42,10 @@ export const routes: Routes = [
   {
     path: 'auth/forgot-password',
     component: ForgotPasswordComponent
+  },
+  {
+    path: 'auth/change-password',
+    component: ChangePasswordComponent
   },
   {
     path: '',
