@@ -97,7 +97,9 @@
       <button class="add-item-btn" (click)="addDeliverable()">+ {{ isRtl ? 'إضافة عنصر' : 'Add Item' }}</button>
 
       <div class="form-footer-actions">
-        <button class="add-new-btn" (click)="savePlan()">+ {{ isRtl ? 'حفظ الخطة' : 'Add User' }}</button>
+        <button class="btn-primary" (click)="savePlan()">
+          + {{ isRtl ? 'إضافة خطة' : 'Add Plan' }}
+        </button>
       </div>
     </div>
   </div>

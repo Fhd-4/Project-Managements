@@ -1,12 +1,12 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, Inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SettingsService, Category, Role } from './settings.service';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, FormsModule], // These are critical for the HTML to work
+  imports: [CommonModule, FormsModule],
   templateUrl: './settings.component.html',
   styleUrls: ['./settings.component.scss']
 })
@@ -14,16 +14,13 @@ export class SettingsComponent implements OnInit {
   activeTab: 'roles' | 'categories' = 'roles';
   searchQuery = '';
   
-  // Data initialized to empty arrays to prevent HTML crashes
   roles: Role[] = [];
   categories: Category[] = [];
   
-  // Modal States
   isAddRoleModalOpen = false;
   isAddCategoryModalOpen = false;
   isDeleteCategoryModalOpen = false;
   
-  // Form Models
   newRoleName = '';
   newCategoryName = '';
   newCategoryAssignTo = '';
@@ -31,10 +28,33 @@ export class SettingsComponent implements OnInit {
 
   assignToOptions = ['Program', 'Portfolio', 'Project', 'Task'];
 
-  constructor(private settingsService: SettingsService) {}
+  // Toast States
+  successMessage: string = '';
+  errorMessage: string = '';
+
+  constructor(
+    private settingsService: SettingsService,
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private cdr: ChangeDetectorRef 
+  ) {}
 
   ngOnInit(): void {
     this.loadData();
+  }
+
+  // --- Toast Helpers ---
+  showSuccess(message: string) {
+    this.successMessage = message;
+    this.errorMessage = ''; // Clear any existing errors
+    this.cdr.detectChanges();
+    setTimeout(() => { this.successMessage = ''; this.cdr.detectChanges(); }, 3000);
+  }
+
+  showError(message: string) {
+    this.errorMessage = message;
+    this.successMessage = ''; // Clear any existing successes
+    this.cdr.detectChanges();
+    setTimeout(() => { this.errorMessage = ''; this.cdr.detectChanges(); }, 3000);
   }
 
   switchTab(tab: 'roles' | 'categories') {
@@ -44,26 +64,32 @@ export class SettingsComponent implements OnInit {
   }
 
   loadData() {
-    if (this.activeTab === 'roles') {
-      this.settingsService.getRoles().subscribe({
-        next: (res) => {
-          this.roles = res || [];
-        },
-        error: (err) => {
-          console.error('Failed to load roles', err);
-          this.roles = [];
-        }
-      });
-    } else {
-      this.settingsService.getCategories(this.searchQuery).subscribe({
-        next: (res) => {
-          this.categories = res || [];
-        },
-        error: (err) => {
-          console.error('Failed to load categories', err);
-          this.categories = [];
-        }
-      });
+    if (isPlatformBrowser(this.platformId)) {
+      if (this.activeTab === 'roles') {
+        this.settingsService.getRoles().subscribe({
+          next: (res) => {
+            this.roles = res || [];
+            this.cdr.detectChanges();
+          },
+          error: (err) => {
+            console.error('Failed to load roles:', err);
+            this.roles = [];
+            this.cdr.detectChanges(); 
+          }
+        });
+      } else {
+        this.settingsService.getCategories(this.searchQuery).subscribe({
+          next: (res) => {
+            this.categories = res || [];
+            this.cdr.detectChanges();
+          },
+          error: (err) => {
+            console.error('Failed to load categories:', err);
+            this.categories = [];
+            this.cdr.detectChanges();
+          }
+        });
+      }
     }
   }
 
@@ -85,9 +111,22 @@ export class SettingsComponent implements OnInit {
   // --- Role Actions ---
   saveRole() {
     if (!this.newRoleName.trim()) return;
-    this.settingsService.createRole(this.newRoleName).subscribe(() => {
-      this.isAddRoleModalOpen = false;
-      this.loadData();
+    
+    this.settingsService.createRole(this.newRoleName).subscribe({
+      next: () => {
+        this.isAddRoleModalOpen = false;
+        this.loadData();
+        this.showSuccess('Role added successfully');
+      },
+      error: (err) => {
+        let msg = 'Fail to add role';
+        if (err.error) {
+           if (typeof err.error === 'string') msg = err.error;
+           else if (err.error[0]?.description) msg = err.error[0].description;
+           else if (err.error.message) msg = err.error.message;
+        }
+        this.showError(msg);
+      }
     });
   }
 
@@ -96,9 +135,17 @@ export class SettingsComponent implements OnInit {
     if (!this.newCategoryName.trim() || !this.newCategoryAssignTo) return;
     
     const newCat: Category = { name: this.newCategoryName, assignTo: this.newCategoryAssignTo };
-    this.settingsService.createCategory(newCat).subscribe(() => {
-      this.isAddCategoryModalOpen = false;
-      this.loadData();
+    
+    this.settingsService.createCategory(newCat).subscribe({
+      next: () => {
+        this.isAddCategoryModalOpen = false;
+        this.loadData();
+        this.showSuccess('Category Added Successfully'); 
+      },
+      error: (err) => {
+        const msg = typeof err.error === 'string' ? err.error : 'Fail to added category';
+        this.showError(msg);
+      }
     });
   }
 
@@ -109,9 +156,15 @@ export class SettingsComponent implements OnInit {
 
   deleteCategory() {
     if (this.categoryToDelete === null) return;
-    this.settingsService.deleteCategory(this.categoryToDelete).subscribe(() => {
-      this.isDeleteCategoryModalOpen = false;
-      this.loadData();
+    this.settingsService.deleteCategory(this.categoryToDelete).subscribe({
+      next: () => {
+        this.isDeleteCategoryModalOpen = false;
+        this.loadData();
+        this.showSuccess('Category deleted successfully');
+      },
+      error: (err) => {
+        this.showError('Fail to delete category');
+      }
     });
   }
 }

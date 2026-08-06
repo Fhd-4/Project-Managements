@@ -1,0 +1,88 @@
+<div class="portfolios-container" [dir]="isRtl ? 'rtl' : 'ltr'">
+  <div class="portfolios-content-card">
+
+    <!-- Header Section (Uses your SCSS) -->
+    <div class="create-header" style="margin-bottom: 32px;">
+      <button class="back-btn" (click)="goBack()">
+        <!-- Arrow flips automatically based on RTL/LTR -->
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#102a43" stroke-width="2">
+          <polyline [attr.points]="isRtl ? '9 18 15 12 9 6' : '15 18 9 12 15 6'"></polyline>
+        </svg>
+      </button>
+      <div class="header-titles">
+        <h2>{{ isRtl ? 'تفاصيل الخطة' : 'Plan Details' }}</h2>
+        <div class="breadcrumb">
+          {{ isRtl ? 'الخطط / تفاصيل الخطة' : 'Setting / Plans / Plan Details' }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" style="text-align: center; padding: 40px; color: #627d98;">
+      {{ isRtl ? 'جاري التحميل...' : 'Loading details...' }}
+    </div>
+
+    <!-- Read-Only Content Area -->
+    <div *ngIf="!isLoading && plan">
+      
+      <!-- Main Plan Info Grid -->
+      <div class="form-grid">
+        <div class="readonly-group">
+          <label>{{ isRtl ? 'اسم الخطة' : 'Plan Name' }}</label>
+          <div class="readonly-value">{{ plan.name }}</div>
+        </div>
+
+        <div class="readonly-group">
+          <label>{{ isRtl ? 'المشروع' : 'Project' }}</label>
+          <div class="readonly-value">{{ plan.projectName || '-' }}</div>
+        </div>
+
+        <div class="readonly-group">
+          <label>{{ isRtl ? 'الإصدار' : 'Version' }}</label>
+          <div class="readonly-value">{{ plan.version || '-' }}</div>
+        </div>
+
+        <div class="readonly-group">
+          <label>{{ isRtl ? 'أنشئت بواسطة' : 'Created by' }}</label>
+          <div class="readonly-value">{{ plan.createdBy || '-' }}</div>
+        </div>
+
+        <div class="readonly-group">
+          <label>{{ isRtl ? 'آخر تحديث' : 'Last Updated' }}</label>
+          <div class="readonly-value">{{ formatDate(plan.lastUpdated) }}</div>
+        </div>
+      </div>
+
+      <!-- Nested Blocks Section (Uses your SCSS) -->
+      <div style="margin-top: 40px;">
+        <h3 style="font-size: 1.1rem; color: #102a43; margin-bottom: 16px;">
+          {{ isRtl ? 'مراحل الخطة' : 'Plan Milestones' }}
+        </h3>
+        
+        <div class="nested-block-section">
+          <div class="block-header">
+            <span>{{ isRtl ? 'المرحلة 1' : 'Milestone 1' }}</span>
+          </div>
+          
+          <div class="form-grid">
+            <div class="readonly-group">
+              <label>{{ isRtl ? 'اسم المرحلة' : 'Milestone Name' }}</label>
+              <div class="readonly-value">Kickoff Phase</div>
+            </div>
+            <div class="readonly-group">
+              <label>{{ isRtl ? 'تاريخ الهدف' : 'Target Date' }}</label>
+              <div class="readonly-value">May 16, 2026</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Error State (If ID doesn't exist) -->
+    <div *ngIf="!isLoading && !plan" style="text-align: center; padding: 40px; color: #ef4444;">
+      <h3>{{ isRtl ? 'لم يتم العثور على الخطة' : 'Plan not found.' }}</h3>
+    </div>
+
+  </div>
+</div>
