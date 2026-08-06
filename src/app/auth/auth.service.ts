@@ -61,4 +61,13 @@ export class AuthService {
       newPassword: newPassword
     });
   }
+
+  changePassword(phone: string, currentPassword: string, newPassword: string): Observable<any> {
+    const url = `${API_CONFIG.baseUrl}${API_CONFIG.endpoints.auth.changePassword}`;
+    return this.http.post<any>(url, {
+      phoneNumber: phone,
+      currentPassword: currentPassword,
+      newPassword: newPassword
+    });
+  }
 }
