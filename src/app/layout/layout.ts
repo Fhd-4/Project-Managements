@@ -1,8 +1,11 @@
 import { Component, ChangeDetectorRef, Inject, NgZone, OnInit } from '@angular/core';
 import { CommonModule, DOCUMENT } from '@angular/common';
 import { Router, RouterLink, RouterOutlet, NavigationEnd } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { filter } from 'rxjs/operators';
 import { PortfolioService } from '../portfolios/portfolio.service';
+import { AuthService } from '../auth/auth.service';
+import { ProjectService } from '../projects/project.service';
 
 type LangCode = 'ar' | 'en';
 
@@ -10,7 +13,7 @@ type LangCode = 'ar' | 'en';
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink],
+  imports: [CommonModule, RouterOutlet, RouterLink, FormsModule],
   templateUrl: './layout.html',
   styleUrl: './layout.scss'
 })
@@ -60,7 +63,9 @@ export class LayoutComponent implements OnInit {
     private router: Router,
     private ngZone: NgZone,
     @Inject(DOCUMENT) private document: Document,
-    public portfolioService: PortfolioService
+    public portfolioService: PortfolioService,
+    private authService: AuthService,
+    private projectService: ProjectService
   ) {
     if (typeof window !== 'undefined' && window.localStorage) {
       const savedLang = localStorage.getItem('preferred_lang') as LangCode;
@@ -72,9 +77,14 @@ export class LayoutComponent implements OnInit {
       if (storedUser) {
         this.userName = storedUser;
       }
-      const storedPhone = localStorage.getItem('auth_phone');
-      if (storedPhone) {
-        this.userEmail = storedPhone; // Or default email representation
+      const storedEmail = localStorage.getItem('auth_email');
+      if (storedEmail && storedEmail.includes('@')) {
+        this.userEmail = storedEmail;
+      } else {
+        const storedPhone = localStorage.getItem('auth_phone');
+        if (storedPhone) {
+          this.userEmail = storedPhone;
+        }
       }
     }
     this.applyDirection();
@@ -88,6 +98,21 @@ export class LayoutComponent implements OnInit {
       this.currentRoute = event.urlAfterRedirects;
       this.cdr.detectChanges();
     });
+
+    const userId = typeof window !== 'undefined' && window.localStorage ? localStorage.getItem('auth_userId') : null;
+    if (userId) {
+      this.projectService.getUserProfile(userId).subscribe({
+        next: (profile) => {
+          if (profile && profile.email) {
+            this.userEmail = profile.email;
+            if (typeof window !== 'undefined' && window.localStorage) {
+              localStorage.setItem('auth_email', profile.email);
+            }
+            this.cdr.detectChanges();
+          }
+        }
+      });
+    }
   }
 
   get t() {
@@ -148,5 +173,90 @@ export class LayoutComponent implements OnInit {
       this.router.navigate(['/portfolios']);
     }
     this.cdr.detectChanges();
+  }
+
+  isChangePasswordModalOpen: boolean = false;
+  currentPass: string = '';
+  newPass: string = '';
+  confirmPass: string = '';
+  isCurrentPassHidden: boolean = true;
+  isNewPassHidden: boolean = true;
+  isConfirmPassHidden: boolean = true;
+  isModalLoading: boolean = false;
+  modalError: string = '';
+  modalSuccess: string = '';
+
+  openChangePasswordModal() {
+    this.isChangePasswordModalOpen = true;
+    this.isUserDropdownOpen = false;
+    this.currentPass = '';
+    this.newPass = '';
+    this.confirmPass = '';
+    this.modalError = '';
+    this.modalSuccess = '';
+    this.cdr.detectChanges();
+  }
+
+  closeChangePasswordModal() {
+    this.isChangePasswordModalOpen = false;
+    this.cdr.detectChanges();
+  }
+
+  submitChangePassword() {
+    this.modalError = '';
+    this.modalSuccess = '';
+
+    if (!this.currentPass || !this.newPass || !this.confirmPass) {
+      this.modalError = this.isRtl 
+        ? 'يرجى ملء جميع الحقول المطلوبة!' 
+        : 'Please fill in all required fields!';
+      return;
+    }
+
+    if (this.newPass !== this.confirmPass) {
+      this.modalError = this.isRtl 
+        ? 'كلمة المرور الجديدة وتأكيد كلمة المرور غير متطابقين!' 
+        : 'New password and confirmation do not match!';
+      return;
+    }
+
+    if (this.newPass.length < 6) {
+      this.modalError = this.isRtl 
+        ? 'كلمة المرور الجديدة يجب ألا تقل عن 6 خانات!' 
+        : 'New password must be at least 6 characters long!';
+      return;
+    }
+
+    this.isModalLoading = true;
+    this.cdr.detectChanges();
+
+    this.authService.changePassword(this.userEmail, this.currentPass, this.newPass).subscribe({
+      next: (res) => {
+        this.isModalLoading = false;
+        this.modalSuccess = this.isRtl 
+          ? 'تم تغيير كلمة المرور بنجاح!' 
+          : 'Password changed successfully!';
+        this.cdr.detectChanges();
+
+        setTimeout(() => {
+          this.closeChangePasswordModal();
+        }, 2000);
+      },
+      error: (err) => {
+        this.isModalLoading = false;
+        if (err.error && typeof err.error === 'string') {
+          this.modalError = err.error;
+        } else if (err.error && Array.isArray(err.error)) {
+          this.modalError = err.error[0].description || (this.isRtl ? 'حدث خطأ ما، يرجى المحاولة مرة أخرى' : 'An error occurred, please try again');
+        } else if (err.error && err.error.message) {
+          this.modalError = err.error.message;
+        } else {
+          this.modalError = this.isRtl 
+            ? 'حدث خطأ أثناء تغيير كلمة المرور، يرجى المحاولة مرة أخرى' 
+            : 'An error occurred while changing password, please try again';
+        }
+        this.cdr.detectChanges();
+      }
+    });
   }
 }

@@ -14,8 +14,8 @@ type LangCode = 'ar' | 'en';
   styleUrl: './forgot-password.scss'
 })
 export class ForgotPasswordComponent {
-  currentStep: number = 1; // 1 = Phone request, 2 = OTP code, 3 = Reset password
-  phone: string = '';
+  currentStep: number = 1; // 1 = Email request, 2 = OTP code, 3 = Reset password
+  email: string = '';
   otpDigits: string[] = ['', '', '', '', '', ''];
   newPassword: string = '';
   confirmPassword: string = '';
@@ -27,7 +27,7 @@ export class ForgotPasswordComponent {
   errorMessage: string = '';
   successMessage: string = '';
   generatedOtp: string = ''; // Saved OTP code returned from API
-  maskedPhone: string = '';
+  maskedEmail: string = '';
   
   currentLang: LangCode = 'ar';
 
@@ -35,14 +35,14 @@ export class ForgotPasswordComponent {
     ar: {
       langLabel: 'English',
       forgotTitle: 'نسيت كلمة المرور',
-      forgotSubtitle: 'أدخل رقم جوالك لتلقي رمز التحقق وإعادة تعيين كلمة المرور الخاصة بك بأمان.',
-      mobileLabel: 'رقم الجوال',
-      mobilePlaceholder: '5xxxxxxxx',
+      forgotSubtitle: 'أدخل بريدك الإلكتروني لتلقي رمز التحقق وإعادة تعيين كلمة المرور الخاصة بك بأمان.',
+      mobileLabel: 'البريد الإلكتروني',
+      mobilePlaceholder: 'name@example.com',
       sendOtpBtn: 'إرسال الرمز',
       sendingOtpBtn: 'جاري الإرسال...',
       
       otpTitle: 'رمز التحقق (OTP)',
-      otpSubtitle: 'أدخل رمز التحقق المرسل إلى الرقم',
+      otpSubtitle: 'أدخل رمز التحقق المرسل إلى البريد الإلكتروني',
       confirmBtn: 'تأكيد الرمز',
       confirmingBtn: 'جاري التأكيد...',
 
@@ -53,7 +53,7 @@ export class ForgotPasswordComponent {
       resetBtn: 'تعديل كلمة المرور',
       resettingBtn: 'جاري التعديل...',
 
-      invalidPhoneError: 'رقم الجوال غير صحيح! يجب أن يكون رقم سعودي يبدأ بـ 5 أو 05.',
+      invalidEmailError: 'البريد الإلكتروني غير صحيح! يرجى إدخال بريد إلكتروني صالح.',
       passwordMismatchError: 'كلمة المرور الجديدة وتأكيد كلمة المرور غير متطابقين!',
       genericError: 'حدث خطأ، حاول مرة أخرى',
       successMessage: 'تمت إعادة تعيين كلمة المرور بنجاح! سيتم توجيهك لصفحة تسجيل الدخول...',
@@ -63,9 +63,9 @@ export class ForgotPasswordComponent {
     en: {
       langLabel: 'العربية',
       forgotTitle: 'Forget Password',
-      forgotSubtitle: 'Enter your phone number to receive a verification code and securely reset your password.',
-      mobileLabel: 'Mobile Number',
-      mobilePlaceholder: '5xxxxxxxx',
+      forgotSubtitle: 'Enter your email address to receive a verification code and securely reset your password.',
+      mobileLabel: 'Email Address',
+      mobilePlaceholder: 'name@example.com',
       sendOtpBtn: 'Send OTP',
       sendingOtpBtn: 'Sending OTP...',
       
@@ -81,7 +81,7 @@ export class ForgotPasswordComponent {
       resetBtn: 'Next',
       resettingBtn: 'Updating...',
 
-      invalidPhoneError: 'Invalid phone number! It must be a Saudi number starting with 5 or 05.',
+      invalidEmailError: 'Invalid email address! Please enter a valid email.',
       passwordMismatchError: 'New password and confirm password do not match!',
       genericError: 'Something went wrong, please try again',
       successMessage: 'Password reset successfully! Redirecting you to login...',
@@ -127,12 +127,6 @@ export class ForgotPasswordComponent {
     const html = this.document.documentElement;
     html.setAttribute('dir', this.isRtl ? 'rtl' : 'ltr');
     html.setAttribute('lang', this.currentLang);
-  }
-
-  onPhoneInput(event: Event) {
-    const input = event.target as HTMLInputElement;
-    input.value = input.value.replace(/[^0-9]/g, '');
-    this.phone = input.value;
   }
 
   // Handle single digit OTP entries
@@ -200,46 +194,31 @@ export class ForgotPasswordComponent {
     this.cdr.detectChanges();
   }
 
-  // STEP 1: Send OTP to phone
+  // STEP 1: Send OTP to email
   sendOtp() {
     this.errorMessage = '';
 
-    if (!this.phone) {
-      this.errorMessage = this.t.invalidPhoneError;
+    if (!this.email || !this.email.includes('@')) {
+      this.errorMessage = this.t.invalidEmailError;
       return;
     }
 
     this.isLoading = true;
 
-    // Sanitize phone number format
-    let formattedPhone = this.phone.trim();
-    if (formattedPhone.startsWith('0')) {
-      formattedPhone = formattedPhone.substring(1);
-    }
-
-    if (formattedPhone.length !== 9 || !formattedPhone.startsWith('5')) {
-      this.isLoading = false;
-      this.errorMessage = this.t.invalidPhoneError;
-      return;
-    }
-
-    const fullPhone = '+966' + formattedPhone;
-
-    this.authService.forgotPassword(fullPhone).subscribe({
+    this.authService.forgotPassword(this.email.trim()).subscribe({
       next: (response) => {
         this.isLoading = false;
         
         // Save the OTP token returned by ASP.NET Identity (for testing)
         if (response && response.token) {
           this.generatedOtp = response.token;
-          
-          // Print it in console and alert the user so they can test it easily
-          console.log('%c[TEST OTP CODE]: ' + response.token, 'background: #222; color: #bada55; font-size: 1.2rem;');
-          alert(this.t.otpAlert + response.token);
 
-          // Mask phone number (e.g. +966 ••• ••• 4821)
-          const last4 = formattedPhone.substring(formattedPhone.length - 4);
-          this.maskedPhone = `+966 ••• ••• ${last4}`;
+          // Mask email for display (e.g. j***@example.com)
+          const parts = this.email.trim().split('@');
+          const name = parts[0];
+          const domain = parts[1];
+          const maskedName = name.length > 2 ? name.substring(0, 2) + '***' : name + '***';
+          this.maskedEmail = `${maskedName}@${domain}`;
 
           // Transition to OTP verification step
           this.currentStep = 2;
@@ -253,7 +232,7 @@ export class ForgotPasswordComponent {
         if (err.error && err.error.message) {
           this.errorMessage = err.error.message;
         } else if (err.status === 404) {
-          this.errorMessage = this.currentLang === 'ar' ? 'رقم الجوال هذا غير مسجل لدينا!' : 'This mobile number is not registered!';
+          this.errorMessage = this.currentLang === 'ar' ? 'هذا البريد الإلكتروني غير مسجل لدينا!' : 'This email address is not registered!';
         } else {
           this.errorMessage = this.t.genericError;
         }
@@ -305,15 +284,9 @@ export class ForgotPasswordComponent {
 
     this.isLoading = true;
 
-    // Sanitize phone number format
-    let formattedPhone = this.phone.trim();
-    if (formattedPhone.startsWith('0')) {
-      formattedPhone = formattedPhone.substring(1);
-    }
-    const fullPhone = '+966' + formattedPhone;
     const otpCode = this.otpDigits.join('');
 
-    this.authService.resetPassword(fullPhone, otpCode, this.newPassword).subscribe({
+    this.authService.resetPassword(this.email.trim(), otpCode, this.newPassword).subscribe({
       next: (response) => {
         this.isLoading = false;
         this.successMessage = this.t.successMessage;

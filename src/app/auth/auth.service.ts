@@ -28,6 +28,7 @@ export class AuthService {
       localStorage.setItem('auth_token', response.token);
       localStorage.setItem('auth_userName', response.username || '');
       localStorage.setItem('auth_phone', response.phoneNumber || '');
+      localStorage.setItem('auth_email', response.email || '');
       if (response.user) {
         localStorage.setItem('auth_userId', response.user.id || '');
       }
@@ -48,24 +49,24 @@ export class AuthService {
     localStorage.removeItem('auth_userId');
   }
 
-  forgotPassword(phone: string): Observable<any> {
+  forgotPassword(email: string): Observable<any> {
     const url = `${API_CONFIG.baseUrl}${API_CONFIG.endpoints.auth.forgotPassword}`;
-    return this.http.post<any>(url, { phoneNumber: phone });
+    return this.http.post<any>(url, { email: email });
   }
 
-  resetPassword(phone: string, token: string, newPassword: string): Observable<any> {
+  resetPassword(email: string, token: string, newPassword: string): Observable<any> {
     const url = `${API_CONFIG.baseUrl}${API_CONFIG.endpoints.auth.resetPassword}`;
     return this.http.post<any>(url, {
-      phoneNumber: phone,
+      email: email,
       token: token,
       newPassword: newPassword
     });
   }
 
-  changePassword(phone: string, currentPassword: string, newPassword: string): Observable<any> {
+  changePassword(email: string, currentPassword: string, newPassword: string): Observable<any> {
     const url = `${API_CONFIG.baseUrl}${API_CONFIG.endpoints.auth.changePassword}`;
     return this.http.post<any>(url, {
-      phoneNumber: phone,
+      email: email,
       currentPassword: currentPassword,
       newPassword: newPassword
     });

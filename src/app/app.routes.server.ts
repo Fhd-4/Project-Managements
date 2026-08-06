@@ -70,6 +70,10 @@ export const serverRoutes: ServerRoute[] = [
   //comment 
   
   {
+    path: 'plans/details/:id',
+    renderMode: RenderMode.Server
+  },
+  {
     path: 'plans/edit/:id',
     renderMode: RenderMode.Server
   },
