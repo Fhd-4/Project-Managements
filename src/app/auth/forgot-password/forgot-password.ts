@@ -209,22 +209,15 @@ export class ForgotPasswordComponent {
       next: (response) => {
         this.isLoading = false;
         
-        // Save the OTP token returned by ASP.NET Identity (for testing)
-        if (response && response.token) {
-          this.generatedOtp = response.token;
+        // Mask email for display (e.g. j***@example.com)
+        const parts = this.email.trim().split('@');
+        const name = parts[0];
+        const domain = parts[1];
+        const maskedName = name.length > 2 ? name.substring(0, 2) + '***' : name + '***';
+        this.maskedEmail = `${maskedName}@${domain}`;
 
-          // Mask email for display (e.g. j***@example.com)
-          const parts = this.email.trim().split('@');
-          const name = parts[0];
-          const domain = parts[1];
-          const maskedName = name.length > 2 ? name.substring(0, 2) + '***' : name + '***';
-          this.maskedEmail = `${maskedName}@${domain}`;
-
-          // Transition to OTP verification step
-          this.currentStep = 2;
-        } else {
-          this.errorMessage = this.t.genericError;
-        }
+        // Transition to OTP verification step
+        this.currentStep = 2;
         this.cdr.detectChanges();
       },
       error: (err) => {
@@ -251,15 +244,27 @@ export class ForgotPasswordComponent {
       return;
     }
 
-    // Verify token locally or check against generatedOtp
-    if (code !== this.generatedOtp) {
-      this.errorMessage = this.currentLang === 'ar' ? 'رمز التحقق غير صحيح!' : 'Incorrect verification code!';
-      return;
-    }
-
-    // Transition to step 3 (reset password)
-    this.currentStep = 3;
+    this.isLoading = true;
     this.cdr.detectChanges();
+
+    this.authService.verifyOtp(this.email.trim(), code).subscribe({
+      next: (res) => {
+        this.isLoading = false;
+        this.currentStep = 3;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.isLoading = false;
+        if (err.error && typeof err.error === 'string') {
+          this.errorMessage = err.error;
+        } else if (err.error && err.error.message) {
+          this.errorMessage = err.error.message;
+        } else {
+          this.errorMessage = this.currentLang === 'ar' ? 'رمز التحقق غير صحيح!' : 'Incorrect verification code!';
+        }
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   // STEP 3: Save new password

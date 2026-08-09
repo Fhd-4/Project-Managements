@@ -54,6 +54,11 @@ export class AuthService {
     return this.http.post<any>(url, { email: email });
   }
 
+  verifyOtp(email: string, token: string): Observable<any> {
+    const url = `${API_CONFIG.baseUrl}/Auth/verify-otp`;
+    return this.http.post<any>(url, { email: email, token: token });
+  }
+
   resetPassword(email: string, token: string, newPassword: string): Observable<any> {
     const url = `${API_CONFIG.baseUrl}${API_CONFIG.endpoints.auth.resetPassword}`;
     return this.http.post<any>(url, {
