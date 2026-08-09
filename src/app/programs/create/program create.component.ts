@@ -72,6 +72,7 @@ export class ProgramCreateComponent implements OnInit {
       fileAttached: 'الملفات المرفقة',
       cancel: 'إلغاء',
       addNew: 'إضافة',
+      saveChanges: 'حفظ التغييرات',
       saving: 'جاري الحفظ...',
       selectPlaceholder: 'اختر...',
       writeHere: 'اكتب هنا',
@@ -95,6 +96,7 @@ export class ProgramCreateComponent implements OnInit {
       fileAttached: 'File Attached',
       cancel: 'Cancel',
       addNew: 'Add New',
+      saveChanges: 'Save Changes',
       saving: 'Saving...',
       selectPlaceholder: 'Select...',
       writeHere: 'Write Here',
@@ -145,16 +147,99 @@ export class ProgramCreateComponent implements OnInit {
           url
         }));
 
-        const matchManager = (list: AppUser[]) => {
-          const match = list.find(u => this.userService.displayName(u, this.currentLang) === program.managerName);
-          if (match) this.managerId = match.id;
+        const matchAllUsers = (list: AppUser[]) => {
+          const matchUserByName = (dbName?: string) => {
+            if (!dbName) return null;
+            const normalizedDbName = dbName.trim().toLowerCase();
+            return list.find(u => 
+              (u.nameAr && u.nameAr.trim().toLowerCase() === normalizedDbName) ||
+              (u.nameEn && u.nameEn.trim().toLowerCase() === normalizedDbName) ||
+              (u.userName && u.userName.trim().toLowerCase() === normalizedDbName) ||
+              (u.email && u.email.trim().toLowerCase() === normalizedDbName) ||
+              u.id.toLowerCase() === normalizedDbName
+            );
+          };
+
+          // Match Manager
+          const managerMatch = matchUserByName(program.managerName);
+          if (managerMatch) this.managerId = managerMatch.id;
+
+          // Match Sponsor
+          const sponsorMatch = matchUserByName(program.sponsorName);
+          if (sponsorMatch) this.sponsorUserId = sponsorMatch.id;
+
+          // Match Owner (Portfolio Owner)
+          if (program.portfolioId) {
+            this.portfolioService.getPortfolioDetails(program.portfolioId).subscribe({
+              next: (portfolio) => {
+                if (portfolio.ownerId) {
+                  const matchedUser = list.find(u => u.id.trim().toLowerCase() === portfolio.ownerId!.trim().toLowerCase());
+                  if (matchedUser) {
+                    this.ownerUserId = matchedUser.id;
+                  } else {
+                    const ownerMatch = matchUserByName(portfolio.ownerName);
+                    if (ownerMatch) this.ownerUserId = ownerMatch.id;
+                  }
+                } else {
+                  const ownerMatch = matchUserByName(portfolio.ownerName);
+                  if (ownerMatch) this.ownerUserId = ownerMatch.id;
+                }
+                this.cdr.detectChanges();
+              }
+            });
+          }
         };
-        if (this.users.length) matchManager(this.users);
-        else this.userService.getAllUsers().subscribe(list => { matchManager(list); this.cdr.detectChanges(); });
+
+        if (this.users.length) {
+          matchAllUsers(this.users);
+        } else {
+          this.userService.getAllUsers().subscribe(list => {
+            this.users = list;
+            matchAllUsers(list);
+            this.cdr.detectChanges();
+          });
+        }
 
         this.cdr.detectChanges();
       },
       error: () => { this.errorMessage = 'Failed to load program.'; this.cdr.detectChanges(); }
+    });
+  }
+
+  onPortfolioChange() {
+    if (!this.portfolioId) {
+      this.ownerUserId = '';
+      return;
+    }
+
+    this.portfolioService.getPortfolioDetails(this.portfolioId).subscribe({
+      next: (portfolio) => {
+        if (portfolio.ownerId) {
+          const matchedUser = this.users.find(u => u.id.trim().toLowerCase() === portfolio.ownerId!.trim().toLowerCase());
+          if (matchedUser) {
+            this.ownerUserId = matchedUser.id;
+          } else {
+            const ownerMatch = this.users.find(u => 
+              (u.nameAr && u.nameAr.trim().toLowerCase() === portfolio.ownerName?.trim().toLowerCase()) ||
+              (u.nameEn && u.nameEn.trim().toLowerCase() === portfolio.ownerName?.trim().toLowerCase()) ||
+              (u.userName && u.userName.trim().toLowerCase() === portfolio.ownerName?.trim().toLowerCase()) ||
+              (u.email && u.email.trim().toLowerCase() === portfolio.ownerName?.trim().toLowerCase()) ||
+              u.id.toLowerCase() === portfolio.ownerName?.trim().toLowerCase()
+            );
+            if (ownerMatch) this.ownerUserId = ownerMatch.id;
+          }
+        } else {
+          const ownerMatch = this.users.find(u => 
+            (u.nameAr && u.nameAr.trim().toLowerCase() === portfolio.ownerName?.trim().toLowerCase()) ||
+            (u.nameEn && u.nameEn.trim().toLowerCase() === portfolio.ownerName?.trim().toLowerCase()) ||
+            (u.userName && u.userName.trim().toLowerCase() === portfolio.ownerName?.trim().toLowerCase()) ||
+            (u.email && u.email.trim().toLowerCase() === portfolio.ownerName?.trim().toLowerCase()) ||
+            u.id.toLowerCase() === portfolio.ownerName?.trim().toLowerCase()
+          );
+          if (ownerMatch) this.ownerUserId = ownerMatch.id;
+        }
+        this.cdr.detectChanges();
+      }
     });
   }
 
@@ -163,16 +248,25 @@ export class ProgramCreateComponent implements OnInit {
     if (!input.files || !input.files.length) return;
 
     const fileList = input.files;
+    const initialLength = this.attachedFiles.length;
     for (let i = 0; i < fileList.length; i++) {
       this.attachedFiles.push({ name: fileList[i].name, progress: 0, raw: fileList[i] });
     }
 
     this.programService.uploadFiles(fileList).subscribe({
-      next: (res) => {
-        const urls: string[] = res?.urls || res?.fileUrls || [];
-        this.attachedFiles.forEach((f, idx) => {
-          if (!f.url && urls[idx]) { f.url = urls[idx]; f.progress = 100; }
-        });
+      next: (res: any) => {
+        const urls: string[] = Array.isArray(res) 
+          ? res.map(item => item.path) 
+          : (res?.urls || res?.fileUrls || []);
+        
+        let pathIdx = 0;
+        for (let i = initialLength; i < this.attachedFiles.length; i++) {
+          if (pathIdx < urls.length) {
+            this.attachedFiles[i].url = urls[pathIdx];
+            this.attachedFiles[i].progress = 100;
+            pathIdx++;
+          }
+        }
         this.cdr.detectChanges();
       },
       error: () => { this.errorMessage = 'File upload failed.'; this.cdr.detectChanges(); }
@@ -192,7 +286,7 @@ export class ProgramCreateComponent implements OnInit {
     this.errorMessage = '';
     if (!this.name || this.budget <= 0 || (!this.isEditMode && !this.portfolioId) || !this.managerId) {
       this.errorMessage = this.t.validationError;
-      this.programService.triggerErrorToast();
+      this.programService.triggerErrorToast('Please fill all required fields correctly', 'يرجى ملء جميع الحقول المطلوبة بشكل صحيح');
       return;
     }
 
@@ -226,17 +320,32 @@ export class ProgramCreateComponent implements OnInit {
 
   private onSaveSuccess() {
     this.isSaving = false;
-    this.programService.triggerSuccessToast();
+    if (this.isEditMode) {
+      this.programService.triggerSuccessToast('Program updated successfully', 'تم تعديل البرنامج بنجاح');
+    } else {
+      this.programService.triggerSuccessToast('Program created successfully', 'تم إنشاء البرنامج بنجاح');
+    }
     this.router.navigate(['/programs']);
   }
 
   private onSaveError() {
     this.isSaving = false;
-    this.programService.triggerErrorToast();
+    this.programService.triggerErrorToast('Failed to save program changes', 'فشل في حفظ تعديلات البرنامج');
     this.cdr.detectChanges();
   }
 
-  cancel() { this.router.navigate(['/programs']); }
+  cancel() {
+    const hasChanges = this.name || this.description || this.budget > 0 || this.attachedFiles.length > 0;
+    if (hasChanges) {
+      const confirmMsg = this.isRtl 
+        ? 'هل أنت متأكد من إلغاء العملية؟ سيتم فقدان جميع التعديلات غير المحفوظة.' 
+        : 'Are you sure you want to cancel? Any unsaved changes will be lost.';
+      if (!confirm(confirmMsg)) {
+        return;
+      }
+    }
+    this.router.navigate(['/programs']);
+  }
 
   userLabel(u: AppUser): string {
     return this.isRtl ? (u.nameAr || u.userName || u.email || u.id) : (u.nameEn || u.userName || u.email || u.id);

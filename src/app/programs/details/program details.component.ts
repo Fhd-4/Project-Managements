@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProgramService, Program, getStatusMeta } from '../program.service';
 import { PortfolioLookupService } from '../../portfolios/portfolio-lookup.service';
+import { API_CONFIG } from '../../api.config';
 import {
   ProjectService,
   Project,
@@ -161,6 +162,17 @@ export class ProgramDetailsComponent implements OnInit {
     const ext = filename.split('.').pop()?.toLowerCase();
     if (ext === 'pdf') return 'pdf';
     return 'doc';
+  }
+
+  downloadFile(url: string) {
+    if (url) {
+      if (url.startsWith('http://') || url.startsWith('https://')) {
+        window.open(url, '_blank');
+      } else {
+        const domainUrl = API_CONFIG.baseUrl.replace('/api', '');
+        window.open(domainUrl + url, '_blank');
+      }
+    }
   }
 
   createProject() {

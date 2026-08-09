@@ -169,6 +169,8 @@ export class LayoutComponent implements OnInit {
       this.router.navigate(['/projects']);
     } else if (this.currentRoute.includes('/tasks')) {
       this.router.navigate(['/tasks']);
+    } else if (this.currentRoute.includes('/programs')) {
+      this.router.navigate(['/programs']);
     } else {
       this.router.navigate(['/portfolios']);
     }

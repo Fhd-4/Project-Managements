@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { PortfolioService, Portfolio } from '../portfolio.service';
+import { UserService, AppUser } from '../../programs/create/user.service';
 
 type LangCode = 'ar' | 'en';
 
@@ -18,6 +19,7 @@ export class CreatePortfolioComponent implements OnInit, OnDestroy {
   isEditMode: boolean = false;
   editingId: number | null = null;
   isLoading: boolean = false;
+  users: AppUser[] = [];
 
   // File Upload State
   attachedFiles: Array<{ name: string, progress: number, size: string, type: string, path?: string }> = [];
@@ -102,6 +104,7 @@ export class CreatePortfolioComponent implements OnInit, OnDestroy {
 
   constructor(
     private portfolioService: PortfolioService,
+    private userService: UserService,
     private cdr: ChangeDetectorRef,
     private router: Router,
     private route: ActivatedRoute
@@ -117,6 +120,22 @@ export class CreatePortfolioComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.userService.getAllUsers().subscribe(list => {
+      this.users = list;
+      
+      // Set default values from database list if available to prevent empty selects
+      if (this.users.length && !this.isEditMode) {
+        const getVal = (idx: number) => {
+          const u = this.users[idx] || this.users[0];
+          return u.userName || u.nameEn || u.id;
+        };
+        this.ownerName = getVal(0);
+        this.sponsorName = getVal(1 % this.users.length);
+        this.managerName = getVal(2 % this.users.length);
+      }
+      this.cdr.detectChanges();
+    });
+
     this.route.paramMap.subscribe(params => {
       const idStr = params.get('id');
       if (idStr) {
@@ -309,5 +328,9 @@ export class CreatePortfolioComponent implements OnInit, OnDestroy {
 
   goBack() {
     this.router.navigate(['/portfolios']);
+  }
+
+  userLabel(u: AppUser): string {
+    return this.isRtl ? (u.nameAr || u.userName || u.email || u.id) : (u.nameEn || u.userName || u.email || u.id);
   }
 }

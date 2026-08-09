@@ -19,7 +19,7 @@
 
         <div class="form-field" *ngIf="!isEditMode">
           <label>{{ t.portfolioName }} *</label>
-          <select [(ngModel)]="portfolioId">
+          <select [(ngModel)]="portfolioId" (ngModelChange)="onPortfolioChange()">
             <option [ngValue]="null">{{ t.selectPlaceholder }}</option>
             <option *ngFor="let p of portfolios" [ngValue]="p.id">{{ isRtl ? p.nameAr : p.nameEn }}</option>
           </select>
@@ -115,7 +115,7 @@
 
       <div class="actions-row">
         <button class="btn-secondary" (click)="cancel()">✕ {{ t.cancel }}</button>
-        <button class="btn-primary" [disabled]="isSaving" (click)="save()">+ {{ isSaving ? t.saving : t.addNew }}</button>
+        <button class="btn-primary" [disabled]="isSaving" (click)="save()">+ {{ isSaving ? t.saving : (isEditMode ? t.saveChanges : t.addNew) }}</button>
       </div>
     </div>
 

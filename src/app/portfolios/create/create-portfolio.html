@@ -63,9 +63,7 @@
           <label>Portfolio Owner</label>
           <div class="select-wrapper">
             <select [(ngModel)]="ownerName" name="ownerName">
-              <option value="Faisal Al-Otaibi">Faisal Al-Otaibi</option>
-              <option value="Omar Al-Harbi">Omar Al-Harbi</option>
-              <option value="Mahmoud Salah">Mahmoud Salah</option>
+              <option *ngFor="let u of users" [value]="u.userName || u.nameEn || u.id">{{ userLabel(u) }}</option>
             </select>
             <div class="avatar-badge-preview">
               <div class="small-preview-avatar" [class]="getAvatarClass(ownerName)">{{ getInitials(ownerName) }}</div>
@@ -81,9 +79,7 @@
           <label>Portfolio Sponsor</label>
           <div class="select-wrapper">
             <select [(ngModel)]="sponsorName" name="sponsorName">
-              <option value="Omar Al-Harbi">Omar Al-Harbi</option>
-              <option value="Faisal Al-Otaibi">Faisal Al-Otaibi</option>
-              <option value="Mahmoud Salah">Mahmoud Salah</option>
+              <option *ngFor="let u of users" [value]="u.userName || u.nameEn || u.id">{{ userLabel(u) }}</option>
             </select>
             <div class="avatar-badge-preview">
               <div class="small-preview-avatar" [class]="getAvatarClass(sponsorName)">{{ getInitials(sponsorName) }}</div>
@@ -99,9 +95,7 @@
           <label>Portfolio Manager</label>
           <div class="select-wrapper">
             <select [(ngModel)]="managerName" name="managerName">
-              <option value="Mahmoud Salah">Mahmoud Salah</option>
-              <option value="Faisal Al-Otaibi">Faisal Al-Otaibi</option>
-              <option value="Omar Al-Harbi">Omar Al-Harbi</option>
+              <option *ngFor="let u of users" [value]="u.userName || u.nameEn || u.id">{{ userLabel(u) }}</option>
             </select>
             <div class="avatar-badge-preview">
               <div class="small-preview-avatar" [class]="getAvatarClass(managerName)">{{ getInitials(managerName) }}</div>

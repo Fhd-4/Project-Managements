@@ -1,8 +1,4 @@
 <div class="details-page" [dir]="isRtl ? 'rtl' : 'ltr'" *ngIf="!isLoading && program">
-  <div class="breadcrumb">
-    <button class="back-btn" (click)="goBack()">‹</button>
-    {{ t.breadcrumb }}
-  </div>
 
   <div class="header-card">
     <div class="header-top">
@@ -73,20 +69,12 @@
       <span class="stat-label">{{ t.projects }}</span>
       <span class="stat-value">{{ program.projectsCount ?? 0 }}</span>
     </div>
-    <div class="stat-box">
-      <span class="stat-label">{{ t.tasks }}</span>
-      <span class="stat-value">{{ program.tasksCount ?? 0 }}</span>
-    </div>
-    <div class="stat-box">
-      <span class="stat-label">{{ t.budget }}</span>
-      <span class="stat-value">{{ formatBudget(program.budget) }}</span>
-    </div>
   </div>
 
   <div class="documents-section">
     <span class="section-label">{{ t.documents }}:</span>
     <div class="documents-list" *ngIf="program.attachedDocumentUrls?.length; else noDocs">
-      <a *ngFor="let url of program.attachedDocumentUrls; let i = index" [href]="url" target="_blank" class="document-card" [title]="fileName(url)">
+      <a *ngFor="let url of program.attachedDocumentUrls; let i = index" (click)="downloadFile(url); $event.preventDefault();" href="javascript:void(0)" class="document-card" [title]="fileName(url)">
         <span class="doc-badge" [ngClass]="fileKind(fileName(url))">
           {{ fileKind(fileName(url)) === 'pdf' ? 'PDF' : 'DOC' }}
         </span>
@@ -94,16 +82,7 @@
       </a>
     </div>
     <ng-template #noDocs>
-      <div class="doc-badges-row">
-        <div class="document-card default-doc">
-          <span class="doc-badge doc">DOC</span>
-          <span class="doc-name">topic_doc</span>
-        </div>
-        <div class="document-card default-doc">
-          <span class="doc-badge pdf">PDF</span>
-          <span class="doc-name">topic_pdf</span>
-        </div>
-      </div>
+      <p class="no-docs-hint">{{ t.noDocuments }}</p>
     </ng-template>
   </div>
 
