@@ -81,17 +81,17 @@ export interface ProgramFilters {
 export class ProgramService {
   private readonly apiUrl = `${API_CONFIG.baseUrl}/Programs`;
 
-  successToast$ = new BehaviorSubject<boolean>(false);
-  errorToast$ = new BehaviorSubject<boolean>(false);
+  successToast$ = new BehaviorSubject<{ show: boolean; messageEn: string; messageAr: string }>({ show: false, messageEn: '', messageAr: '' });
+  errorToast$ = new BehaviorSubject<{ show: boolean; messageEn: string; messageAr: string }>({ show: false, messageEn: '', messageAr: '' });
 
-  triggerSuccessToast() {
-    this.successToast$.next(true);
-    setTimeout(() => this.successToast$.next(false), 4000);
+  triggerSuccessToast(messageEn: string = 'Operation completed successfully', messageAr: string = 'تمت العملية بنجاح') {
+    this.successToast$.next({ show: true, messageEn, messageAr });
+    setTimeout(() => this.successToast$.next({ show: false, messageEn: '', messageAr: '' }), 4000);
   }
 
-  triggerErrorToast() {
-    this.errorToast$.next(true);
-    setTimeout(() => this.errorToast$.next(false), 4000);
+  triggerErrorToast(messageEn: string = 'An error occurred', messageAr: string = 'حدث خطأ ما') {
+    this.errorToast$.next({ show: true, messageEn, messageAr });
+    setTimeout(() => this.errorToast$.next({ show: false, messageEn: '', messageAr: '' }), 4000);
   }
 
   constructor(
@@ -172,7 +172,7 @@ export class ProgramService {
     return this.http.delete<any>(`${this.apiUrl}/${id}`, { headers: this.getHeaders() });
   }
 
-  // No dedicated Programs upload endpoint documented — reuses Portfolios/upload.
+  // Uses dedicated Programs upload endpoint
   uploadFiles(files: FileList): Observable<any> {
     const formData = new FormData();
     for (let i = 0; i < files.length; i++) {
@@ -185,6 +185,6 @@ export class ProgramService {
     const headers = new HttpHeaders({
       ...(token ? { Authorization: `Bearer ${token}` } : {})
     });
-    return this.http.post<any>(`${API_CONFIG.baseUrl}/Portfolios/upload`, formData, { headers });
+    return this.http.post<any>(`${this.apiUrl}/upload`, formData, { headers });
   }
 }

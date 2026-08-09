@@ -137,7 +137,7 @@
     <!-- Top Header -->
     <header class="top-header">
       <div class="breadcrumb-title">
-        <div class="header-breadcrumb-container" *ngIf="currentRoute.includes('/portfolios/create') || currentRoute.includes('/portfolios/edit') || currentRoute.includes('/portfolios/details') || currentRoute.includes('/projects/create') || currentRoute.includes('/projects/edit') || currentRoute.includes('/projects/details') || currentRoute.includes('/tasks/create') || currentRoute.includes('/tasks/edit'); else normalHeaderTitle">
+        <div class="header-breadcrumb-container" *ngIf="currentRoute.includes('/portfolios/create') || currentRoute.includes('/portfolios/edit') || currentRoute.includes('/portfolios/details') || currentRoute.includes('/projects/create') || currentRoute.includes('/projects/edit') || currentRoute.includes('/projects/details') || currentRoute.includes('/tasks/create') || currentRoute.includes('/tasks/edit') || currentRoute.includes('/programs/create') || currentRoute.includes('/programs/edit') || currentRoute.includes('/programs/details'); else normalHeaderTitle">
           <button class="header-back-btn" (click)="goBackList()">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#102a43" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <line x1="19" y1="12" x2="5" y2="12"></line>
@@ -156,6 +156,20 @@
               </span>
               <span class="breadcrumb-sub" *ngIf="currentRoute.includes('/portfolios/details')">
                 {{ isRtl ? 'المحافظ / تفاصيل' : 'Portfolios / Details' }}
+              </span>
+            </ng-container>
+
+            <!-- Programs Breadcrumbs -->
+            <ng-container *ngIf="currentRoute.includes('/programs')">
+              <h2 class="breadcrumb-main">{{ isRtl ? 'البرامج' : 'Programs' }}</h2>
+              <span class="breadcrumb-sub" *ngIf="currentRoute.includes('/programs/create')">
+                {{ isRtl ? 'البرامج / إضافة جديد' : 'Programs / Create Program' }}
+              </span>
+              <span class="breadcrumb-sub" *ngIf="currentRoute.includes('/programs/edit')">
+                {{ isRtl ? 'البرامج / تعديل' : 'Programs / Edit Program' }}
+              </span>
+              <span class="breadcrumb-sub" *ngIf="currentRoute.includes('/programs/details')">
+                {{ isRtl ? 'البرامج / تفاصيل' : 'Programs / Program Details' }}
               </span>
             </ng-container>
 
@@ -186,7 +200,7 @@
           </div>
         </div>
         <ng-template #normalHeaderTitle>
-          <h2>{{ isActive('/portfolios') ? (isRtl ? 'المحافظ' : 'Portfolios') : isActive('/projects') ? (isRtl ? 'المشاريع' : 'Projects') : isActive('/tasks') ? (isRtl ? 'المهام' : 'Tasks') : (isRtl ? 'لوحة التحكم' : 'Dashboard') }}</h2>
+          <h2>{{ isActive('/portfolios') ? (isRtl ? 'المحافظ' : 'Portfolios') : isActive('/programs') ? (isRtl ? 'البرامج' : 'Programs') : isActive('/projects') ? (isRtl ? 'المشاريع' : 'Projects') : isActive('/tasks') ? (isRtl ? 'المهام' : 'Tasks') : (isRtl ? 'لوحة التحكم' : 'Dashboard') }}</h2>
         </ng-template>
       </div>
 

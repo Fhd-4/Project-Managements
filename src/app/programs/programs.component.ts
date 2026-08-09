@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -46,7 +46,9 @@ export class ProgramsComponent implements OnInit, OnDestroy {
   completedCount = 0;
 
   showSuccessToast = false;
+  successToastMessage = '';
   showErrorToast = false;
+  errorToastMessage = '';
   private subs = new Subscription();
 
   isRtl = false;
@@ -88,14 +90,22 @@ export class ProgramsComponent implements OnInit, OnDestroy {
 
   kanbanColumns: { status: number; meta: StatusMeta; programs: Program[] }[] = [];
 
-  constructor(private programService: ProgramService, private router: Router) {}
+  constructor(private programService: ProgramService, private router: Router, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.subs.add(
-      this.programService.successToast$.subscribe(val => this.showSuccessToast = val)
+      this.programService.successToast$.subscribe(state => {
+        this.showSuccessToast = state.show;
+        this.successToastMessage = this.isRtl ? state.messageAr : state.messageEn;
+        this.cdr.detectChanges();
+      })
     );
     this.subs.add(
-      this.programService.errorToast$.subscribe(val => this.showErrorToast = val)
+      this.programService.errorToast$.subscribe(state => {
+        this.showErrorToast = state.show;
+        this.errorToastMessage = this.isRtl ? state.messageAr : state.messageEn;
+        this.cdr.detectChanges();
+      })
     );
 
     if (typeof window !== 'undefined') {
@@ -111,6 +121,7 @@ export class ProgramsComponent implements OnInit, OnDestroy {
 
   loadPrograms(): void {
     this.isLoading = true;
+    this.cdr.detectChanges();
     const filters = {
       keyword: this.searchQuery.trim() || undefined,
       status: this.statusFilter !== null ? Number(this.statusFilter) : undefined
@@ -123,6 +134,7 @@ export class ProgramsComponent implements OnInit, OnDestroy {
         this.applySortingAndPagination();
         this.buildKanbanColumns();
         this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.programs = [];
@@ -130,6 +142,7 @@ export class ProgramsComponent implements OnInit, OnDestroy {
         this.applySortingAndPagination();
         this.buildKanbanColumns();
         this.isLoading = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -186,6 +199,7 @@ export class ProgramsComponent implements OnInit, OnDestroy {
     this.pagedPrograms = result.slice(startIndex, startIndex + this.pageSize);
 
     this.pageNumbers = Array.from({ length: this.totalPages }, (_, i) => i + 1);
+    this.cdr.detectChanges();
   }
 
   goToPage(page: number): void {
@@ -230,11 +244,11 @@ export class ProgramsComponent implements OnInit, OnDestroy {
     if (confirm(msg)) {
       this.programService.deleteProgram(id).subscribe({
         next: () => {
-          this.programService.triggerSuccessToast();
+          this.programService.triggerSuccessToast('Program deleted successfully', 'تم حذف البرنامج بنجاح');
           this.loadPrograms();
         },
         error: () => {
-          this.programService.triggerErrorToast();
+          this.programService.triggerErrorToast('Failed to delete program. It may contain active projects.', 'فشل في حذف البرنامج. قد يحتوي على مشاريع نشطة.');
         }
       });
     }

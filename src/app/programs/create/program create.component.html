@@ -115,7 +115,7 @@
 
       <div class="actions-row">
         <button class="btn-secondary" (click)="cancel()">✕ {{ t.cancel }}</button>
-        <button class="btn-primary" [disabled]="isSaving" (click)="save()">+ {{ isSaving ? t.saving : t.addNew }}</button>
+        <button class="btn-primary" [disabled]="isSaving" (click)="save()">+ {{ isSaving ? t.saving : (isEditMode ? t.saveChanges : t.addNew) }}</button>
       </div>
     </div>
 
