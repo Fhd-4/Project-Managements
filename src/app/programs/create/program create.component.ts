@@ -172,11 +172,19 @@ export class ProgramCreateComponent implements OnInit {
           if (program.portfolioId) {
             this.portfolioService.getPortfolioDetails(program.portfolioId).subscribe({
               next: (portfolio) => {
-                const ownerMatch = matchUserByName(portfolio.ownerName);
-                if (ownerMatch) {
-                  this.ownerUserId = ownerMatch.id;
-                  this.cdr.detectChanges();
+                if (portfolio.ownerId) {
+                  const matchedUser = list.find(u => u.id.trim().toLowerCase() === portfolio.ownerId!.trim().toLowerCase());
+                  if (matchedUser) {
+                    this.ownerUserId = matchedUser.id;
+                  } else {
+                    const ownerMatch = matchUserByName(portfolio.ownerName);
+                    if (ownerMatch) this.ownerUserId = ownerMatch.id;
+                  }
+                } else {
+                  const ownerMatch = matchUserByName(portfolio.ownerName);
+                  if (ownerMatch) this.ownerUserId = ownerMatch.id;
                 }
+                this.cdr.detectChanges();
               }
             });
           }
@@ -195,6 +203,43 @@ export class ProgramCreateComponent implements OnInit {
         this.cdr.detectChanges();
       },
       error: () => { this.errorMessage = 'Failed to load program.'; this.cdr.detectChanges(); }
+    });
+  }
+
+  onPortfolioChange() {
+    if (!this.portfolioId) {
+      this.ownerUserId = '';
+      return;
+    }
+
+    this.portfolioService.getPortfolioDetails(this.portfolioId).subscribe({
+      next: (portfolio) => {
+        if (portfolio.ownerId) {
+          const matchedUser = this.users.find(u => u.id.trim().toLowerCase() === portfolio.ownerId!.trim().toLowerCase());
+          if (matchedUser) {
+            this.ownerUserId = matchedUser.id;
+          } else {
+            const ownerMatch = this.users.find(u => 
+              (u.nameAr && u.nameAr.trim().toLowerCase() === portfolio.ownerName?.trim().toLowerCase()) ||
+              (u.nameEn && u.nameEn.trim().toLowerCase() === portfolio.ownerName?.trim().toLowerCase()) ||
+              (u.userName && u.userName.trim().toLowerCase() === portfolio.ownerName?.trim().toLowerCase()) ||
+              (u.email && u.email.trim().toLowerCase() === portfolio.ownerName?.trim().toLowerCase()) ||
+              u.id.toLowerCase() === portfolio.ownerName?.trim().toLowerCase()
+            );
+            if (ownerMatch) this.ownerUserId = ownerMatch.id;
+          }
+        } else {
+          const ownerMatch = this.users.find(u => 
+            (u.nameAr && u.nameAr.trim().toLowerCase() === portfolio.ownerName?.trim().toLowerCase()) ||
+            (u.nameEn && u.nameEn.trim().toLowerCase() === portfolio.ownerName?.trim().toLowerCase()) ||
+            (u.userName && u.userName.trim().toLowerCase() === portfolio.ownerName?.trim().toLowerCase()) ||
+            (u.email && u.email.trim().toLowerCase() === portfolio.ownerName?.trim().toLowerCase()) ||
+            u.id.toLowerCase() === portfolio.ownerName?.trim().toLowerCase()
+          );
+          if (ownerMatch) this.ownerUserId = ownerMatch.id;
+        }
+        this.cdr.detectChanges();
+      }
     });
   }
 
