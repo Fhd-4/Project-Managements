@@ -52,13 +52,20 @@
         grid-template-columns: 1fr auto;
         gap: 20px;
         align-items: stretch;
+
+        @media (max-width: 1024px) {
+            grid-template-columns: 1fr;
+        }
     }
 
-    /* 3 Person Cards in a row */
     .persons-cards-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 14px;
+
+        @media (max-width: 768px) {
+            grid-template-columns: 1fr;
+        }
     }
 
     .person-card {
@@ -137,7 +144,6 @@
         }
     }
 
-    /* Right: Progress Wheel Card */
     .status-wheel-card {
         border: 1.5px solid #fcd34d;
         border-radius: 12px;
@@ -213,21 +219,31 @@
         }
     }
 
-    /* ── Stats Pills Row ── */
+    /* ── Stats Pills Row (Forced Grid Layout) ── */
     .stats-pills-row {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 12px;
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 12px !important;
+        width: 100%;
 
-        .stat-pill {
+        @media (max-width: 768px) {
+            grid-template-columns: 1fr !important;
+        }
+
+        .stat-pill, .interactive-pill {
             border: 1.5px solid #102a43;
             border-radius: 10px;
             padding: 13px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
             gap: 10px;
             background: white;
+            width: 100%;
+            box-sizing: border-box;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
 
             .pill-label {
                 font-size: 0.9rem;
@@ -242,10 +258,183 @@
             }
 
             &.budget-pill {
+                cursor: default;
                 .riyal-icon {
                     font-size: 1.1rem;
                     font-weight: 800;
                     color: #0f172a;
+                }
+            }
+
+            &.interactive-pill {
+                &:hover {
+                    background: #f8fafc;
+                    border-color: #2563eb;
+                }
+
+                &.active-pill {
+                    background: #eff6ff;
+                    border-color: #2563eb;
+                    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+
+                    .pill-label, .pill-value, .chevron-icon {
+                        color: #2563eb;
+                    }
+                }
+
+                .chevron-icon {
+                    transition: transform 0.2s ease;
+                    color: #64748b;
+
+                    &.rotated {
+                        transform: rotate(180deg);
+                    }
+                }
+            }
+        }
+    }
+
+    /* ── Interactive Expanded List Container ── */
+    .interactive-list-container {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        background: #f8fafc;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 20px;
+        animation: fadeIn 0.3s ease-out;
+
+        .list-header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            .desc-title {
+                margin: 0;
+                font-size: 0.95rem;
+                font-weight: 700;
+                color: #0f172a;
+            }
+
+            .count-badge {
+                font-size: 0.75rem;
+                font-weight: 700;
+                background: #e2e8f0;
+                color: #334155;
+                padding: 3px 10px;
+                border-radius: 12px;
+            }
+        }
+
+        .rich-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+
+            @media (max-width: 768px) {
+                grid-template-columns: 1fr;
+            }
+
+            .rich-entity-card {
+                background: white;
+                border: 1.5px solid #e2e8f0;
+                border-radius: 12px;
+                padding: 16px;
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+                transition: transform 0.2s, box-shadow 0.2s;
+
+                &:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+                    border-color: #cbd5e1;
+                }
+
+                .rich-card-top {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+
+                    .entity-avatar {
+                        width: 42px;
+                        height: 42px;
+                        border-radius: 50%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-weight: 800;
+                        font-size: 0.85rem;
+                        flex-shrink: 0;
+                    }
+
+                    .entity-main-info {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 2px;
+                        flex: 1;
+                        text-align: start;
+
+                        .rich-entity-name {
+                            font-size: 0.9rem;
+                            font-weight: 700;
+                            color: #0f172a;
+                        }
+
+                        .rich-entity-sub {
+                            font-size: 0.75rem;
+                            color: #64748b;
+                            font-weight: 500;
+                        }
+                    }
+
+                    .entity-badge {
+                        font-size: 0.72rem;
+                        font-weight: 700;
+                        padding: 4px 10px;
+                        border-radius: 20px;
+                        white-space: nowrap;
+
+                        &.active { background: #eff6ff; color: #2563eb; }
+                        &.completed { background: #f0fdf4; color: #16a34a; }
+                        &.pending { background: #fffbeb; color: #d97706; }
+                    }
+                }
+
+                .rich-card-footer {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    border-top: 1px solid #f1f5f9;
+                    padding-top: 10px;
+                    font-size: 0.8rem;
+
+                    .footer-label {
+                        color: #64748b;
+                        font-weight: 600;
+                    }
+
+                    .footer-value {
+                        color: #0f172a;
+                        font-weight: 800;
+                    }
+
+                    .mini-progress-bar {
+                        flex: 1;
+                        height: 6px;
+                        background: #f1f5f9;
+                        border-radius: 3px;
+                        margin: 0 12px;
+                        overflow: hidden;
+
+                        .progress-fill {
+                            height: 100%;
+                            background: #2563eb;
+                            border-radius: 3px;
+                        }
+                    }
                 }
             }
         }
@@ -322,17 +511,17 @@
 [dir="rtl"] {
     .person-card {
         .person-card-header {
-            .person-meta {
-                text-align: right;
-            }
-            .person-card-footer {
-                text-align: right;
-            }
+            .person-meta { text-align: right; }
+            .person-card-footer { text-align: right; }
         }
     }
     .description-block {
-        .desc-title, .desc-text {
-            text-align: right;
+        .desc-title, .desc-text { text-align: right; }
+    }
+    .interactive-list-container {
+        .list-header-row { .desc-title { text-align: right; } }
+        .rich-entity-card {
+            .rich-card-top { .entity-main-info { text-align: right; } }
         }
     }
 }

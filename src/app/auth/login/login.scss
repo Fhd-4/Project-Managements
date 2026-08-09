@@ -95,6 +95,27 @@
         position: relative;
         overflow: hidden;
 
+        /* Back navigation button */
+        .back-button {
+            position: absolute;
+            top: 40px;
+            cursor: pointer;
+            color: #1a2b4c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+
+            &:hover {
+                background: #f8fafc;
+                border-color: #cbd5e1;
+            }
+        }
+
         .lang-selector {
             position: absolute;
             top: 40px;
@@ -116,14 +137,49 @@
             }
         }
 
+        .form-container {
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+
+            &.centered-text {
+                align-items: center;
+            }
+        }
+
         .login-title {
             font-size: 2.3rem;
             font-weight: 700;
             color: #007bff;
-            margin-bottom: 40px;
+            margin-bottom: 12px;
             align-self: flex-start;
             width: 100%;
-            max-width: 400px;
+
+            &.centered-text {
+                align-self: center;
+                text-align: center;
+            }
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: #718096;
+            line-height: 1.5;
+            margin-bottom: 30px;
+            text-align: start;
+
+            &.centered-text {
+                text-align: center;
+            }
+        }
+
+        .highlight-phone {
+            font-weight: 700;
+            color: #1a2b4c;
+            font-size: 1.1rem;
+            display: inline-block;
+            margin-top: 5px;
         }
 
         form {
@@ -225,6 +281,35 @@
                 }
             }
 
+            /* OTP input box wrapper and individual boxes */
+            .otp-boxes-wrapper {
+                display: flex;
+                justify-content: space-between;
+                gap: 8px;
+                width: 100%;
+                margin: 20px 0;
+            }
+
+            .otp-box {
+                width: 56px;
+                height: 56px;
+                background: #f5f6f8;
+                border: 2px solid transparent;
+                border-radius: 12px;
+                text-align: center;
+                font-size: 1.5rem;
+                font-weight: 700;
+                color: #1a2b4c;
+                outline: none;
+                transition: all 0.2s ease;
+
+                &:focus {
+                    border-color: #007bff;
+                    background: white;
+                    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+                }
+            }
+
             button {
                 width: 100%;
                 padding: 16px;
@@ -267,18 +352,30 @@
     }
 }
 
-/* Handle LTR/RTL layout of language selector */
-[dir="ltr"] .lang-selector {
-    right: 60px;
+/* Handle LTR/RTL layout of back button and lang selector */
+[dir="ltr"] {
+    .back-button {
+        left: 60px;
+    }
+    .lang-selector {
+        right: 60px;
+    }
 }
 
-[dir="rtl"] .lang-selector {
-    left: 60px;
-}
-
-[dir="rtl"] .btn-arrow {
-    display: inline-block;
-    transform: scaleX(-1);
+[dir="rtl"] {
+    .back-button {
+        right: 60px;
+        svg {
+            transform: rotate(180deg);
+        }
+    }
+    .lang-selector {
+        left: 60px;
+    }
+    .btn-arrow {
+        display: inline-block;
+        transform: scaleX(-1);
+    }
 }
 
 /* Responsiveness: on smaller screens stack panels */
@@ -294,17 +391,28 @@
             padding: 40px;
             height: 100vh;
             width: 100vw;
+
+            .back-button {
+                top: 40px;
+            }
         }
     }
 
-    [dir="ltr"] .lang-selector,
-    [dir="rtl"] .lang-selector {
-        right: 40px;
-        left: auto;
+    [dir="ltr"] {
+        .back-button {
+            left: 40px;
+        }
+        .lang-selector {
+            right: 40px;
+        }
     }
 
-    [dir="rtl"] .lang-selector {
-        left: 40px;
-        right: auto;
+    [dir="rtl"] {
+        .back-button {
+            right: 40px;
+        }
+        .lang-selector {
+            left: 40px;
+        }
     }
 }

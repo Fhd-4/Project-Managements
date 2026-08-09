@@ -29,7 +29,6 @@ import { UserProfileDetailsComponent } from './users/profile/user-profile-detail
 import { SettingsComponent } from './settings/settings.component';
 import { ChangePasswordComponent } from './auth/change-password/change-password';
 
-
 export const routes: Routes = [
   {
     path: '',
@@ -72,8 +71,6 @@ export const routes: Routes = [
         path: 'portfolios/details/:id',
         component: PortfolioDetailsComponent
       },
-      
-      // 👈 إضافة مسارات إدارة البرامج الجديدة هنا لتظهر داخل الـ Layout
       {
         path: 'programs',
         component: ProgramsComponent
@@ -158,10 +155,12 @@ export const routes: Routes = [
         path: 'plans/edit/:id',
         component: PlansCreateComponent
       },
-      { path: 'plans/details/:id', component: PlanDetailsComponent },
-      { path: 'plans/edit/:id', component: PlansCreateComponent },
-  
-      { path: 'change-requests',
+      { 
+        path: 'plans/details/:id', 
+        component: PlanDetailsComponent 
+      },
+      { 
+        path: 'change-requests',
         component: ChangeRequestsComponent
       },
       {
