@@ -20,6 +20,20 @@ export class PortfolioDetailsComponent implements OnInit, OnDestroy {
   id: number | null = null;
   attachedFiles: Array<any> = [];
 
+  // 🟢 Interactive Toggle State & Rich Profile Lists
+  selectedSection: 'programs' | 'projects' | null = null;
+
+  portfolioPrograms = [
+    { id: 1, name: 'Smart Systems Program', budget: 10000000, status: 'In Progress', manager: 'Mahmoud Salah', avatarBg: '#eff6ff', avatarColor: '#2563eb' },
+    { id: 2, name: 'Digital Transformation Core', budget: 5000000, status: 'Completed', manager: 'Omar Al-Harbi', avatarBg: '#f0fdf4', avatarColor: '#16a34a' }
+  ];
+
+  portfolioProjects = [
+    { id: 1, name: 'Cloud Infrastructure Migration', manager: 'Mahmoud Salah', status: 'Active', progress: 75, avatarBg: '#eff6ff', avatarColor: '#2563eb' },
+    { id: 2, name: 'AI Portal Automated Analytics', manager: 'Faisal Al-Otaibi', status: 'Pending', progress: 30, avatarBg: '#fffbeb', avatarColor: '#d97706' },
+    { id: 3, name: 'Cybersecurity Hardening Phase II', manager: 'Omar Al-Harbi', status: 'Completed', progress: 100, avatarBg: '#f0fdf4', avatarColor: '#16a34a' }
+  ];
+
   translations = {
     ar: {
       langLabel: 'English',
@@ -61,6 +75,16 @@ export class PortfolioDetailsComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.portfolioService.isCreatePageActive = false;
+  }
+
+  // 🟢 Toggle Interactive Sections
+  toggleSection(section: 'programs' | 'projects') {
+    if (this.selectedSection === section) {
+      this.selectedSection = null;
+    } else {
+      this.selectedSection = section;
+    }
+    this.cdr.detectChanges();
   }
 
   get t() {
