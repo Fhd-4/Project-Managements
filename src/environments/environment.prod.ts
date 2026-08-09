@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://prosync-swagger.runasp.net',
+  apiUrl: 'https://prosync-swagger.runasp.net/api',
   endpoints: {
     auth: {
       login: '/api/Auth/login',
@@ -15,7 +15,6 @@ export const environment = {
       roles: '/api/Auth/roles',
       createSuperAdmin: '/api/Auth/create-superadmin',
       deleteUser: '/api/Auth/delete-user'
-      // hi
     }
   }
 };
