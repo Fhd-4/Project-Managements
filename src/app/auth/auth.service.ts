@@ -41,7 +41,15 @@ export class AuthService {
     }
     return false;
   }
-
+  
+  verifyLogin2Fa(userId: string, code: string): Observable<any> {
+    const url = `${API_CONFIG.baseUrl}${API_CONFIG.endpoints.auth.verifyLogin2Fa}`; // تأكدي أن الـ endpoint موجود في api.config
+    return this.http.post<any>(url, {
+      userId: userId,
+      code: code
+    });
+  } 
+  
   logout() {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('auth_userName');

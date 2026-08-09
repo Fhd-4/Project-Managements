@@ -304,3 +304,124 @@ $color-red: #EF4444;
     border-radius: 24px;
   }
 }
+
+/* 기존 التنسيقات الخاصة بك بالكامل مع إضافة تنسيق الـ Toggle */
+$color-navy: #153259; 
+$color-gray-text: #6B7280;
+$color-gray-border: #E5E7EB;
+$color-bg: #F4F6F8;
+$color-red: #EF4444;
+
+.settings-page { padding: 24px 32px; }
+.page-title { font-size: 24px; font-weight: 700; color: #0B1C33; margin-bottom: 24px; }
+.portfolios-content-card { background: #FFFFFF; border-radius: 16px; padding: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+
+.tabs-header {
+  display: flex; gap: 24px; border-bottom: 1px solid $color-gray-border; margin-bottom: 24px;
+  .tab-link {
+    background: none; border: none; padding: 0 0 12px 0; font-size: 15px; font-weight: 600; color: $color-gray-text; cursor: pointer; position: relative;
+    &.active {
+      color: $color-navy;
+      &::after { content: ''; position: absolute; bottom: -1px; left: 0; width: 100%; height: 2px; background: $color-navy; }
+    }
+  }
+}
+
+.toolbar-row {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;
+  .tab-title h3 { font-size: 16px; font-weight: 700; color: #0B1C33; margin: 0; }
+  .toolbar-actions {
+    display: flex; gap: 12px; align-items: center;
+    .search-box input {
+      padding: 10px 16px 10px 36px; border: 1px solid $color-gray-border; border-radius: 20px; font-size: 13px; outline: none; background: #fff; width: 250px;
+      &:focus { border-color: $color-navy; }
+    }
+    .create-btn { background: $color-navy; color: white; border: none; padding: 10px 24px; border-radius: 20px; font-size: 14px; font-weight: 600; cursor: pointer; &:hover { background: #1c447a; } }
+  }
+}
+
+.table-wrapper { width: 100%; overflow-x: auto; }
+.portfolios-table {
+  width: 100%; border-collapse: collapse; text-align: left;
+  th { padding: 16px; font-size: 13px; font-weight: 600; color: $color-gray-text; border-bottom: 1px solid $color-gray-border; background: #F9FAFB; }
+  td { padding: 16px; font-size: 14px; font-weight: 500; color: #0B1C33; border-bottom: 1px solid #F9FAFB; vertical-align: middle; }
+  .name-cell { font-weight: 600; }
+  .actions-cell {
+    display: flex; gap: 8px;
+    .action-icon {
+      background: none; border: none; color: #9CA3AF; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; transition: 0.2s;
+      &:hover { background: #F3F4F6; color: $color-navy; }
+      &.delete:hover { color: $color-red; background: #FEF2F2; }
+    }
+  }
+}
+
+.empty-state-section { text-align: center; padding: 60px 0; }
+
+/* ================= SECURITY & TOGGLE STYLES ================= */
+.security-settings-wrapper {
+  padding: 12px 0;
+  .security-item-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #F9FAFB;
+    padding: 24px;
+    border-radius: 12px;
+    border: 1px solid $color-gray-border;
+
+    .security-info {
+      h3 { font-size: 16px; font-weight: 700; color: #0B1C33; margin: 0 0 6px 0; }
+      p { font-size: 13px; color: $color-gray-text; margin: 0; max-width: 600px; line-height: 1.5; }
+    }
+  }
+}
+
+/* Toggle Switch CSS */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 52px;
+  height: 28px;
+
+  input { opacity: 0; width: 0; height: 0; }
+
+  .slider {
+    position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #CBD5E1; transition: .3s; border-radius: 28px;
+    
+    &:before {
+      position: absolute; content: ""; height: 22px; width: 22px; left: 3px; bottom: 3px;
+      background-color: white; transition: .3s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+  }
+
+  input:checked + .slider { background-color: #007bff; }
+  input:focus + .slider { box-shadow: 0 0 1px #007bff; }
+  input:checked + .slider:before { transform: translateX(24px); }
+}
+
+/* ================= MODALS & TOASTS ================= */
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+.modal-content { background: white; border-radius: 12px; width: 400px; padding: 24px; &.modal-wide { width: 600px; } }
+.modal-header { margin-bottom: 20px; h2 { font-size: 18px; color: $color-navy; margin-bottom: 4px; display: flex; gap: 8px; } .breadcrumb { font-size: 11px; color: $color-gray-text; } }
+.modal-body {
+  margin-bottom: 24px; &.flex-row { display: flex; gap: 16px; }
+  .form-group { display: flex; flex-direction: column; gap: 8px; &.flex-1 { flex: 1; } label { font-size: 12px; font-weight: 600; color: $color-navy; } input, select { padding: 10px 12px; border: 1px solid $color-gray-border; border-radius: 8px; font-size: 13px; outline: none; background: #F9FAFB; &:focus { border-color: $color-navy; } } }
+}
+.modal-footer { display: flex; justify-content: flex-end; gap: 12px; }
+.btn-primary { background: $color-navy; color: white; border: none; padding: 9px 20px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.btn-cancel { background: transparent; color: $color-gray-text; border: 1px solid $color-gray-border; padding: 9px 20px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; &.text-red { color: $color-red; border-color: $color-red; } }
+.btn-danger { background: $color-red; color: white; border: none; padding: 9px 20px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; }
+
+.toast-container { position: fixed; top: 32px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 12px; }
+.toast {
+  padding: 12px 24px; border-radius: 8px; display: flex; align-items: center; gap: 12px; font-weight: 500; font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  &.success { background-color: #ECFDF5; color: #10B981; border: 1px solid #A7F3D0; }
+  &.error { background-color: #FEF2F2; color: #EF4444; border: 1px solid #FECACA; }
+}
+
+.delete-modal { padding: 40px 24px 24px !important; position: relative; text-align: center; width: 360px !important; border-radius: 16px !important; }
+.delete-icon-wrapper { width: 48px; height: 48px; background: #FEF2F2; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: absolute; top: -24px; left: 50%; transform: translateX(-50%); }
+.delete-title { color: #EF4444; font-size: 18px; font-weight: 700; margin-top: 8px; margin-bottom: 24px; }
+.delete-actions { display: flex; justify-content: center; gap: 16px; button { padding: 10px 0; font-size: 14px; width: 130px; display: flex; justify-content: center; align-items: center; gap: 6px; border-radius: 24px; } }

@@ -11,11 +11,12 @@ import { SettingsService, Category, Role } from './settings.service';
   styleUrls: ['./settings.component.scss']
 })
 export class SettingsComponent implements OnInit {
-  activeTab: 'roles' | 'categories' = 'roles';
+  activeTab: 'roles' | 'categories' | 'security' = 'roles';
   searchQuery = '';
   
   roles: Role[] = [];
   categories: Category[] = [];
+  isTwoFactorEnabled: boolean = false;
   
   isAddRoleModalOpen = false;
   isAddCategoryModalOpen = false;
@@ -28,7 +29,6 @@ export class SettingsComponent implements OnInit {
 
   assignToOptions = ['Program', 'Portfolio', 'Project', 'Task'];
 
-  // Toast States
   successMessage: string = '';
   errorMessage: string = '';
 
@@ -42,22 +42,21 @@ export class SettingsComponent implements OnInit {
     this.loadData();
   }
 
-  // --- Toast Helpers ---
   showSuccess(message: string) {
     this.successMessage = message;
-    this.errorMessage = ''; // Clear any existing errors
+    this.errorMessage = '';
     this.cdr.detectChanges();
     setTimeout(() => { this.successMessage = ''; this.cdr.detectChanges(); }, 3000);
   }
 
   showError(message: string) {
     this.errorMessage = message;
-    this.successMessage = ''; // Clear any existing successes
+    this.successMessage = '';
     this.cdr.detectChanges();
     setTimeout(() => { this.errorMessage = ''; this.cdr.detectChanges(); }, 3000);
   }
 
-  switchTab(tab: 'roles' | 'categories') {
+  switchTab(tab: 'roles' | 'categories' | 'security') {
     this.activeTab = tab;
     this.searchQuery = '';
     this.loadData();
@@ -67,30 +66,47 @@ export class SettingsComponent implements OnInit {
     if (isPlatformBrowser(this.platformId)) {
       if (this.activeTab === 'roles') {
         this.settingsService.getRoles().subscribe({
-          next: (res) => {
-            this.roles = res || [];
-            this.cdr.detectChanges();
-          },
-          error: (err) => {
-            console.error('Failed to load roles:', err);
-            this.roles = [];
-            this.cdr.detectChanges(); 
-          }
+          next: (res) => { this.roles = res || []; this.cdr.detectChanges(); },
+          error: (err) => { console.error('Failed to load roles:', err); this.roles = []; this.cdr.detectChanges(); }
         });
-      } else {
+      } else if (this.activeTab === 'categories') {
         this.settingsService.getCategories(this.searchQuery).subscribe({
-          next: (res) => {
-            this.categories = res || [];
-            this.cdr.detectChanges();
-          },
-          error: (err) => {
-            console.error('Failed to load categories:', err);
-            this.categories = [];
-            this.cdr.detectChanges();
-          }
+          next: (res) => { this.categories = res || []; this.cdr.detectChanges(); },
+          error: (err) => { console.error('Failed to load categories:', err); this.categories = []; this.cdr.detectChanges(); }
         });
+      } else if (this.activeTab === 'security') {
+        // جلب حالة الـ 2FA الحالية للمستخدم من التخزين المحلي أو الـ API
+        const userId = localStorage.getItem('auth_userId') || '';
+        // افتراضياً يمكن جلب الحالة أو حفظها، وهنا نربطها بالتخزين أو حالة مبدئية
+        this.isTwoFactorEnabled = localStorage.getItem('auth_2fa') === 'true';
+        this.cdr.detectChanges();
       }
     }
+  }
+
+  // --- Toggle 2FA Action ---
+  toggleTwoFactor(event: any) {
+    const isChecked = event.target.checked;
+    const userId = localStorage.getItem('auth_userId');
+
+    if (!userId) {
+      this.showError('User ID not found!');
+      event.target.checked = !isChecked; // إعادة الزر لحالته السابقة
+      return;
+    }
+
+    this.settingsService.toggle2Fa(userId, isChecked).subscribe({
+      next: (res: any) => {
+        this.isTwoFactorEnabled = isChecked;
+        localStorage.setItem('auth_2fa', isChecked.toString());
+        this.showSuccess(res.message || '2FA status updated successfully');
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        event.target.checked = !isChecked; // إعادة الزر لحالته السابقة عند الفشل
+        this.showError('Failed to update 2FA status');
+      }
+    });
   }
 
   onSearch() {
@@ -108,10 +124,8 @@ export class SettingsComponent implements OnInit {
     }
   }
 
-  // --- Role Actions ---
   saveRole() {
     if (!this.newRoleName.trim()) return;
-    
     this.settingsService.createRole(this.newRoleName).subscribe({
       next: () => {
         this.isAddRoleModalOpen = false;
@@ -130,12 +144,9 @@ export class SettingsComponent implements OnInit {
     });
   }
 
-  // --- Category Actions ---
   saveCategory() {
     if (!this.newCategoryName.trim() || !this.newCategoryAssignTo) return;
-    
     const newCat: Category = { name: this.newCategoryName, assignTo: this.newCategoryAssignTo };
-    
     this.settingsService.createCategory(newCat).subscribe({
       next: () => {
         this.isAddCategoryModalOpen = false;

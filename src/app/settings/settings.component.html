@@ -1,6 +1,6 @@
 <div class="settings-page">
   
-  <!-- TOAST NOTIFICATIONS (Matches Figma perfectly) -->
+  <!-- TOAST NOTIFICATIONS -->
   <div class="toast-container" *ngIf="successMessage || errorMessage">
     <div class="toast success" *ngIf="successMessage">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
@@ -18,21 +18,22 @@
   <!-- The White Card Container -->
   <div class="portfolios-content-card">
     
-    <!-- Tabs Section -->
+    <!-- Tabs Section (Added Security Tab) -->
     <div class="tabs-header">
       <button class="tab-link" [class.active]="activeTab === 'roles'" (click)="switchTab('roles')">Roles</button>
       <button class="tab-link" [class.active]="activeTab === 'categories'" (click)="switchTab('categories')">Categories</button>
+      <button class="tab-link" [class.active]="activeTab === 'security'" (click)="switchTab('security')">Security & 2FA</button>
     </div>
 
-    <!-- Toolbar -->
-    <div class="toolbar-row">
+    <!-- Toolbar (Hidden on Security tab) -->
+    <div class="toolbar-row" *ngIf="activeTab !== 'security'">
       <div class="tab-title">
         <h3 *ngIf="activeTab === 'roles'">All Roles</h3>
         <h3 *ngIf="activeTab === 'categories'">All Categories</h3>
       </div>
 
       <div class="toolbar-actions">
-        <div class="search-box">
+        <div class="search-box" *ngIf="activeTab === 'categories'">
           <input type="text" placeholder="Search for everything" [(ngModel)]="searchQuery" (ngModelChange)="onSearch()" />
         </div>
         <button class="create-btn" (click)="openCreateModal()">+ Create New</button>
@@ -40,7 +41,7 @@
     </div>
 
     <!-- Empty State -->
-    <div class="empty-state-section" *ngIf="(activeTab === 'roles' && roles.length === 0) || (activeTab === 'categories' && categories.length === 0)">
+    <div class="empty-state-section" *ngIf="activeTab !== 'security' && ((activeTab === 'roles' && roles.length === 0) || (activeTab === 'categories' && categories.length === 0))">
       <img src="assets/images/empty-data.svg" alt="No data" class="empty-img" style="width: 120px; margin-bottom: 16px;" />
       <div class="empty-title" style="font-size: 18px; font-weight: 700; color: #0B1C33; margin-bottom: 8px;">No data right now</div>
       <p style="color: #6B7280; font-size: 13px;">Please click on <strong>create new</strong> to choose the suitable option</p>
@@ -85,19 +86,36 @@
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
               </button>
               <button class="action-icon" title="Settings">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1.05 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1.05 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06-.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
               </button>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
+
+    <!-- SECURITY & 2FA TAB CONTENT -->
+    <div class="security-settings-wrapper" *ngIf="activeTab === 'security'">
+      <div class="security-item-card">
+        <div class="security-info">
+          <h3>Two-Factor Authentication (2FA)</h3>
+          <p>Protect your account with an additional layer of security. When enabled, a verification code will be sent to your email upon login.</p>
+        </div>
+        <div class="toggle-switch-container">
+          <label class="switch">
+            <input type="checkbox" [checked]="isTwoFactorEnabled" (change)="toggleTwoFactor($event)">
+            <span class="slider round"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
 <!-- ================= MODALS ================= -->
 
-<!-- Add Role Modal (unchanged) -->
+<!-- Add Role Modal -->
 <div class="modal-overlay" *ngIf="isAddRoleModalOpen">
   <div class="modal-content">
     <div class="modal-header">
@@ -117,7 +135,7 @@
   </div>
 </div>
 
-<!-- Add Category Modal (unchanged) -->
+<!-- Add Category Modal -->
 <div class="modal-overlay" *ngIf="isAddCategoryModalOpen">
   <div class="modal-content modal-wide">
     <div class="modal-header">
@@ -144,20 +162,15 @@
   </div>
 </div>
 
-<!-- Delete Category Modal (Matches Figma!) -->
+<!-- Delete Category Modal -->
 <div class="modal-overlay" *ngIf="isDeleteCategoryModalOpen">
   <div class="modal-content delete-modal">
-    <!-- Floating Icon -->
     <div class="delete-icon-wrapper">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
     </div>
-    
     <h3 class="delete-title">Delete Category?</h3>
-    
     <div class="delete-actions">
-      <button class="btn-cancel text-red" (click)="isDeleteCategoryModalOpen = false">
-        ✕ Cancel
-      </button>
+      <button class="btn-cancel text-red" (click)="isDeleteCategoryModalOpen = false">✕ Cancel</button>
       <button class="btn-danger" (click)="deleteCategory()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
         Delete

@@ -1,18 +1,19 @@
 export const environment = {
   production: false,
-  apiUrl: 'https://localhost:44319/api',
+  apiUrl: 'https://localhost:7130',
   endpoints: {
     auth: {
-      login: '/Auth/login',
-      register: '/Auth/register',
-      allUsers: '/Auth/all-users',
-      changePassword: '/Auth/change-password',
-      forgotPassword: '/Auth/forgot-password',
-      resetPassword: '/Auth/reset-password',
-      createRole: '/Auth/create-role',
-      roles: '/Auth/roles',
-      createSuperAdmin: '/Auth/create-superadmin',
-      deleteUser: '/Auth/delete-user'
+      login: '/api/Auth/login',
+      register: '/api/Auth/register',
+      verifyLogin2Fa: '/api/Auth/verify-login-2fa',
+      allUsers: '/api/Auth/all-users',
+      changePassword: '/api/Auth/change-password',
+      forgotPassword: '/api/Auth/forgot-password',
+      resetPassword: '/api/Auth/reset-password',
+      createRole: '/api/Auth/create-role',
+      roles: '/api/Auth/roles',
+      createSuperAdmin: '/api/Auth/create-superadmin',
+      deleteUser: '/api/Auth/delete-user'
     }
   }
 };

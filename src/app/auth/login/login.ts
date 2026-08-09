@@ -14,6 +14,7 @@ type LangCode = 'ar' | 'en';
   styleUrl: './login.scss'
 })
 export class LoginComponent implements OnInit, OnDestroy {
+  currentStep: number = 1; // 1 = Login form, 2 = OTP Verification
   passwordType: string = 'password';
   isPasswordHidden: boolean = true;
   activeIndex = 0;
@@ -21,6 +22,9 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   phone: string = '';
   password: string = '';
+  userId: string = '';
+  otpDigits: string[] = ['', '', '', '', '', ''];
+  maskedEmail: string = '';
 
   isLoading: boolean = false;
   errorMessage: string = '';
@@ -39,6 +43,11 @@ export class LoginComponent implements OnInit, OnDestroy {
       loadingButton: 'جاري الدخول...',
       genericError: 'حدث خطأ، حاول مرة أخرى',
       credentialError: 'رقم الجوال أو الرقم السري غير صحيح!',
+      otpTitle: 'رمز التحقق (OTP)',
+      otpSubtitle: 'أدخل رمز التحقق المرسل إلى بريدك الإلكتروني',
+      confirmBtn: 'تأكيد الرمز',
+      confirmingBtn: 'جاري التأكيد...',
+      invalidOtpError: 'يرجى إدخال رمز التحقق بالكامل (6 أرقام)',
       slides: [
         {
           title: 'تحكم في كل مشروع من مكان واحد',
@@ -68,6 +77,11 @@ export class LoginComponent implements OnInit, OnDestroy {
       loadingButton: 'Logging in...',
       genericError: 'Something went wrong, please try again',
       credentialError: 'Incorrect phone number or password!',
+      otpTitle: 'Verification Code (OTP)',
+      otpSubtitle: 'Enter the verification code sent to your email',
+      confirmBtn: 'Confirm',
+      confirmingBtn: 'Confirming...',
+      invalidOtpError: 'Please enter the full 6-digit verification code',
       slides: [
         {
           title: 'Control Every Project From One Place',
@@ -164,6 +178,53 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.phone = input.value;
   }
 
+  // Handle single digit OTP entries
+  onOtpDigitInput(event: Event, index: number) {
+    const input = event.target as HTMLInputElement;
+    let val = input.value.replace(/[^0-9]/g, '');
+    if (val.length > 0) {
+      val = val.substring(val.length - 1);
+    }
+    input.value = val;
+    this.otpDigits[index] = val;
+
+    if (val && index < 5) {
+      const nextInput = document.getElementById(`otp-${index + 1}`) as HTMLInputElement;
+      if (nextInput) {
+        nextInput.focus();
+        nextInput.select();
+      }
+    }
+    this.cdr.detectChanges();
+  }
+
+  // Handle backspace navigation for OTP inputs
+  onOtpKeyDown(event: KeyboardEvent, index: number) {
+    if (event.key === 'Backspace') {
+      if (!this.otpDigits[index] && index > 0) {
+        const prevInput = document.getElementById(`otp-${index - 1}`) as HTMLInputElement;
+        if (prevInput) {
+          prevInput.focus();
+          this.otpDigits[index - 1] = '';
+          prevInput.select();
+        }
+      } else {
+        this.otpDigits[index] = '';
+      }
+      this.cdr.detectChanges();
+    }
+  }
+
+  goBack() {
+    if (this.currentStep === 2) {
+      this.currentStep = 1;
+      this.errorMessage = '';
+      this.otpDigits = ['', '', '', '', '', ''];
+    }
+    this.cdr.detectChanges();
+  }
+
+  // Step 1: Submit credentials
   onSubmit() {
     this.errorMessage = '';
 
@@ -174,27 +235,35 @@ export class LoginComponent implements OnInit, OnDestroy {
 
     this.isLoading = true;
 
-    // Remove leading zero or whitespace
     let formattedPhone = this.phone.trim();
     if (formattedPhone.startsWith('0')) {
       formattedPhone = formattedPhone.substring(1);
     }
-    // Prepend country code
     const fullPhone = '+966' + formattedPhone;
 
     this.authService.login({ phone: fullPhone, password: this.password }).subscribe({
       next: (response) => {
         this.isLoading = false;
         
-        if (response && response.token) {
-          this.authService.saveSession(response);
+        if (response && response.requiresTwoFactor) {
+          this.userId = response.userId;
           
-          this.ngZone.run(() => {
-            this.router.navigate(['/dashboard']).then(
-              (success) => console.log('Navigation success:', success),
-              (error) => console.log('Navigation error:', error)          
-            );
-          });
+          const userEmail = response.email || '';
+          if (userEmail.includes('@')) {
+            const parts = userEmail.split('@');
+            const name = parts[0];
+            const domain = parts[1];
+            const maskedName = name.length > 2 ? name.substring(0, 2) + '***' : name + '***';
+            this.maskedEmail = `${maskedName}@${domain}`;
+          } else {
+            this.maskedEmail = userEmail;
+          }
+
+          this.currentStep = 2;
+        } 
+        else if (response && response.token) {
+          this.authService.saveSession(response);
+          this.redirectToDashboard();
         } else {
           this.errorMessage = this.t.credentialError;
         }
@@ -209,6 +278,47 @@ export class LoginComponent implements OnInit, OnDestroy {
         }
         this.cdr.detectChanges();
       }
+    });
+  }
+
+  // Step 2: Confirm login OTP code
+  confirmLoginOtp() {
+    this.errorMessage = '';
+    const code = this.otpDigits.join('');
+
+    if (code.length < 6) {
+      this.errorMessage = this.t.invalidOtpError;
+      return;
+    }
+
+    this.isLoading = true;
+
+    this.authService.verifyLogin2Fa(this.userId, code).subscribe({
+      next: (response) => {
+        this.isLoading = false;
+        if (response && response.token) {
+          this.authService.saveSession(response);
+          this.redirectToDashboard();
+        } else {
+          this.errorMessage = this.t.genericError;
+        }
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.isLoading = false;
+        if (err.error && typeof err.error === 'string') {
+          this.errorMessage = err.error;
+        } else {
+          this.errorMessage = this.currentLang === 'ar' ? 'رمز التحقق غير صحيح أو انتهت صلاحيته!' : 'Invalid or expired verification code!';
+        }
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  private redirectToDashboard() {
+    this.ngZone.run(() => {
+      this.router.navigate(['/dashboard']);
     });
   }
 }

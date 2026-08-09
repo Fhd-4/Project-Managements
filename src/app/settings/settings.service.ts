@@ -46,4 +46,12 @@ export class SettingsService {
   createRole(roleName: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/Auth/create-role`, { roleName });
   }
+
+  // --- Security & 2FA API ---
+  toggle2Fa(userId: string, enable: boolean): Observable<any> {
+    return this.http.post(`${this.apiUrl}/api/Auth/toggle-2fa`, {
+      userId: userId,
+      enable: enable
+    });
+  }
 }
