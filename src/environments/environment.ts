@@ -15,7 +15,6 @@ export const environment = {
       roles: '/Auth/roles',
       createSuperAdmin: '/Auth/create-superadmin',
       deleteUser: '/Auth/delete-user'
-  
     }
   }
 };
