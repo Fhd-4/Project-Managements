@@ -49,7 +49,7 @@ export class SettingsService {
 
   // --- Security & 2FA API ---
   toggle2Fa(userId: string, enable: boolean): Observable<any> {
-    return this.http.post(`${this.apiUrl}/api/Auth/toggle-2fa`, {
+    return this.http.post(`${this.apiUrl}/Auth/toggle-2fa`, {
       userId: userId,
       enable: enable
     });
