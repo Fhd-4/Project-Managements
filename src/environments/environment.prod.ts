@@ -6,7 +6,7 @@ export const environment = {
       login: '/Auth/login',
       register: '/Auth/register',
       verifyLogin2Fa: '/Auth/verify-login-2fa',
-      toggle2Fa: '/Auth/toggle-2fa',
+      toggle2Fa: '/api/Auth/toggle-2fa',
       allUsers: '/Auth/all-users',
       changePassword: '/Auth/change-password',
       forgotPassword: '/Auth/forgot-password',
