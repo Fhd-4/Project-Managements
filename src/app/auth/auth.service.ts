@@ -32,6 +32,9 @@ export class AuthService {
       if (response.user) {
         localStorage.setItem('auth_userId', response.user.id || '');
       }
+      if (response.user && response.user.isTwoFactorEnabled !== undefined) {
+        localStorage.setItem('auth_2fa', response.user.isTwoFactorEnabled.toString());
+      }
     }
   }
 

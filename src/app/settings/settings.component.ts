@@ -105,6 +105,7 @@ export class SettingsComponent implements OnInit {
       error: (err) => {
         event.target.checked = !isChecked; // إعادة الزر لحالته السابقة عند الفشل
         this.showError('Failed to update 2FA status');
+        this.cdr.detectChanges();
       }
     });
   }
