@@ -3,19 +3,19 @@ export const environment = {
   apiUrl: 'https://prosync-swagger.runasp.net/api',
   endpoints: {
     auth: {
-      login: '/api/Auth/login',
-      register: '/api/Auth/register',
-      verifyLogin2Fa: '/api/Auth/verify-login-2fa',
-      toggle2Fa: '/api/Auth/toggle-2fa',
-      allUsers: '/api/Auth/all-users',
-      changePassword: '/api/Auth/change-password',
-      forgotPassword: '/api/Auth/forgot-password',
-      resetPassword: '/api/Auth/reset-password',
-      createRole: '/api/Auth/create-role',
-      roles: '/api/Auth/roles',
-      createSuperAdmin: '/api/Auth/create-superadmin',
-      deleteUser: '/api/Auth/delete-user'
-    
+      login: '/Auth/login',
+      register: '/Auth/register',
+      verifyLogin2Fa: '/Auth/verify-login-2fa',
+      toggle2Fa: '/Auth/toggle-2fa',
+      allUsers: '/Auth/all-users',
+      changePassword: '/Auth/change-password',
+      forgotPassword: '/Auth/forgot-password',
+      resetPassword: '/Auth/reset-password',
+      createRole: '/Auth/create-role',
+      roles: '/Auth/roles',
+      createSuperAdmin: '/Auth/create-superadmin',
+      deleteUser: '/Auth/delete-user'
+  
     }
   }
 };
