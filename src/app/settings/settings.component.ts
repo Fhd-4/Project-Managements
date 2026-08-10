@@ -75,11 +75,22 @@ export class SettingsComponent implements OnInit {
           error: (err) => { console.error('Failed to load categories:', err); this.categories = []; this.cdr.detectChanges(); }
         });
       } else if (this.activeTab === 'security') {
-        // جلب حالة الـ 2FA الحالية للمستخدم من التخزين المحلي أو الـ API
+        // جلب حالة الـ 2FA الحالية مباشرة من الـ Endpoint المخصصة في السيرفر
         const userId = localStorage.getItem('auth_userId') || '';
-        // افتراضياً يمكن جلب الحالة أو حفظها، وهنا نربطها بالتخزين أو حالة مبدئية
-        this.isTwoFactorEnabled = localStorage.getItem('auth_2fa') === 'true';
-        this.cdr.detectChanges();
+        if (userId) {
+          this.settingsService.getTwoFactorStatus(userId).subscribe({
+            next: (res: any) => {
+              this.isTwoFactorEnabled = res.isTwoFactorEnabled ?? false;
+              localStorage.setItem('auth_2fa', this.isTwoFactorEnabled.toString());
+              this.cdr.detectChanges();
+            },
+            error: (err) => {
+              console.error('Failed to fetch 2FA status from server:', err);
+              this.isTwoFactorEnabled = localStorage.getItem('auth_2fa') === 'true';
+              this.cdr.detectChanges();
+            }
+          });
+        }
       }
     }
   }

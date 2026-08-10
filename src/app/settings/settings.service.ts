@@ -54,4 +54,8 @@ export class SettingsService {
       enable: enable
     });
   }
+
+  getTwoFactorStatus(userId: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/Auth/2fa-status/${userId}`);
+  }
 }
