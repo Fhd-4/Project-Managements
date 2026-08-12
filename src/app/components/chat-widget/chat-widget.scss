@@ -1,0 +1,212 @@
+$primary-blue: rgb(19, 60, 150); 
+$navy-dark: #1f2937;    
+$grey-light: #f8fafc;   
+$grey-text: #64748b;    
+$border-color: #e2e8f0; 
+
+/* الأيقونة العائمة */
+.chat-fab {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 54px;
+  height: 54px;
+  background-color: $primary-blue;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.4);
+  cursor: pointer;
+  z-index: 1000;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.08);
+  }
+
+  &.close-fab {
+    background-color: $primary-blue;
+  }
+}
+
+/* حاوية نافذة الشات */
+.chat-popup-container {
+  position: fixed;
+  bottom: 95px;
+  right: 24px;
+  width: 360px;
+  height: 500px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 1000;
+  border: 1px solid $border-color;
+  font-family: inherit;
+}
+
+/* رأس النافذة */
+.chat-header {
+  background: linear-gradient(135deg, $primary-blue, $navy-dark);
+  color: white;
+  padding: 16px;
+  text-align: center;
+  position: relative;
+
+  .back-btn {
+    position: absolute;
+    top: 12px;
+    left: 16px;
+    font-size: 20px;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.8);
+    &:hover { color: white; }
+  }
+
+  .chat-title {
+    font-weight: 600;
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+
+  .chat-subtitle {
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 2px;
+  }
+
+  .chat-sub-desc {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.8);
+  }
+}
+
+/* الأيقونة البسيطة داخل الرأس والرسائل */
+.plain-avatar {
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  margin: 0 auto 6px auto;
+
+  &.small {
+    width: 26px;
+    height: 26px;
+    background: #e2e8f0;
+    border: none;
+    color: $navy-dark;
+    margin: 0;
+  }
+}
+
+/* جسم المحادثة */
+.chat-body {
+  flex: 1;
+  background: $grey-light;
+  padding: 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  .date-badge {
+    text-align: center;
+    font-size: 11px;
+    color: #94a3b8;
+    margin-bottom: 4px;
+  }
+
+  .message-row {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+
+    &.incoming {
+      align-self: flex-start;
+    }
+  }
+
+  .message-bubble {
+    background: white;
+    color: $navy-dark;
+    padding: 10px 14px;
+    border-radius: 12px 12px 12px 2px;
+    font-size: 13px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    max-width: 260px;
+    line-height: 1.4;
+  }
+
+  .quick-options {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 8px;
+    align-items: flex-start;
+
+    .option-pill {
+      background: white;
+      border: 1px solid $primary-blue;
+      color: $primary-blue;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+
+      &:hover {
+        background: #eff6ff;
+      }
+    }
+  }
+}
+
+/* شريط الإدخال السفلي */
+.chat-footer {
+  background: white;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid $border-color;
+
+  input {
+    flex: 1;
+    border: 1px solid $border-color;
+    border-radius: 20px;
+    padding: 8px 14px;
+    font-size: 13px;
+    outline: none;
+    background: #f8fafc;
+    color: $navy-dark;
+
+    &:focus {
+      border-color: $primary-blue;
+      background: white;
+    }
+  }
+
+  .attach-btn, .send-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: $grey-text;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+
+    &:hover {
+      color: $primary-blue;
+    }
+  }
+}
