@@ -5,7 +5,7 @@ import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { ProjectService } from '../project.service';
 
 type LangCode = 'ar' | 'en';
-//w
+
 @Component({
   selector: 'app-create-project',
   standalone: true,
