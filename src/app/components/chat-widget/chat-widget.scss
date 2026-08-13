@@ -129,21 +129,58 @@ $border-color: #e2e8f0;
     display: flex;
     gap: 8px;
     align-items: flex-end;
+    max-width: 85%;
 
     &.incoming {
       align-self: flex-start;
+      flex-direction: row;
+
+      .message-bubble {
+        background: white;
+        color: $navy-dark;
+        border-radius: 12px 12px 12px 2px;
+      }
+
+      .message-wrapper {
+        align-items: flex-start;
+      }
+    }
+
+    &.outgoing {
+      align-self: flex-end;
+      flex-direction: row-reverse;
+
+      .message-bubble {
+        background: $primary-blue;
+        color: white;
+        border-radius: 12px 12px 2px 12px;
+      }
+
+      .message-wrapper {
+        align-items: flex-end;
+      }
     }
   }
 
+  .message-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .message-sender {
+    font-size: 10px;
+    color: $grey-text;
+    margin: 0 4px;
+  }
+
   .message-bubble {
-    background: white;
-    color: $navy-dark;
     padding: 10px 14px;
-    border-radius: 12px 12px 12px 2px;
     font-size: 13px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     max-width: 260px;
     line-height: 1.4;
+    word-break: break-word;
   }
 
   .quick-options {

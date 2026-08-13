@@ -22,18 +22,55 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     { user: 'Support', message: 'Hello! 👋 Need help tracking project milestones or updating a task status?', isIncoming: true }
   ];
 
+  currentUserId = '';
+
   private messageSub!: Subscription;
 
   constructor(private chatService: ChatService) {}
 
   ngOnInit() {
+    this.resolveCurrentUser();
+    this.chatService.startConnection();
+
     // استقبال الرسائل الحية عند حدوث الـ Event (ReceiveMessage)
     this.messageSub = this.chatService.currentMessage$.subscribe(data => {
       if (data) {
-        this.messages.push(data);
-        this.scrollToBottom();
+        // منع تكرار الرسالة الصادرة من المرسل نفسه (لأنها تضاف محلياً فور الإرسال)
+        const isFromSelf = data.user.trim().toLowerCase() === this.currentUserId.trim().toLowerCase() ||
+                           data.user.trim().toLowerCase() === this.currentUser.trim().toLowerCase();
+        if (!isFromSelf) {
+          this.messages.push(data);
+          this.scrollToBottom();
+        }
       }
     });
+  }
+
+  private resolveCurrentUser() {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      this.currentUserId = localStorage.getItem('auth_userId') || '';
+      const savedUserName = localStorage.getItem('auth_userName');
+      if (savedUserName) {
+        this.currentUser = savedUserName;
+      }
+
+      if (!this.currentUserId) {
+        const token = localStorage.getItem('auth_token');
+        if (token) {
+          try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            this.currentUserId = payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'] ||
+                                 payload.nameid || 
+                                 payload.unique_name || 
+                                 'yousra';
+          } catch (e) {
+            this.currentUserId = 'yousra';
+          }
+        } else {
+          this.currentUserId = 'yousra';
+        }
+      }
+    }
   }
 
   ngOnDestroy() {
@@ -59,13 +96,13 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
 
     const messageText = this.newMessage;
     
-    // إرسال الرسالة للباك إند باستخدام طريقة SendMessage
-    this.chatService.sendMessage(this.currentUser, messageText).then(() => {
-      // إضافتها محلياً للشاشة فوراً
-      this.messages.push({ user: this.currentUser, message: messageText, isIncoming: false });
-      this.newMessage = '';
-      this.scrollToBottom();
-    });
+    // إضافتها محلياً للشاشة فوراً دون انتظار رد السيرفر لمنع تأخر الاستجابة
+    this.messages.push({ user: this.currentUser, message: messageText, isIncoming: false });
+    this.newMessage = '';
+    setTimeout(() => this.scrollToBottom(), 50);
+
+    // إرسال الرسالة للباك إند بالخلفية
+    this.chatService.sendMessage(this.currentUser, messageText);
   }
 
   private scrollToBottom(): void {

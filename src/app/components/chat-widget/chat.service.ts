@@ -16,22 +16,39 @@ export class ChatService {
 
   private initConnection() {
     this.hubConnection = new signalR.HubConnectionBuilder()
-      .withUrl('http://prosync-swagger.runasp.net/chathub', {
+      .withUrl('https://prosync-swagger.runasp.net/chathub', {
+        accessTokenFactory: () => {
+          if (typeof window !== 'undefined' && window.localStorage) {
+            return localStorage.getItem('auth_token') || '';
+          }
+          return '';
+        },
         skipNegotiation: true,
         transport: signalR.HttpTransportType.WebSockets
       })
+      .configureLogging(signalR.LogLevel.Warning)
       .withAutomaticReconnect()
       .build();
 
     this.hubConnection
       .start()
-      .then(() => console.log('SignalR Connected Successfully!'))
-      .catch(err => console.error('Error while starting SignalR connection: ', err));
+      .then(() => console.log('SignalR connected successfully!'))
+      .catch(err => console.error('SignalR connection failed:', err));
 
     // الاستماع لحدث استقبال الرسائل (ReceiveMessage)
-    this.hubConnection.on('ReceiveMessage', (user: string, message: string) => {
-      this.messageSource.next({ user, message, isIncoming: true });
+    // الباك إند يرسل: senderId, content, timestamp
+    this.hubConnection.on('ReceiveMessage', (senderId: string, content: string, timestamp: string) => {
+      this.messageSource.next({ user: senderId, message: content, timestamp, isIncoming: true });
     });
+  }
+
+  // محاولة تشغيل الاتصال إذا كان مغلقاً (مثال: بعد تسجيل الدخول)
+  public startConnection() {
+    if (this.hubConnection && this.hubConnection.state === signalR.HubConnectionState.Disconnected) {
+      this.hubConnection.start()
+        .then(() => console.log('SignalR connected successfully on demand!'))
+        .catch(err => console.error('SignalR manual connection failed:', err));
+    }
   }
 
   // دالة إرسال الرسالة للباك إند عبر Method (SendMessage)
