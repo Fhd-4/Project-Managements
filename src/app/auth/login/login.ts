@@ -3,6 +3,7 @@ import { CommonModule, DOCUMENT } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../auth.service';
+import { ChatService } from '../../components/chat-widget/chat.service';
 
 type LangCode = 'ar' | 'en';
 
@@ -105,6 +106,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   constructor(
     private cdr: ChangeDetectorRef,
     private authService: AuthService,
+    private chatService: ChatService,
     private router: Router,
     private ngZone: NgZone,
     @Inject(DOCUMENT) private document: Document
@@ -263,6 +265,7 @@ export class LoginComponent implements OnInit, OnDestroy {
         } 
         else if (response && response.token) {
           this.authService.saveSession(response);
+          this.chatService.startConnection();
           this.redirectToDashboard();
         } else {
           this.errorMessage = this.t.credentialError;
@@ -298,6 +301,7 @@ export class LoginComponent implements OnInit, OnDestroy {
         this.isLoading = false;
         if (response && response.token) {
           this.authService.saveSession(response);
+          this.chatService.startConnection();
           this.redirectToDashboard();
         } else {
           this.errorMessage = this.t.genericError;
