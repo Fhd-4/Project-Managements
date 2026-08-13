@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, ElementRef, ViewChild, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ChatService } from './chat.service'; // تأكدي من مسار الخدمة الصحيح
@@ -26,7 +26,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
 
   private messageSub!: Subscription;
 
-  constructor(private chatService: ChatService) {}
+  constructor(private chatService: ChatService, private ngZone: NgZone) {}
 
   ngOnInit() {
     this.resolveCurrentUser();
@@ -39,8 +39,10 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
         const isFromSelf = data.user.trim().toLowerCase() === this.currentUserId.trim().toLowerCase() ||
                            data.user.trim().toLowerCase() === this.currentUser.trim().toLowerCase();
         if (!isFromSelf) {
-          this.messages.push(data);
-          this.scrollToBottom();
+          this.ngZone.run(() => {
+            this.messages.push(data);
+            setTimeout(() => this.scrollToBottom(), 50);
+          });
         }
       }
     });
