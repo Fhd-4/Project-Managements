@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ElementRef, ViewChild, NgZone } from '@angular/core';
+import { Component, OnInit, OnDestroy, ElementRef, ViewChild, NgZone, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ChatService } from './chat.service'; // تأكدي من مسار الخدمة الصحيح
@@ -26,7 +26,11 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
 
   private messageSub!: Subscription;
 
-  constructor(private chatService: ChatService, private ngZone: NgZone) {}
+  constructor(
+    private chatService: ChatService,
+    private ngZone: NgZone,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit() {
     this.resolveCurrentUser();
@@ -41,7 +45,11 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
         if (!isFromSelf) {
           this.ngZone.run(() => {
             this.messages.push(data);
-            setTimeout(() => this.scrollToBottom(), 50);
+            this.cdr.detectChanges(); // فرض تحديث الواجهة فوراً
+            setTimeout(() => {
+              this.scrollToBottom();
+              this.cdr.detectChanges(); // إعادة فرض التحديث بعد التمرير لضمان المظهر
+            }, 50);
           });
         }
       }
