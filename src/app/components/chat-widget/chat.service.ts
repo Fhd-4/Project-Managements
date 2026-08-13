@@ -51,9 +51,9 @@ export class ChatService {
     }
   }
 
-  // دالة إرسال الرسالة للباك إند عبر Method (SendMessage)
-  public sendMessage(user: string, message: string): Promise<void> {
-    return this.hubConnection.invoke('SendMessage', user, message)
+  // دالة إرسال الرسالة للباك إند عبر Method (SendMessage) الجماعي (بدون ID المستلم)
+  public sendMessage(message: string): Promise<void> {
+    return this.hubConnection.invoke('SendMessage', message)
       .catch(err => console.error('Error while sending message: ', err));
   }
 }

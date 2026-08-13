@@ -101,8 +101,8 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     this.newMessage = '';
     setTimeout(() => this.scrollToBottom(), 50);
 
-    // إرسال الرسالة للباك إند بالخلفية
-    this.chatService.sendMessage(this.currentUser, messageText);
+    // إرسال الرسالة للباك إند بالخلفية (الشات الجماعي يتطلب الرسالة فقط)
+    this.chatService.sendMessage(messageText);
   }
 
   private scrollToBottom(): void {
