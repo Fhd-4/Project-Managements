@@ -1,21 +1,23 @@
 import { Component, OnInit, OnDestroy, ElementRef, ViewChild, NgZone, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ChatService } from './chat.service';
+import { ChatService, ReactionEvent } from './chat.service';
 import { Subscription } from 'rxjs';
 
-export interface Reaction {
+export interface ReactionGroup {
   emoji: string;
   count: number;
-  users: string[];
+  users: string[]; // List of user IDs
 }
 
 export interface ChatMessage {
-  id?: string;
+  id?: number | string;
   user: string;
+  userId?: string;
   message: string;
   isIncoming: boolean;
-  reactions?: Reaction[];
+  timestamp?: string;
+  reactions: ReactionGroup[];
 }
 
 @Component({
@@ -33,13 +35,14 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
   currentUser = 'Yousra';
   currentUserId = '';
 
-  // Emojis and reactions state
   showInputEmojiStrip = false;
   hoveredMessageIndex: number | null = null;
+  private hoverLeaveTimeout: any;
+
   readonly emojiList: string[] = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
   
   messages: ChatMessage[] = [
-    { user: 'Support', message: 'Hello! 👋 Need help tracking project milestones or updating a task status?', isIncoming: true, reactions: [] }
+    { id: 0, user: 'Support', message: 'Hello! 👋 Need help tracking project milestones or updating a task status?', isIncoming: true, reactions: [] }
   ];
 
   isLocalTyping = false;
@@ -48,6 +51,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
 
   private messageSub!: Subscription;
   private typingSub!: Subscription;
+  private reactionSub!: Subscription;
 
   constructor(
     private chatService: ChatService,
@@ -55,11 +59,12 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef
   ) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.resolveCurrentUser();
     this.chatService.startConnection();
     this.loadHistory();
 
+    // 1. Receive incoming messages
     this.messageSub = this.chatService.currentMessage$.subscribe(data => {
       if (data) {
         const senderIdStr = String(data.userId || data.user || '').trim().toLowerCase();
@@ -71,8 +76,12 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
         if (!isFromSelf) {
           this.ngZone.run(() => {
             this.messages.push({
-              ...data,
-              reactions: data.reactions || []
+              id: data.id || Date.now(),
+              user: data.user,
+              userId: data.userId,
+              message: data.message,
+              isIncoming: true,
+              reactions: []
             });
             this.cdr.detectChanges();
             setTimeout(() => {
@@ -84,6 +93,17 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
       }
     });
 
+    // 2. Receive live SignalR reaction event
+    this.reactionSub = this.chatService.reactionReceived$.subscribe((res: ReactionEvent) => {
+      if (res) {
+        this.ngZone.run(() => {
+          this.handleLiveReaction(res);
+          this.cdr.detectChanges();
+        });
+      }
+    });
+
+    // 3. Receive typing indicator events
     this.typingSub = this.chatService.typingStatus$.subscribe(data => {
       if (data) {
         this.ngZone.run(() => {
@@ -103,46 +123,96 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     });
   }
 
-  // Insert emoji into input text
-  insertEmoji(emoji: string) {
-    this.newMessage += emoji;
-    this.onInputChange();
+  onMessageMouseEnter(index: number): void {
+    clearTimeout(this.hoverLeaveTimeout);
+    this.hoveredMessageIndex = index;
   }
 
-  // Toggle reaction on a message
-  toggleReaction(msg: ChatMessage, emoji: string) {
+  onMessageMouseLeave(): void {
+    clearTimeout(this.hoverLeaveTimeout);
+    this.hoverLeaveTimeout = setTimeout(() => {
+      this.hoveredMessageIndex = null;
+      this.cdr.detectChanges();
+    }, 400);
+  }
+
+  // Invoked when clicking an emoji on a message
+  toggleReaction(msg: ChatMessage, emoji: string): void {
+    if (!msg.id || msg.id === 0) return;
+
+    // Send to SignalR Hub
+    this.chatService.sendReaction(msg.id, emoji);
+  }
+
+  // Processes the backend broadcast: handles adds, updates, and removals
+  private handleLiveReaction(event: ReactionEvent): void {
+    const msg = this.messages.find(m => String(m.id) === String(event.messageId));
+    if (!msg) return;
+
     if (!msg.reactions) {
       msg.reactions = [];
     }
 
-    const userId = this.currentUserId || this.currentUser || 'me';
-    const existing = msg.reactions.find(r => r.emoji === emoji);
+    // Remove user's previous reaction on this message (if any)
+    msg.reactions.forEach(group => {
+      group.users = group.users.filter(u => u !== event.userId);
+      group.count = group.users.length;
+    });
 
-    if (existing) {
-      if (existing.users.includes(userId)) {
-        existing.users = existing.users.filter(u => u !== userId);
-        existing.count--;
-        if (existing.count <= 0) {
-          msg.reactions = msg.reactions.filter(r => r.emoji !== emoji);
+    // If it's not a complete removal, add user to target emoji group
+    if (!event.isRemoved) {
+      const existingGroup = msg.reactions.find(g => g.emoji === event.emoji);
+      if (existingGroup) {
+        if (!existingGroup.users.includes(event.userId)) {
+          existingGroup.users.push(event.userId);
+          existingGroup.count = existingGroup.users.length;
         }
       } else {
-        existing.users.push(userId);
-        existing.count++;
+        msg.reactions.push({
+          emoji: event.emoji,
+          count: 1,
+          users: [event.userId]
+        });
       }
-    } else {
-      msg.reactions.push({
-        emoji,
-        count: 1,
-        users: [userId]
-      });
     }
+
+    // Clean up empty reaction groups
+    msg.reactions = msg.reactions.filter(g => g.count > 0);
   }
 
-  loadHistory() {
+  // Transforms raw API reactions [{ userId, userName, emoji }] into aggregated groups
+  private formatReactionsFromHistory(rawReactions: any[]): ReactionGroup[] {
+    if (!rawReactions || !Array.isArray(rawReactions)) return [];
+
+    const groupMap = new Map<string, string[]>();
+
+    rawReactions.forEach(r => {
+      if (r.emoji) {
+        const users = groupMap.get(r.emoji) || [];
+        if (r.userId && !users.includes(r.userId)) {
+          users.push(r.userId);
+        }
+        groupMap.set(r.emoji, users);
+      }
+    });
+
+    const groups: ReactionGroup[] = [];
+    groupMap.forEach((users, emoji) => {
+      groups.push({
+        emoji,
+        count: users.length,
+        users
+      });
+    });
+
+    return groups;
+  }
+
+  loadHistory(): void {
     this.chatService.getChatHistory().subscribe({
       next: (history: any[]) => {
         if (history && Array.isArray(history)) {
-          const mapped = history.map(msg => {
+          const mapped: ChatMessage[] = history.map(msg => {
             const senderName = String(msg.senderName || msg.senderUserName || msg.userName || '').trim();
             const senderId = String(msg.senderId || msg.sender || msg.user || '').trim();
             
@@ -154,15 +224,20 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
             const isFromSelf = (senderIdLower && currentUserIdLower && senderIdLower === currentUserIdLower) ||
                                (senderNameLower && currentUserLower && senderNameLower === currentUserLower) ||
                                (senderIdLower && currentUserLower && senderIdLower === currentUserLower);
+            
             return {
+              id: msg.id ?? msg.Id,
               user: senderName || senderId,
-              message: msg.content || msg.message || '',
+              userId: senderId,
+              message: msg.content ?? msg.message ?? '',
               isIncoming: !isFromSelf,
-              reactions: msg.reactions || []
+              timestamp: msg.timestamp ?? '',
+              reactions: this.formatReactionsFromHistory(msg.reactions ?? msg.Reactions)
             };
           });
+
           this.messages = [
-            { user: 'Support', message: 'Hello! 👋 Need help tracking project milestones or updating a task status?', isIncoming: true, reactions: [] },
+            { id: 0, user: 'Support', message: 'Hello! 👋 Need help tracking project milestones or updating a task status?', isIncoming: true, reactions: [] },
             ...mapped
           ];
           this.cdr.detectChanges();
@@ -178,7 +253,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     });
   }
 
-  private resolveCurrentUser() {
+  private resolveCurrentUser(): void {
     if (typeof window !== 'undefined' && window.localStorage) {
       this.currentUserId = localStorage.getItem('auth_userId') || '';
       const savedUserName = localStorage.getItem('auth_userName');
@@ -205,30 +280,47 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     }
   }
 
-  ngOnDestroy() {
-    if (this.messageSub) this.messageSub.unsubscribe();
-    if (this.typingSub) this.typingSub.unsubscribe();
+  insertEmoji(emoji: string): void {
+    this.newMessage += emoji;
+    this.onInputChange();
   }
 
-  toggleChat() {
+  ngOnDestroy(): void {
+    if (this.hoverLeaveTimeout) clearTimeout(this.hoverLeaveTimeout);
+    if (this.typingTimeout) clearTimeout(this.typingTimeout);
+    if (this.messageSub) this.messageSub.unsubscribe();
+    if (this.typingSub) this.typingSub.unsubscribe();
+    if (this.reactionSub) this.reactionSub.unsubscribe();
+  }
+
+  toggleChat(): void {
     this.isOpen = !this.isOpen;
     if (this.isOpen) {
       setTimeout(() => this.scrollToBottom(), 100);
     }
   }
 
-  sendQuickMessage(text: string) {
+  sendQuickMessage(text: string): void {
     this.newMessage = text;
     this.sendMessage();
   }
 
-  sendMessage() {
+  sendMessage(): void {
     if (!this.newMessage.trim()) return;
 
     this.stopLocalTyping();
     const messageText = this.newMessage;
     
-    this.messages.push({ user: this.currentUser, message: messageText, isIncoming: false, reactions: [] });
+    // Add locally for instant UI feedback
+    this.messages.push({ 
+      id: Date.now(), 
+      user: this.currentUser, 
+      userId: this.currentUserId,
+      message: messageText, 
+      isIncoming: false, 
+      reactions: [] 
+    });
+    
     this.newMessage = '';
     this.showInputEmojiStrip = false;
     setTimeout(() => this.scrollToBottom(), 50);
@@ -236,7 +328,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     this.chatService.sendMessage(messageText);
   }
 
-  onInputChange() {
+  onInputChange(): void {
     if (!this.isLocalTyping) {
       this.isLocalTyping = true;
       this.chatService.startTyping();
@@ -247,7 +339,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     }, 2000);
   }
 
-  stopLocalTyping() {
+  stopLocalTyping(): void {
     if (this.isLocalTyping) {
       this.isLocalTyping = false;
       this.chatService.stopTyping();
