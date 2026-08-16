@@ -205,6 +205,66 @@ $border-color: #e2e8f0;
       }
     }
   }
+
+  .typing-indicator-row {
+    display: flex;
+    align-self: flex-start;
+    margin: 4px 8px;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .typing-bubble {
+    background: white;
+    color: $grey-text;
+    padding: 8px 12px;
+    border-radius: 12px 12px 12px 2px;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border: 1px solid $border-color;
+
+    .typing-text {
+      font-style: italic;
+    }
+
+    .dots-container {
+      display: flex;
+      gap: 3px;
+      align-items: center;
+
+      .dot {
+        width: 4px;
+        height: 4px;
+        background-color: $grey-text;
+        border-radius: 50%;
+        display: inline-block;
+        animation: bounce 1.4s infinite ease-in-out both;
+
+        &:nth-child(1) {
+          animation-delay: -0.32s;
+        }
+        &:nth-child(2) {
+          animation-delay: -0.16s;
+        }
+      }
+    }
+  }
+}
+
+@keyframes bounce {
+  0%, 80%, 100% { 
+    transform: scale(0);
+  } 
+  40% { 
+    transform: scale(1.0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* شريط الإدخال السفلي */

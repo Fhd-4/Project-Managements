@@ -12,6 +12,9 @@ export class ChatService {
   private messageSource = new BehaviorSubject<any>(null);
   public currentMessage$ = this.messageSource.asObservable();
 
+  private typingSource = new BehaviorSubject<{ user: string, isTyping: boolean } | null>(null);
+  public typingStatus$ = this.typingSource.asObservable();
+
   constructor(private http: HttpClient) {
     this.initConnection();
   }
@@ -36,6 +39,11 @@ export class ChatService {
       .start()
       .then(() => console.log('SignalR connected successfully!'))
       .catch(err => console.error('SignalR connection failed:', err));
+
+    // الاستماع لحدث بدء/إيقاف الكتابة (UserTyping)
+    this.hubConnection.on('UserTyping', (userName: string, isTyping: boolean) => {
+      this.typingSource.next({ user: userName, isTyping });
+    });
 
     // الاستماع لحدث استقبال الرسائل (ReceiveMessage) بشكل ديناميكي (كائن واحد أو 3 أو 4 بارامترات)
     this.hubConnection.on('ReceiveMessage', (...args: any[]) => {
@@ -100,5 +108,23 @@ export class ChatService {
       'Authorization': `Bearer ${token}`
     });
     return this.http.get(`${API_CONFIG.baseUrl}/Chat/history`, { headers });
+  }
+
+  // إرسال إشارة بدء الكتابة للباك إند
+  public startTyping(): Promise<void> {
+    if (this.hubConnection && this.hubConnection.state === signalR.HubConnectionState.Connected) {
+      return this.hubConnection.invoke('StartTyping')
+        .catch(err => console.error('Error while sending StartTyping: ', err));
+    }
+    return Promise.resolve();
+  }
+
+  // إرسال إشارة إيقاف الكتابة للباك إند
+  public stopTyping(): Promise<void> {
+    if (this.hubConnection && this.hubConnection.state === signalR.HubConnectionState.Connected) {
+      return this.hubConnection.invoke('StopTyping')
+        .catch(err => console.error('Error while sending StopTyping: ', err));
+    }
+    return Promise.resolve();
   }
 }

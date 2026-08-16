@@ -23,8 +23,12 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
   ];
 
   currentUserId = '';
+  isLocalTyping = false;
+  typingTimeout: any;
+  typingUsers = new Set<string>();
 
   private messageSub!: Subscription;
+  private typingSub!: Subscription;
 
   constructor(
     private chatService: ChatService,
@@ -57,6 +61,26 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
             }, 50);
           });
         }
+      }
+    });
+
+    // استقبال حالات الكتابة الحية (UserTyping)
+    this.typingSub = this.chatService.typingStatus$.subscribe(data => {
+      if (data) {
+        this.ngZone.run(() => {
+          // عدم إظهار يكتب الآن لرسالتك الخاصة
+          const userStr = String(data.user || '').trim().toLowerCase();
+          const currentUserStr = String(this.currentUser || '').trim().toLowerCase();
+          if (userStr !== currentUserStr) {
+            if (data.isTyping) {
+              this.typingUsers.add(data.user);
+            } else {
+              this.typingUsers.delete(data.user);
+            }
+            this.cdr.detectChanges();
+            setTimeout(() => this.scrollToBottom(), 50);
+          }
+        });
       }
     });
   }
@@ -132,6 +156,9 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     if (this.messageSub) {
       this.messageSub.unsubscribe();
     }
+    if (this.typingSub) {
+      this.typingSub.unsubscribe();
+    }
   }
 
   toggleChat() {
@@ -149,6 +176,9 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
   sendMessage() {
     if (!this.newMessage.trim()) return;
 
+    // إيقاف إشارة الكتابة للمرسل فور الإرسال
+    this.stopLocalTyping();
+
     const messageText = this.newMessage;
     
     // إضافتها محلياً للشاشة فوراً دون انتظار رد السيرفر لمنع تأخر الاستجابة
@@ -158,6 +188,36 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
 
     // إرسال الرسالة للباك إند بالخلفية (الشات الجماعي يتطلب الرسالة فقط)
     this.chatService.sendMessage(messageText);
+  }
+
+  onInputChange() {
+    if (!this.isLocalTyping) {
+      this.isLocalTyping = true;
+      this.chatService.startTyping();
+    }
+    clearTimeout(this.typingTimeout);
+    this.typingTimeout = setTimeout(() => {
+      this.stopLocalTyping();
+    }, 2000);
+  }
+
+  stopLocalTyping() {
+    if (this.isLocalTyping) {
+      this.isLocalTyping = false;
+      this.chatService.stopTyping();
+    }
+  }
+
+  getTypingText(): string {
+    const usersArray = Array.from(this.typingUsers);
+    if (usersArray.length === 1) {
+      return `${usersArray[0]} is typing`;
+    } else if (usersArray.length === 2) {
+      return `${usersArray[0]} and ${usersArray[1]} are typing`;
+    } else if (usersArray.length > 2) {
+      return 'Multiple people are typing';
+    }
+    return '';
   }
 
   private scrollToBottom(): void {

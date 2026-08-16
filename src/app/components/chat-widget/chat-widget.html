@@ -46,6 +46,18 @@
       </div>
     </div>
 
+    <!-- مؤشر الكتابة الجماعي الحية -->
+    <div class="typing-indicator-row" *ngIf="typingUsers.size > 0">
+      <div class="typing-bubble">
+        <span class="typing-text">{{ getTypingText() }}</span>
+        <div class="dots-container">
+          <span class="dot"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
+        </div>
+      </div>
+    </div>
+
     <div class="quick-options" *ngIf="messages.length <= 1">
       <button class="option-pill" (click)="sendQuickMessage('Check project milestones!')">Check project milestones!</button>
       <button class="option-pill" (click)="sendQuickMessage('Talk to project manager!')">Talk to project manager!</button>
@@ -63,6 +75,7 @@
     <input 
       type="text" 
       [(ngModel)]="newMessage" 
+      (input)="onInputChange()"
       (keyup.enter)="sendMessage()" 
       placeholder="Type your message here..." 
     />
