@@ -40,13 +40,13 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     // استقبال الرسائل الحية عند حدوث الـ Event (ReceiveMessage)
     this.messageSub = this.chatService.currentMessage$.subscribe(data => {
       if (data) {
-        // منع تكرار الرسالة الصادرة من المرسل نفسه (لأنها تضاف محلياً فور الإرسال)
-        const userStr = String(data.user || '').trim().toLowerCase();
+        // منع تكرار الرسالة الصادرة من المرسل نفسه بمقارنة الـ GUID الفريـد للمرسل
+        const senderIdStr = String(data.userId || data.user || '').trim().toLowerCase();
         const currentUserIdStr = String(this.currentUserId || '').trim().toLowerCase();
         const currentUserStr = String(this.currentUser || '').trim().toLowerCase();
         
-        const isFromSelf = (userStr && currentUserIdStr && userStr === currentUserIdStr) ||
-                           (userStr && currentUserStr && userStr === currentUserStr);
+        const isFromSelf = (senderIdStr && currentUserIdStr && senderIdStr === currentUserIdStr) ||
+                           (senderIdStr && currentUserStr && senderIdStr === currentUserStr);
         if (!isFromSelf) {
           this.ngZone.run(() => {
             this.messages.push(data);

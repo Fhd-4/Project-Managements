@@ -40,30 +40,38 @@ export class ChatService {
     // الاستماع لحدث استقبال الرسائل (ReceiveMessage) بشكل ديناميكي (كائن واحد أو 3 أو 4 بارامترات)
     this.hubConnection.on('ReceiveMessage', (...args: any[]) => {
       console.log('ReceiveMessage event args received:', args);
-      let user = '';
+      let senderId = '';
+      let senderName = '';
       let content = '';
       let timestamp = '';
 
       if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
         const msgObj = args[0];
-        const senderId = msgObj.senderId || msgObj.sender || '';
-        const senderName = msgObj.senderName || msgObj.senderUserName || msgObj.userName || '';
-        user = senderName || senderId;
+        senderId = msgObj.senderId || msgObj.sender || '';
+        senderName = msgObj.senderName || msgObj.senderUserName || msgObj.userName || '';
         content = msgObj.content || msgObj.message || '';
         timestamp = msgObj.timestamp || '';
       } else if (args.length === 4) {
-        const [senderId, senderName, msgContent, msgTimestamp] = args;
-        user = senderName || senderId; // استخدام الاسم المباشر إذا وجد، وإلا معرّف المرسل
+        const [id, name, msgContent, msgTimestamp] = args;
+        senderId = id;
+        senderName = name;
         content = msgContent;
         timestamp = msgTimestamp;
       } else {
         const [senderNameOrId, msgContent, msgTimestamp] = args;
-        user = senderNameOrId;
+        senderId = senderNameOrId;
+        senderName = senderNameOrId;
         content = msgContent;
         timestamp = msgTimestamp;
       }
 
-      this.messageSource.next({ user, message: content, timestamp, isIncoming: true });
+      this.messageSource.next({ 
+        user: senderName || senderId, 
+        userId: senderId, 
+        message: content, 
+        timestamp, 
+        isIncoming: true 
+      });
     });
   }
 
