@@ -35,6 +35,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.resolveCurrentUser();
     this.chatService.startConnection();
+    this.loadHistory();
 
     // استقبال الرسائل الحية عند حدوث الـ Event (ReceiveMessage)
     this.messageSub = this.chatService.currentMessage$.subscribe(data => {
@@ -53,6 +54,31 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
           });
         }
       }
+    });
+  }
+
+  loadHistory() {
+    this.chatService.getChatHistory().subscribe({
+      next: (history: any[]) => {
+        if (history && Array.isArray(history)) {
+          this.messages = history.map(msg => {
+            const sender = msg.senderId || msg.sender || msg.user || '';
+            const isFromSelf = sender.trim().toLowerCase() === this.currentUserId.trim().toLowerCase() ||
+                               sender.trim().toLowerCase() === this.currentUser.trim().toLowerCase();
+            return {
+              user: sender,
+              message: msg.content || msg.message || '',
+              isIncoming: !isFromSelf
+            };
+          });
+          this.cdr.detectChanges();
+          setTimeout(() => {
+            this.scrollToBottom();
+            this.cdr.detectChanges();
+          }, 100);
+        }
+      },
+      error: (err) => console.error('Failed to load chat history:', err)
     });
   }
 

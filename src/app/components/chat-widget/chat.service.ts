@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { API_CONFIG } from '../../api.config';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +12,7 @@ export class ChatService {
   private messageSource = new BehaviorSubject<any>(null);
   public currentMessage$ = this.messageSource.asObservable();
 
-  constructor() {
+  constructor(private http: HttpClient) {
     this.initConnection();
   }
 
@@ -55,5 +57,17 @@ export class ChatService {
   public sendMessage(message: string): Promise<void> {
     return this.hubConnection.invoke('SendMessage', message)
       .catch(err => console.error('Error while sending message: ', err));
+  }
+
+  // جلب سجل المحادثات الجماعية من السيرفر
+  public getChatHistory(): Observable<any> {
+    let token = '';
+    if (typeof window !== 'undefined' && window.localStorage) {
+      token = localStorage.getItem('auth_token') || '';
+    }
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.get(`${API_CONFIG.baseUrl}/api/Chat/history`, { headers });
   }
 }
