@@ -1,8 +1,22 @@
 import { Component, OnInit, OnDestroy, ElementRef, ViewChild, NgZone, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ChatService } from './chat.service'; // تأكدي من مسار الخدمة الصحيح
+import { ChatService } from './chat.service';
 import { Subscription } from 'rxjs';
+
+export interface Reaction {
+  emoji: string;
+  count: number;
+  users: string[];
+}
+
+export interface ChatMessage {
+  id?: string;
+  user: string;
+  message: string;
+  isIncoming: boolean;
+  reactions?: Reaction[];
+}
 
 @Component({
   selector: 'app-chat-widget',
@@ -16,13 +30,18 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
 
   isOpen = false;
   newMessage = '';
-  currentUser = 'Yousra'; // يمكنك استبداله باسم المستخدم الحالي أو الـ ID
+  currentUser = 'Yousra';
+  currentUserId = '';
+
+  // Emojis and reactions state
+  showInputEmojiStrip = false;
+  hoveredMessageIndex: number | null = null;
+  readonly emojiList: string[] = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
   
-  messages: Array<{ user: string, message: string, isIncoming: boolean }> = [
-    { user: 'Support', message: 'Hello! 👋 Need help tracking project milestones or updating a task status?', isIncoming: true }
+  messages: ChatMessage[] = [
+    { user: 'Support', message: 'Hello! 👋 Need help tracking project milestones or updating a task status?', isIncoming: true, reactions: [] }
   ];
 
-  currentUserId = '';
   isLocalTyping = false;
   typingTimeout: any;
   typingUsers = new Set<string>();
@@ -41,10 +60,8 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     this.chatService.startConnection();
     this.loadHistory();
 
-    // استقبال الرسائل الحية عند حدوث الـ Event (ReceiveMessage)
     this.messageSub = this.chatService.currentMessage$.subscribe(data => {
       if (data) {
-        // منع تكرار الرسالة الصادرة من المرسل نفسه بمقارنة الـ GUID الفريـد للمرسل
         const senderIdStr = String(data.userId || data.user || '').trim().toLowerCase();
         const currentUserIdStr = String(this.currentUserId || '').trim().toLowerCase();
         const currentUserStr = String(this.currentUser || '').trim().toLowerCase();
@@ -53,22 +70,23 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
                            (senderIdStr && currentUserStr && senderIdStr === currentUserStr);
         if (!isFromSelf) {
           this.ngZone.run(() => {
-            this.messages.push(data);
-            this.cdr.detectChanges(); // فرض تحديث الواجهة فوراً
+            this.messages.push({
+              ...data,
+              reactions: data.reactions || []
+            });
+            this.cdr.detectChanges();
             setTimeout(() => {
               this.scrollToBottom();
-              this.cdr.detectChanges(); // إعادة فرض التحديث بعد التمرير لضمان المظهر
+              this.cdr.detectChanges();
             }, 50);
           });
         }
       }
     });
 
-    // استقبال حالات الكتابة الحية (UserTyping)
     this.typingSub = this.chatService.typingStatus$.subscribe(data => {
       if (data) {
         this.ngZone.run(() => {
-          // عدم إظهار يكتب الآن لرسالتك الخاصة
           const userStr = String(data.user || '').trim().toLowerCase();
           const currentUserStr = String(this.currentUser || '').trim().toLowerCase();
           if (userStr !== currentUserStr) {
@@ -85,10 +103,44 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     });
   }
 
+  // Insert emoji into input text
+  insertEmoji(emoji: string) {
+    this.newMessage += emoji;
+    this.onInputChange();
+  }
+
+  // Toggle reaction on a message
+  toggleReaction(msg: ChatMessage, emoji: string) {
+    if (!msg.reactions) {
+      msg.reactions = [];
+    }
+
+    const userId = this.currentUserId || this.currentUser || 'me';
+    const existing = msg.reactions.find(r => r.emoji === emoji);
+
+    if (existing) {
+      if (existing.users.includes(userId)) {
+        existing.users = existing.users.filter(u => u !== userId);
+        existing.count--;
+        if (existing.count <= 0) {
+          msg.reactions = msg.reactions.filter(r => r.emoji !== emoji);
+        }
+      } else {
+        existing.users.push(userId);
+        existing.count++;
+      }
+    } else {
+      msg.reactions.push({
+        emoji,
+        count: 1,
+        users: [userId]
+      });
+    }
+  }
+
   loadHistory() {
     this.chatService.getChatHistory().subscribe({
       next: (history: any[]) => {
-        console.log('Chat history response received:', history);
         if (history && Array.isArray(history)) {
           const mapped = history.map(msg => {
             const senderName = String(msg.senderName || msg.senderUserName || msg.userName || '').trim();
@@ -105,11 +157,12 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
             return {
               user: senderName || senderId,
               message: msg.content || msg.message || '',
-              isIncoming: !isFromSelf
+              isIncoming: !isFromSelf,
+              reactions: msg.reactions || []
             };
           });
           this.messages = [
-            { user: 'Support', message: 'Hello! 👋 Need help tracking project milestones or updating a task status?', isIncoming: true },
+            { user: 'Support', message: 'Hello! 👋 Need help tracking project milestones or updating a task status?', isIncoming: true, reactions: [] },
             ...mapped
           ];
           this.cdr.detectChanges();
@@ -153,12 +206,8 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    if (this.messageSub) {
-      this.messageSub.unsubscribe();
-    }
-    if (this.typingSub) {
-      this.typingSub.unsubscribe();
-    }
+    if (this.messageSub) this.messageSub.unsubscribe();
+    if (this.typingSub) this.typingSub.unsubscribe();
   }
 
   toggleChat() {
@@ -176,17 +225,14 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
   sendMessage() {
     if (!this.newMessage.trim()) return;
 
-    // إيقاف إشارة الكتابة للمرسل فور الإرسال
     this.stopLocalTyping();
-
     const messageText = this.newMessage;
     
-    // إضافتها محلياً للشاشة فوراً دون انتظار رد السيرفر لمنع تأخر الاستجابة
-    this.messages.push({ user: this.currentUser, message: messageText, isIncoming: false });
+    this.messages.push({ user: this.currentUser, message: messageText, isIncoming: false, reactions: [] });
     this.newMessage = '';
+    this.showInputEmojiStrip = false;
     setTimeout(() => this.scrollToBottom(), 50);
 
-    // إرسال الرسالة للباك إند بالخلفية (الشات الجماعي يتطلب الرسالة فقط)
     this.chatService.sendMessage(messageText);
   }
 
