@@ -41,8 +41,12 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     this.messageSub = this.chatService.currentMessage$.subscribe(data => {
       if (data) {
         // منع تكرار الرسالة الصادرة من المرسل نفسه (لأنها تضاف محلياً فور الإرسال)
-        const isFromSelf = data.user.trim().toLowerCase() === this.currentUserId.trim().toLowerCase() ||
-                           data.user.trim().toLowerCase() === this.currentUser.trim().toLowerCase();
+        const userStr = (data.user || '').trim().toLowerCase();
+        const currentUserIdStr = (this.currentUserId || '').trim().toLowerCase();
+        const currentUserStr = (this.currentUser || '').trim().toLowerCase();
+        
+        const isFromSelf = (userStr && currentUserIdStr && userStr === currentUserIdStr) ||
+                           (userStr && currentUserStr && userStr === currentUserStr);
         if (!isFromSelf) {
           this.ngZone.run(() => {
             this.messages.push(data);
@@ -63,11 +67,17 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
         console.log('Chat history response received:', history);
         if (history && Array.isArray(history)) {
           const mapped = history.map(msg => {
-            const senderName = msg.senderName || msg.senderUserName || msg.userName || '';
-            const senderId = msg.senderId || msg.sender || msg.user || '';
-            const isFromSelf = senderId.trim().toLowerCase() === this.currentUserId.trim().toLowerCase() ||
-                               senderName.trim().toLowerCase() === this.currentUser.trim().toLowerCase() ||
-                               senderId.trim().toLowerCase() === this.currentUser.trim().toLowerCase();
+            const senderName = (msg.senderName || msg.senderUserName || msg.userName || '').trim();
+            const senderId = (msg.senderId || msg.sender || msg.user || '').trim();
+            
+            const senderNameLower = senderName.toLowerCase();
+            const senderIdLower = senderId.toLowerCase();
+            const currentUserIdLower = (this.currentUserId || '').trim().toLowerCase();
+            const currentUserLower = (this.currentUser || '').trim().toLowerCase();
+
+            const isFromSelf = (senderIdLower && currentUserIdLower && senderIdLower === currentUserIdLower) ||
+                               (senderNameLower && currentUserLower && senderNameLower === currentUserLower) ||
+                               (senderIdLower && currentUserLower && senderIdLower === currentUserLower);
             return {
               user: senderName || senderId,
               message: msg.content || msg.message || '',
