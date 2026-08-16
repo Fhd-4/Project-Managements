@@ -37,14 +37,21 @@ export class ChatService {
       .then(() => console.log('SignalR connected successfully!'))
       .catch(err => console.error('SignalR connection failed:', err));
 
-    // الاستماع لحدث استقبال الرسائل (ReceiveMessage) بشكل ديناميكي (3 أو 4 بارامترات)
+    // الاستماع لحدث استقبال الرسائل (ReceiveMessage) بشكل ديناميكي (كائن واحد أو 3 أو 4 بارامترات)
     this.hubConnection.on('ReceiveMessage', (...args: any[]) => {
       console.log('ReceiveMessage event args received:', args);
       let user = '';
       let content = '';
       let timestamp = '';
 
-      if (args.length === 4) {
+      if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+        const msgObj = args[0];
+        const senderId = msgObj.senderId || msgObj.sender || '';
+        const senderName = msgObj.senderName || msgObj.senderUserName || msgObj.userName || '';
+        user = senderName || senderId;
+        content = msgObj.content || msgObj.message || '';
+        timestamp = msgObj.timestamp || '';
+      } else if (args.length === 4) {
         const [senderId, senderName, msgContent, msgTimestamp] = args;
         user = senderName || senderId; // استخدام الاسم المباشر إذا وجد، وإلا معرّف المرسل
         content = msgContent;

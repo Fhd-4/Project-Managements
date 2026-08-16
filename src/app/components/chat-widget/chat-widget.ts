@@ -41,9 +41,9 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     this.messageSub = this.chatService.currentMessage$.subscribe(data => {
       if (data) {
         // منع تكرار الرسالة الصادرة من المرسل نفسه (لأنها تضاف محلياً فور الإرسال)
-        const userStr = (data.user || '').trim().toLowerCase();
-        const currentUserIdStr = (this.currentUserId || '').trim().toLowerCase();
-        const currentUserStr = (this.currentUser || '').trim().toLowerCase();
+        const userStr = String(data.user || '').trim().toLowerCase();
+        const currentUserIdStr = String(this.currentUserId || '').trim().toLowerCase();
+        const currentUserStr = String(this.currentUser || '').trim().toLowerCase();
         
         const isFromSelf = (userStr && currentUserIdStr && userStr === currentUserIdStr) ||
                            (userStr && currentUserStr && userStr === currentUserStr);
@@ -67,13 +67,13 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
         console.log('Chat history response received:', history);
         if (history && Array.isArray(history)) {
           const mapped = history.map(msg => {
-            const senderName = (msg.senderName || msg.senderUserName || msg.userName || '').trim();
-            const senderId = (msg.senderId || msg.sender || msg.user || '').trim();
+            const senderName = String(msg.senderName || msg.senderUserName || msg.userName || '').trim();
+            const senderId = String(msg.senderId || msg.sender || msg.user || '').trim();
             
             const senderNameLower = senderName.toLowerCase();
             const senderIdLower = senderId.toLowerCase();
-            const currentUserIdLower = (this.currentUserId || '').trim().toLowerCase();
-            const currentUserLower = (this.currentUser || '').trim().toLowerCase();
+            const currentUserIdLower = String(this.currentUserId || '').trim().toLowerCase();
+            const currentUserLower = String(this.currentUser || '').trim().toLowerCase();
 
             const isFromSelf = (senderIdLower && currentUserIdLower && senderIdLower === currentUserIdLower) ||
                                (senderNameLower && currentUserLower && senderNameLower === currentUserLower) ||
