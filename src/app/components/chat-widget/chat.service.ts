@@ -37,10 +37,26 @@ export class ChatService {
       .then(() => console.log('SignalR connected successfully!'))
       .catch(err => console.error('SignalR connection failed:', err));
 
-    // الاستماع لحدث استقبال الرسائل (ReceiveMessage)
-    // الباك إند يرسل: senderId, content, timestamp
-    this.hubConnection.on('ReceiveMessage', (senderId: string, content: string, timestamp: string) => {
-      this.messageSource.next({ user: senderId, message: content, timestamp, isIncoming: true });
+    // الاستماع لحدث استقبال الرسائل (ReceiveMessage) بشكل ديناميكي (3 أو 4 بارامترات)
+    this.hubConnection.on('ReceiveMessage', (...args: any[]) => {
+      console.log('ReceiveMessage event args received:', args);
+      let user = '';
+      let content = '';
+      let timestamp = '';
+
+      if (args.length === 4) {
+        const [senderId, senderName, msgContent, msgTimestamp] = args;
+        user = senderName || senderId; // استخدام الاسم المباشر إذا وجد، وإلا معرّف المرسل
+        content = msgContent;
+        timestamp = msgTimestamp;
+      } else {
+        const [senderNameOrId, msgContent, msgTimestamp] = args;
+        user = senderNameOrId;
+        content = msgContent;
+        timestamp = msgTimestamp;
+      }
+
+      this.messageSource.next({ user, message: content, timestamp, isIncoming: true });
     });
   }
 

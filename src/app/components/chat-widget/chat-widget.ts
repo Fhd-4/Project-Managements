@@ -63,11 +63,13 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
         console.log('Chat history response received:', history);
         if (history && Array.isArray(history)) {
           const mapped = history.map(msg => {
-            const sender = msg.senderId || msg.sender || msg.user || '';
-            const isFromSelf = sender.trim().toLowerCase() === this.currentUserId.trim().toLowerCase() ||
-                               sender.trim().toLowerCase() === this.currentUser.trim().toLowerCase();
+            const senderName = msg.senderName || msg.senderUserName || msg.userName || '';
+            const senderId = msg.senderId || msg.sender || msg.user || '';
+            const isFromSelf = senderId.trim().toLowerCase() === this.currentUserId.trim().toLowerCase() ||
+                               senderName.trim().toLowerCase() === this.currentUser.trim().toLowerCase() ||
+                               senderId.trim().toLowerCase() === this.currentUser.trim().toLowerCase();
             return {
-              user: sender,
+              user: senderName || senderId,
               message: msg.content || msg.message || '',
               isIncoming: !isFromSelf
             };
