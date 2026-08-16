@@ -60,8 +60,9 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
   loadHistory() {
     this.chatService.getChatHistory().subscribe({
       next: (history: any[]) => {
+        console.log('Chat history response received:', history);
         if (history && Array.isArray(history)) {
-          this.messages = history.map(msg => {
+          const mapped = history.map(msg => {
             const sender = msg.senderId || msg.sender || msg.user || '';
             const isFromSelf = sender.trim().toLowerCase() === this.currentUserId.trim().toLowerCase() ||
                                sender.trim().toLowerCase() === this.currentUser.trim().toLowerCase();
@@ -71,6 +72,10 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
               isIncoming: !isFromSelf
             };
           });
+          this.messages = [
+            { user: 'Support', message: 'Hello! 👋 Need help tracking project milestones or updating a task status?', isIncoming: true },
+            ...mapped
+          ];
           this.cdr.detectChanges();
           setTimeout(() => {
             this.scrollToBottom();
@@ -78,7 +83,9 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
           }, 100);
         }
       },
-      error: (err) => console.error('Failed to load chat history:', err)
+      error: (err) => {
+        console.error('Failed to load chat history:', err);
+      }
     });
   }
 

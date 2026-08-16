@@ -68,6 +68,6 @@ export class ChatService {
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
-    return this.http.get(`${API_CONFIG.baseUrl}/api/Chat/history`, { headers });
+    return this.http.get(`${API_CONFIG.baseUrl}/Chat/history`, { headers });
   }
 }
