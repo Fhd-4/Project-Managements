@@ -6,6 +6,7 @@ import { filter } from 'rxjs/operators';
 import { PortfolioService } from '../portfolios/portfolio.service';
 import { AuthService } from '../auth/auth.service';
 import { ProjectService } from '../projects/project.service';
+import { ChatWidgetComponent } from '../components/chat-widget/chat-widget';
 
 type LangCode = 'ar' | 'en';
 
@@ -13,7 +14,7 @@ type LangCode = 'ar' | 'en';
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, FormsModule],
+  imports: [CommonModule, RouterOutlet, RouterLink, FormsModule, ChatWidgetComponent],
   templateUrl: './layout.html',
   styleUrl: './layout.scss'
 })

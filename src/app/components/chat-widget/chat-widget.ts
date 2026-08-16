@@ -208,16 +208,35 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     }
   }
 
-  getTypingText(): string {
-    const usersArray = Array.from(this.typingUsers);
-    if (usersArray.length === 1) {
-      return `${usersArray[0]} is typing`;
-    } else if (usersArray.length === 2) {
-      return `${usersArray[0]} and ${usersArray[1]} are typing`;
-    } else if (usersArray.length > 2) {
-      return 'Multiple people are typing';
+  getCurrentLang(): 'ar' | 'en' {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      return (localStorage.getItem('preferred_lang') as 'ar' | 'en') || 'ar';
     }
-    return '';
+    return 'ar';
+  }
+
+  getTypingText(): string {
+    const isAr = this.getCurrentLang() === 'ar';
+    const usersArray = Array.from(this.typingUsers);
+    if (usersArray.length === 0) return '';
+
+    if (isAr) {
+      if (usersArray.length === 1) {
+        return `${usersArray[0]} يكتب الآن`;
+      } else if (usersArray.length === 2) {
+        return `${usersArray[0]} و ${usersArray[1]} يكتبان الآن`;
+      } else {
+        return 'عدة أشخاص يكتبون الآن';
+      }
+    } else {
+      if (usersArray.length === 1) {
+        return `${usersArray[0]} is typing`;
+      } else if (usersArray.length === 2) {
+        return `${usersArray[0]} and ${usersArray[1]} are typing`;
+      } else {
+        return 'Multiple people are typing';
+      }
+    }
   }
 
   private scrollToBottom(): void {
