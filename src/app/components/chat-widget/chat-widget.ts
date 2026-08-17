@@ -45,7 +45,6 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     { id: 0, user: 'Support', message: 'Hello! 👋 Need help tracking project milestones or updating a task status?', isIncoming: true, reactions: [] }
   ];
 
-  // User online status storage
   usersList: UserListItem[] = [];
   onlineUserIds = new Set<string>();
 
@@ -116,15 +115,20 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     this.statusSub = this.chatService.userStatusChanged$.subscribe((status: UserStatusEvent) => {
       if (status) {
         this.ngZone.run(() => {
-          const user = this.usersList.find(u => u.id === status.userId);
+          const targetId = status.userId.toLowerCase();
+          const user = this.usersList.find(u => u.id.toLowerCase() === targetId);
           if (user) {
             user.isOnline = status.isOnline;
           }
 
           if (status.isOnline) {
-            this.onlineUserIds.add(status.userId);
+            this.onlineUserIds.add(targetId);
+            if (user?.userName) this.onlineUserIds.add(user.userName.toLowerCase());
+            if (user?.nameAr) this.onlineUserIds.add(user.nameAr.toLowerCase());
           } else {
-            this.onlineUserIds.delete(status.userId);
+            this.onlineUserIds.delete(targetId);
+            if (user?.userName) this.onlineUserIds.delete(user.userName.toLowerCase());
+            if (user?.nameAr) this.onlineUserIds.delete(user.nameAr.toLowerCase());
           }
 
           this.cdr.detectChanges();
@@ -153,44 +157,35 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
   }
 
   loadUsers(): void {
-  this.chatService.getAllUsers().subscribe({
-    next: (users) => {
-      if (users && Array.isArray(users)) {
-        this.usersList = users;
-        this.onlineUserIds.clear();
-        users.forEach(u => {
-          if (u.isOnline) {
-            this.onlineUserIds.add(u.id.toLowerCase());
-            if (u.userName) this.onlineUserIds.add(u.userName.toLowerCase());
-          }
-        });
-        this.cdr.detectChanges();
-      }
-    },
-    error: (err) => console.error('Failed to load users list:', err)
-  });
+    this.chatService.getAllUsers().subscribe({
+      next: (users) => {
+        if (users && Array.isArray(users)) {
+          this.usersList = users;
+          this.onlineUserIds.clear();
+          users.forEach(u => {
+            if (u.isOnline) {
+              if (u.id) this.onlineUserIds.add(u.id.toLowerCase());
+              if (u.userName) this.onlineUserIds.add(u.userName.toLowerCase());
+              if (u.nameAr) this.onlineUserIds.add(u.nameAr.toLowerCase());
+              if (u.nameEn) this.onlineUserIds.add(u.nameEn.toLowerCase());
+            }
+          });
+          this.cdr.detectChanges();
+        }
+      },
+      error: (err) => console.error('Failed to load users list:', err)
+    });
+  }
+
+  getOnlineCount(): number {
+    return this.usersList.filter(u => u.isOnline).length;
   }
 
   isUserOnline(userIdOrName?: string): boolean {
-  if (!userIdOrName) return false;
-  const searchKey = String(userIdOrName).trim().toLowerCase();
-
-  // 1. Direct ID check
-  if (this.onlineUserIds.has(searchKey)) {
-    return true;
+    if (!userIdOrName) return false;
+    const key = String(userIdOrName).trim().toLowerCase();
+    return this.onlineUserIds.has(key);
   }
-
-  // 2. Lookup matching user object by ID, UserName, NameAr, or NameEn
-  const matchedUser = this.usersList.find(u => 
-    (u.id && u.id.toLowerCase() === searchKey) ||
-    (u.userName && u.userName.toLowerCase() === searchKey) ||
-    (u.nameAr && u.nameAr.toLowerCase() === searchKey) ||
-    (u.nameEn && u.nameEn.toLowerCase() === searchKey)
-  );
-
-  return !!matchedUser?.isOnline;
-  
-}
 
   onMessageMouseEnter(index: number): void {
     clearTimeout(this.hoverLeaveTimeout);
@@ -358,6 +353,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
   toggleChat(): void {
     this.isOpen = !this.isOpen;
     if (this.isOpen) {
+      this.loadUsers();
       setTimeout(() => this.scrollToBottom(), 100);
     }
   }

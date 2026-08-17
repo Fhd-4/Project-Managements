@@ -8,19 +8,28 @@
 <!-- نافذة المحادثة المنبثقة -->
 <div class="chat-popup-container" *ngIf="isOpen">
   
-  <!-- رأس النافذة -->
+  <!-- رأس النافذة مع مؤشر التواجد بالقمة -->
   <div class="chat-header">
     <div class="back-btn" (click)="toggleChat()">‹</div>
     <div class="chat-title">PMO Team Support</div>
+    
+    <!-- الأفاتار الرئيسي بالرأس مع نقطة الاتصال وعداد المتصلين -->
     <div class="avatar-container">
       <div class="plain-avatar">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
           <circle cx="12" cy="7" r="4"></circle>
         </svg>
+        <span class="header-online-dot"></span>
       </div>
     </div>
-    <div class="chat-subtitle">We will reply as soon as we can</div>
+    
+    <div class="chat-subtitle">
+      <span>We will reply as soon as we can</span>
+      <span class="online-pill" *ngIf="getOnlineCount() > 0">
+        <span class="pulse-dot"></span> {{ getOnlineCount() }} Online
+      </span>
+    </div>
     <div class="chat-sub-desc">Ask about project status, tasks, or share feedback.</div>
   </div>
 
@@ -35,7 +44,7 @@
          (mouseenter)="onMessageMouseEnter(i)"
          (mouseleave)="onMessageMouseLeave()">
       
-      <!-- صورة وأفاتار المرسل مع مؤشر حالة الاتصال -->
+      <!-- صورة وأفاتار المرسل مع نقطة الحالة المباشرة -->
       <div class="message-avatar" *ngIf="msg.isIncoming">
         <div class="plain-avatar small">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -43,7 +52,6 @@
             <circle cx="12" cy="7" r="4"></circle>
           </svg>
         </div>
-        <!-- نقطة الاتصال الخضراء / الرمادية -->
         <span class="status-indicator" 
               [ngClass]="{'online': isUserOnline(msg.userId || msg.user), 'offline': !isUserOnline(msg.userId || msg.user)}"
               [title]="isUserOnline(msg.userId || msg.user) ? 'Online' : 'Offline'">
@@ -54,7 +62,6 @@
         <span class="message-sender">{{ msg.user === currentUser ? 'You' : msg.user }}</span>
         
         <div class="message-bubble">
-          <!-- شريط التفاعلات العائم -->
           <div class="reaction-strip" *ngIf="hoveredMessageIndex === i">
             <button type="button" 
                     *ngFor="let emoji of emojiList" 
@@ -66,7 +73,6 @@
 
           {{ msg.message }}
 
-          <!-- شارة التفاعلات أسفل الرسالة -->
           <div class="reactions-badge" *ngIf="msg.reactions && msg.reactions.length > 0">
             <span *ngFor="let r of msg.reactions" class="reaction-pill">
               {{ r.emoji }} <small *ngIf="r.count > 1">{{ r.count }}</small>

@@ -49,7 +49,7 @@ $border-color: #e2e8f0;
   font-family: inherit;
 }
 
-/* رأس النافذة */
+/* رأس النافذة مع مؤشر التواجد بالقمة */
 .chat-header {
   background: linear-gradient(135deg, $primary-blue, $navy-dark);
   color: white;
@@ -74,10 +74,50 @@ $border-color: #e2e8f0;
     margin-bottom: 8px;
   }
 
+  .avatar-container {
+    position: relative;
+    display: inline-block;
+
+    .header-online-dot {
+      position: absolute;
+      bottom: 6px;
+      right: 2px;
+      width: 10px;
+      height: 10px;
+      background-color: #22c55e;
+      border: 2px solid $primary-blue;
+      border-radius: 50%;
+    }
+  }
+
   .chat-subtitle {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 500;
-    margin-bottom: 2px;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    .online-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(34, 197, 94, 0.2);
+      border: 1px solid rgba(34, 197, 94, 0.4);
+      padding: 1px 6px;
+      border-radius: 10px;
+      font-size: 10px;
+      color: #86efac;
+
+      .pulse-dot {
+        width: 6px;
+        height: 6px;
+        background-color: #22c55e;
+        border-radius: 50%;
+        animation: pulse 1.8s infinite;
+      }
+    }
   }
 
   .chat-sub-desc {
@@ -145,7 +185,6 @@ $border-color: #e2e8f0;
         border-radius: 12px 12px 12px 2px;
         border: 1px solid $border-color;
 
-        /* تمدد الشريط للداخل باتجاه اليسار */
         .reaction-strip {
           right: 0 !important;
           left: auto !important;
@@ -167,7 +206,6 @@ $border-color: #e2e8f0;
         color: white;
         border-radius: 12px 12px 2px 12px;
 
-        /* تمدد الشريط للداخل باتجاه اليمين */
         .reaction-strip {
           left: 0 !important;
           right: auto !important;
@@ -236,7 +274,6 @@ $border-color: #e2e8f0;
     line-height: 1.4;
     word-break: break-word;
 
-    /* شريط التفاعلات العائم */
     .reaction-strip {
       position: absolute;
       top: -38px;
@@ -250,7 +287,6 @@ $border-color: #e2e8f0;
       white-space: nowrap;
       animation: popIn 0.15s ease-out;
 
-      /* جسر شفاف يمنع اختفاء الشريط عند حركة المؤشر */
       &::after {
         content: '';
         position: absolute;
@@ -275,7 +311,6 @@ $border-color: #e2e8f0;
       }
     }
 
-    /* شارة التفاعلات أسفل الرسالة */
     .reactions-badge {
       position: absolute;
       bottom: -10px;
@@ -432,6 +467,11 @@ $border-color: #e2e8f0;
       color: $primary-blue;
     }
   }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.8); }
 }
 
 @keyframes bounce {

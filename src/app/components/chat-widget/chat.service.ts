@@ -47,7 +47,6 @@ export class ChatService {
   private reactionSource = new Subject<ReactionEvent>();
   public reactionReceived$: Observable<ReactionEvent> = this.reactionSource.asObservable();
 
-  // Observable for online/offline status changes
   private userStatusSource = new Subject<UserStatusEvent>();
   public userStatusChanged$: Observable<UserStatusEvent> = this.userStatusSource.asObservable();
 
@@ -78,9 +77,23 @@ export class ChatService {
       .then(() => console.log('SignalR connected successfully!'))
       .catch(err => console.error('SignalR connection failed:', err));
 
-    // Listen for live Online/Offline status changes
-    this.hubConnection.on('UserStatusChanged', (userId: string, isOnline: boolean) => {
-      this.userStatusSource.next({ userId, isOnline });
+    // Handle UserStatusChanged with flexible argument unpacking
+    this.hubConnection.on('UserStatusChanged', (...args: any[]) => {
+      console.log('UserStatusChanged received:', args);
+      let userId = '';
+      let isOnline = false;
+
+      if (args.length === 1 && typeof args[0] === 'object') {
+        userId = args[0].userId || args[0].id || '';
+        isOnline = !!args[0].isOnline;
+      } else if (args.length >= 2) {
+        userId = String(args[0]);
+        isOnline = Boolean(args[1]);
+      }
+
+      if (userId) {
+        this.userStatusSource.next({ userId, isOnline });
+      }
     });
 
     this.hubConnection.on('UserTyping', (userName: string, isTyping: boolean) => {
@@ -174,19 +187,18 @@ export class ChatService {
       osc.start(now);
       osc.stop(now + 0.35);
     } catch (e) {
-      console.warn('Audio notification could not play:', e);
+      console.warn('Audio notification error:', e);
     }
   }
 
   public startConnection() {
     if (this.hubConnection && this.hubConnection.state === signalR.HubConnectionState.Disconnected) {
       this.hubConnection.start()
-        .then(() => console.log('SignalR connected successfully on demand!'))
+        .then(() => console.log('SignalR connected successfully!'))
         .catch(err => console.error('SignalR manual connection failed:', err));
     }
   }
 
-  // Fetch initial users list with isOnline status
   public getAllUsers(): Observable<UserListItem[]> {
     let token = '';
     if (typeof window !== 'undefined' && window.localStorage) {
@@ -201,14 +213,14 @@ export class ChatService {
   public sendReaction(messageId: number | string, emoji: string): Promise<void> {
     if (this.hubConnection && this.hubConnection.state === signalR.HubConnectionState.Connected) {
       return this.hubConnection.invoke('SendReaction', Number(messageId), emoji)
-        .catch(err => console.error('Error while invoking SendReaction: ', err));
+        .catch(err => console.error('Error sending reaction: ', err));
     }
     return Promise.resolve();
   }
 
   public sendMessage(message: string): Promise<void> {
     return this.hubConnection.invoke('SendMessage', message)
-      .catch(err => console.error('Error while sending message: ', err));
+      .catch(err => console.error('Error sending message: ', err));
   }
 
   public getChatHistory(): Observable<any> {
@@ -225,7 +237,7 @@ export class ChatService {
   public startTyping(): Promise<void> {
     if (this.hubConnection && this.hubConnection.state === signalR.HubConnectionState.Connected) {
       return this.hubConnection.invoke('StartTyping')
-        .catch(err => console.error('Error while sending StartTyping: ', err));
+        .catch(err => console.error('Error sending StartTyping: ', err));
     }
     return Promise.resolve();
   }
@@ -233,7 +245,7 @@ export class ChatService {
   public stopTyping(): Promise<void> {
     if (this.hubConnection && this.hubConnection.state === signalR.HubConnectionState.Connected) {
       return this.hubConnection.invoke('StopTyping')
-        .catch(err => console.error('Error while sending StopTyping: ', err));
+        .catch(err => console.error('Error sending StopTyping: ', err));
     }
     return Promise.resolve();
   }
