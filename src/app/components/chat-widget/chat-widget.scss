@@ -552,3 +552,233 @@ $border-color: #e2e8f0;
   from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* Replied message block */
+.replied-message-box {
+  background: rgba(0, 0, 0, 0.05);
+  border-left: 3px solid $primary-blue;
+  border-radius: 4px;
+  padding: 5px 8px;
+  margin-bottom: 6px;
+  font-size: 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  
+  .replied-sender {
+    font-weight: bold;
+    color: $primary-blue;
+  }
+  
+  .replied-text {
+    color: #64748b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+}
+.outgoing .replied-message-box {
+  background: rgba(255, 255, 255, 0.16);
+  border-left-color: white;
+  
+  .replied-sender {
+    color: white;
+  }
+  
+  .replied-text {
+    color: rgba(255, 255, 255, 0.8);
+  }
+}
+
+.reply-action-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 11px;
+  cursor: pointer;
+  padding: 2px 8px;
+  margin-left: 4px;
+  border-left: 1px solid rgba(255, 255, 255, 0.25);
+  font-weight: 500;
+  transition: opacity 0.1s;
+  
+  &:hover {
+    opacity: 0.85;
+  }
+}
+
+/* Mentions Badge styling */
+::ng-deep .mention-tag {
+  background-color: rgba(59, 130, 246, 0.15);
+  color: #2563eb;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-weight: 600;
+  display: inline-block;
+  
+  &.all-mention {
+    background-color: rgba(220, 38, 38, 0.15);
+    color: #dc2626;
+  }
+}
+.outgoing ::ng-deep .mention-tag {
+  background-color: rgba(255, 255, 255, 0.25);
+  color: white;
+}
+
+/* Message Time & Checks Info row */
+.message-info {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  font-size: 9px;
+  color: #94a3b8;
+  margin-top: 4px;
+  
+  .message-time {
+    font-size: 9px;
+  }
+  
+  .message-status {
+    display: inline-flex;
+    align-items: center;
+    
+    .checkmark {
+      width: 13px;
+      height: 13px;
+      
+      &.sent {
+        color: #94a3b8;
+      }
+      &.delivered {
+        color: #94a3b8;
+      }
+      &.read {
+        color: #38bdf8; /* Blue checks */
+      }
+    }
+  }
+}
+.outgoing .message-bubble .message-info {
+  color: rgba(255, 255, 255, 0.7);
+  
+  .checkmark {
+    &.sent, &.delivered {
+      color: rgba(255, 255, 255, 0.7);
+    }
+    &.read {
+      color: #60a5fa;
+    }
+  }
+}
+
+/* Mentions Autocomplete list box */
+.mentions-dropdown {
+  position: absolute;
+  bottom: 60px;
+  left: 14px;
+  right: 14px;
+  background: white;
+  border: 1px solid $border-color;
+  border-radius: 12px;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.12);
+  max-height: 180px;
+  overflow-y: auto;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.15s ease-out;
+  
+  .mention-user-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background 0.1s;
+    
+    &:hover {
+      background: #f1f5f9;
+    }
+    
+    .mention-avatar {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: $primary-blue;
+      color: white;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+    
+    .mention-username {
+      font-size: 12px;
+      color: $navy-dark;
+      font-weight: 500;
+    }
+  }
+}
+
+/* Message Reply Preview Bar */
+.reply-preview-bar {
+  display: flex;
+  align-items: center;
+  background: #f8fafc;
+  border-top: 1px solid $border-color;
+  padding: 8px 14px;
+  gap: 12px;
+  position: relative;
+  animation: slideUp 0.15s ease-out;
+  flex-shrink: 0;
+  
+  .reply-bar-accent {
+    width: 4px;
+    align-self: stretch;
+    background: $primary-blue;
+    border-radius: 2px;
+  }
+  
+  .reply-preview-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    
+    .reply-sender-name {
+      font-size: 11px;
+      font-weight: bold;
+      color: $primary-blue;
+    }
+    
+    .reply-body-text {
+      font-size: 11px;
+      color: #64748b;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+  
+  .close-reply-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    color: #94a3b8;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.1s;
+    
+    &:hover {
+      color: #dc2626;
+    }
+  }
+}

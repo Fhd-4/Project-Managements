@@ -44,6 +44,9 @@ export class ChatService {
   private userStatusSource = new Subject<UserStatusEvent>();
   public userStatusChanged$: Observable<UserStatusEvent> = this.userStatusSource.asObservable();
 
+  private readStatusSource = new Subject<{ readerUserId: string, messageIds: number[] }>();
+  public readStatus$: Observable<{ readerUserId: string, messageIds: number[] }> = this.readStatusSource.asObservable();
+
   private audioCtx: AudioContext | null = null;
 
   constructor(private http: HttpClient) {
@@ -104,12 +107,18 @@ export class ChatService {
       }
     });
 
+    this.hubConnection.on('MessagesRead', (readerUserId: string, messageIds: number[]) => {
+      this.readStatusSource.next({ readerUserId, messageIds });
+    });
+
     this.hubConnection.on('ReceiveMessage', (...args: any[]) => {
       let id: any = null;
       let senderId = '';
       let senderName = '';
       let content = '';
       let timestamp = '';
+      let replyToMessage: any = null;
+      let status = 0;
 
       if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
         const msgObj = args[0];
@@ -118,6 +127,8 @@ export class ChatService {
         senderName = msgObj.senderName || msgObj.senderUserName || msgObj.userName || '';
         content = msgObj.content || msgObj.message || '';
         timestamp = msgObj.timestamp || '';
+        replyToMessage = msgObj.replyToMessage;
+        status = msgObj.status || 0;
       } else if (args.length === 4) {
         const [msgId, name, msgContent, msgTimestamp] = args;
         id = msgId;
@@ -140,6 +151,8 @@ export class ChatService {
         message: content, 
         timestamp, 
         isIncoming: true,
+        replyToMessage,
+        status,
         reactions: []
       });
     });
@@ -210,9 +223,35 @@ export class ChatService {
     return Promise.resolve();
   }
 
-  public sendMessage(message: string): Promise<void> {
-    return this.hubConnection.invoke('SendMessage', message)
-      .catch(err => console.error('Error sending message: ', err));
+  public sendMessage(message: string, replyToMessageId?: number): Promise<void> {
+    if (this.hubConnection && this.hubConnection.state === signalR.HubConnectionState.Connected) {
+      if (replyToMessageId) {
+        return this.hubConnection.invoke('SendMessage', message, replyToMessageId)
+          .catch(err => console.error('Error sending message: ', err));
+      }
+      return this.hubConnection.invoke('SendMessage', message)
+        .catch(err => console.error('Error sending message: ', err));
+    }
+    return Promise.resolve();
+  }
+
+  public getUsers(): Observable<any[]> {
+    let token = '';
+    if (typeof window !== 'undefined' && window.localStorage) {
+      token = localStorage.getItem('auth_token') || '';
+    }
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.get<any[]>(`${API_CONFIG.baseUrl}/Auth/all-users`, { headers });
+  }
+
+  public markMessagesAsRead(): Promise<void> {
+    if (this.hubConnection && this.hubConnection.state === signalR.HubConnectionState.Connected) {
+      return this.hubConnection.invoke('MarkMessagesAsRead')
+        .catch(err => console.error('Error marking messages as read: ', err));
+    }
+    return Promise.resolve();
   }
 
   public getChatHistory(): Observable<any> {

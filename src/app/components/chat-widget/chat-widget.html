@@ -84,13 +84,33 @@
                     class="reaction-btn">
               {{ emoji }}
             </button>
+            <button type="button" class="reply-action-btn" (click)="initiateReply(msg)" title="Reply">
+              ↩ الرد
+            </button>
           </div>
 
-          {{ msg.message }}
+          <!-- Replied message header -->
+          <div class="replied-message-box" *ngIf="msg.replyToMessage">
+            <span class="replied-sender">{{ msg.replyToMessage.senderName === currentUser ? 'You' : msg.replyToMessage.senderName }}</span>
+            <span class="replied-text">{{ msg.replyToMessage.content }}</span>
+          </div>
+
+          <!-- Message Text formatting mentions -->
+          <div class="message-content-text" [innerHTML]="formatMessage(msg.message)"></div>
 
           <div class="reactions-badge" *ngIf="msg.reactions && msg.reactions.length > 0">
             <span *ngFor="let r of msg.reactions" class="reaction-pill">
               {{ r.emoji }} <small *ngIf="r.count > 1">{{ r.count }}</small>
+            </span>
+          </div>
+
+          <!-- Message Status and Time info -->
+          <div class="message-info">
+            <span class="message-time" *ngIf="msg.timestamp">{{ msg.timestamp | date:'shortTime' }}</span>
+            <span class="message-status" *ngIf="!msg.isIncoming">
+              <svg *ngIf="msg.status === 0" class="checkmark sent" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+              <svg *ngIf="msg.status === 1" class="checkmark delivered" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/><path d="M16 6l-8 8-3-3" opacity="0.6"/></svg>
+              <svg *ngIf="msg.status === 2" class="checkmark read" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/><path d="M16 6l-8 8-3-3" opacity="0.6"/></svg>
             </span>
           </div>
         </div>
@@ -123,6 +143,26 @@
             class="emoji-item">
       {{ emoji }}
     </button>
+  </div>
+
+  <!-- Mentions Autocomplete list -->
+  <div class="mentions-dropdown" *ngIf="showMentionsList && filteredUsers.length > 0">
+    <div class="mention-user-item" *ngFor="let u of filteredUsers" (click)="selectMention(u)">
+      <div class="mention-avatar">
+        {{ u.userName.charAt(0).toUpperCase() }}
+      </div>
+      <span class="mention-username">{{ u.userName }}</span>
+    </div>
+  </div>
+
+  <!-- Message Reply Preview Bar -->
+  <div class="reply-preview-bar" *ngIf="replyingToMessage">
+    <div class="reply-bar-accent"></div>
+    <div class="reply-preview-content">
+      <span class="reply-sender-name">{{ replyingToMessage.user === currentUser ? 'You' : replyingToMessage.user }}</span>
+      <span class="reply-body-text">{{ replyingToMessage.message }}</span>
+    </div>
+    <button class="close-reply-btn" (click)="cancelReply()">✕</button>
   </div>
 
   <!-- Input Footer -->

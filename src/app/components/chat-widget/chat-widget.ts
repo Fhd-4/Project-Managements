@@ -18,6 +18,12 @@ export interface ChatMessage {
   isIncoming: boolean;
   timestamp?: string;
   reactions: ReactionGroup[];
+  replyToMessage?: {
+    id: number | string;
+    senderName: string;
+    content: string;
+  };
+  status?: number;
 }
 
 @Component({
@@ -48,6 +54,11 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
   onlineUsersList: OnlineUserDto[] = [];
   onlineUserIds = new Set<string>();
 
+  allProjectUsers: any[] = [];
+  filteredUsers: any[] = [];
+  showMentionsList = false;
+  replyingToMessage: ChatMessage | null = null;
+
   isLocalTyping = false;
   typingTimeout: any;
   typingUsers = new Set<string>();
@@ -56,6 +67,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
   private typingSub!: Subscription;
   private reactionSub!: Subscription;
   private statusSub!: Subscription;
+  private readSub!: Subscription;
 
   constructor(
     private chatService: ChatService,
@@ -67,6 +79,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     this.resolveCurrentUser();
     this.chatService.startConnection();
     this.loadOnlineUsers();
+    this.loadAllProjectUsers();
     this.loadHistory();
 
     // 1. Receive incoming messages
@@ -86,10 +99,16 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
               userId: data.userId,
               message: data.message,
               isIncoming: true,
+              replyToMessage: data.replyToMessage,
+              status: data.status || 0,
               reactions: []
             });
 
             this.chatService.playNotificationSound();
+
+            if (this.isOpen) {
+              this.chatService.markMessagesAsRead();
+            }
 
             this.cdr.detectChanges();
             setTimeout(() => {
@@ -98,6 +117,21 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
             }, 50);
           });
         }
+      }
+    });
+
+    // 1b. Receive message read status changes
+    this.readSub = this.chatService.readStatus$.subscribe(data => {
+      if (data) {
+        this.ngZone.run(() => {
+          data.messageIds.forEach(id => {
+            const msg = this.messages.find(m => m.id === id);
+            if (msg) {
+              msg.status = 2; // Read
+            }
+          });
+          this.cdr.detectChanges();
+        });
       }
     });
 
@@ -288,6 +322,8 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
               message: msg.content ?? msg.message ?? '',
               isIncoming: !isFromSelf,
               timestamp: msg.timestamp ?? '',
+              status: msg.status || 0,
+              replyToMessage: msg.replyToMessage,
               reactions: this.formatReactionsFromHistory(msg.reactions ?? msg.Reactions)
             };
           });
@@ -296,18 +332,23 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
             { id: 0, user: 'Support', message: 'Hello! 👋 Need help tracking project milestones or updating a task status?', isIncoming: true, reactions: [] },
             ...mapped
           ];
-          this.cdr.detectChanges();
-          setTimeout(() => {
-            this.scrollToBottom();
+            
+            if (this.isOpen) {
+              this.chatService.markMessagesAsRead();
+            }
+
             this.cdr.detectChanges();
-          }, 100);
+            setTimeout(() => {
+              this.scrollToBottom();
+              this.cdr.detectChanges();
+            }, 100);
+          }
+        },
+        error: (err: any) => {
+          console.error('Failed to load chat history:', err);
         }
-      },
-      error: (err: any) => {
-        console.error('Failed to load chat history:', err);
-      }
-    });
-  }
+      });
+    }
 
   private resolveCurrentUser(): void {
     if (typeof window !== 'undefined' && window.localStorage) {
@@ -348,12 +389,14 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     if (this.typingSub) this.typingSub.unsubscribe();
     if (this.reactionSub) this.reactionSub.unsubscribe();
     if (this.statusSub) this.statusSub.unsubscribe();
+    if (this.readSub) this.readSub.unsubscribe();
   }
 
   toggleChat(): void {
     this.isOpen = !this.isOpen;
     if (this.isOpen) {
       this.loadOnlineUsers();
+      this.chatService.markMessagesAsRead();
       setTimeout(() => this.scrollToBottom(), 100);
     }
   }
@@ -368,6 +411,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
 
     this.stopLocalTyping();
     const messageText = this.newMessage;
+    const replyId = this.replyingToMessage?.id;
     
     this.messages.push({ 
       id: Date.now(), 
@@ -375,14 +419,21 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
       userId: this.currentUserId,
       message: messageText, 
       isIncoming: false, 
+      status: 0,
+      replyToMessage: this.replyingToMessage ? {
+        id: this.replyingToMessage.id!,
+        senderName: this.replyingToMessage.user,
+        content: this.replyingToMessage.message
+      } : undefined,
       reactions: [] 
     });
     
     this.newMessage = '';
     this.showInputEmojiStrip = false;
+    this.replyingToMessage = null;
     setTimeout(() => this.scrollToBottom(), 50);
 
-    this.chatService.sendMessage(messageText);
+    this.chatService.sendMessage(messageText, replyId as number);
   }
 
   onInputChange(): void {
@@ -394,6 +445,73 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     this.typingTimeout = setTimeout(() => {
       this.stopLocalTyping();
     }, 2000);
+
+    const lastAtWordMatch = this.newMessage.match(/@([a-zA-Z0-9_.\u0600-\u06FF]*)$/);
+    if (lastAtWordMatch) {
+      this.showMentionsList = true;
+      const query = lastAtWordMatch[1].toLowerCase();
+      this.filteredUsers = this.allProjectUsers.filter(u => {
+        const name = (u.userName || u.nameAr || u.nameEn || '').toLowerCase();
+        return name.includes(query);
+      });
+      this.filteredUsers.unshift({
+        id: 'all',
+        userName: 'الكل (all)',
+        nameAr: 'الكل',
+        nameEn: 'all'
+      });
+    } else {
+      this.showMentionsList = false;
+    }
+  }
+
+  loadAllProjectUsers(): void {
+    this.chatService.getUsers().subscribe({
+      next: (users) => {
+        this.allProjectUsers = users || [];
+      },
+      error: (err) => console.error('Failed to load project users:', err)
+    });
+  }
+
+  selectMention(user: any): void {
+    const mentionText = user.id === 'all' ? '@الكل ' : `@${user.userName || user.nameAr || 'user'} `;
+    const lastAtIndex = this.newMessage.lastIndexOf('@');
+    if (lastAtIndex !== -1) {
+      this.newMessage = this.newMessage.substring(0, lastAtIndex) + mentionText;
+    } else {
+      this.newMessage += mentionText;
+    }
+    this.showMentionsList = false;
+    this.filteredUsers = [];
+  }
+
+  initiateReply(msg: ChatMessage): void {
+    this.replyingToMessage = msg;
+    this.showInputEmojiStrip = false;
+  }
+
+  cancelReply(): void {
+    this.replyingToMessage = null;
+  }
+
+  formatMessage(text: string): string {
+    if (!text) return '';
+    let escaped = text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+      
+    escaped = escaped.replace(/@([a-zA-Z0-9_.\u0600-\u06FF\s()]+)/g, (match, username) => {
+      const lowerName = username.trim().toLowerCase();
+      if (lowerName === 'all' || lowerName === 'الكل' || lowerName.includes('all') || lowerName.includes('الكل')) {
+        return `<span class="mention-tag all-mention">${match}</span>`;
+      }
+      return `<span class="mention-tag">${match}</span>`;
+    });
+    return escaped;
   }
 
   stopLocalTyping(): void {
