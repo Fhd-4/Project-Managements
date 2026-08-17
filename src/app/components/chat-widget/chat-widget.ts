@@ -24,6 +24,7 @@ export interface ChatMessage {
     content: string;
   };
   status?: number;
+  readStates?: Array<{ userId: string; readAt: string; }>;
 }
 
 @Component({
@@ -127,6 +128,15 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
           const msg = this.messages.find(m => m.id === data.messageId);
           if (msg) {
             msg.status = 2; // Read
+            if (!msg.readStates) {
+              msg.readStates = [];
+            }
+            if (!msg.readStates.some(r => r.userId === data.readerUserId)) {
+              msg.readStates.push({
+                userId: data.readerUserId,
+                readAt: new Date().toISOString()
+              });
+            }
           }
           this.cdr.detectChanges();
         });
@@ -322,6 +332,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
               timestamp: msg.timestamp ?? '',
               status: msg.status || 0,
               replyToMessage: msg.replyToMessage,
+              readStates: msg.readStates ?? msg.ReadStates ?? [],
               reactions: this.formatReactionsFromHistory(msg.reactions ?? msg.Reactions)
             };
           });
@@ -518,6 +529,11 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
       return `<span class="mention-tag">${match}</span>`;
     });
     return escaped;
+  }
+
+  getReaderName(userId: string): string {
+    const user = this.allProjectUsers.find(u => u.id === userId);
+    return user ? (user.userName || user.nameAr || 'مستخدم') : 'مستخدم';
   }
 
   stopLocalTyping(): void {

@@ -107,10 +107,18 @@
           <!-- Message Status and Time info -->
           <div class="message-info">
             <span class="message-time" *ngIf="msg.timestamp">{{ msg.timestamp | date:'shortTime' }}</span>
-            <span class="message-status" *ngIf="!msg.isIncoming">
+            <span class="message-status status-ticks-container" *ngIf="!msg.isIncoming">
               <svg *ngIf="msg.status === 0" class="checkmark sent" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
               <svg *ngIf="msg.status === 1" class="checkmark delivered" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/><path d="M16 6l-8 8-3-3" opacity="0.6"/></svg>
               <svg *ngIf="msg.status === 2" class="checkmark read" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/><path d="M16 6l-8 8-3-3" opacity="0.6"/></svg>
+
+              <!-- Tooltip showing who read the message -->
+              <div class="readers-tooltip" *ngIf="msg.readStates && msg.readStates.length > 0">
+                <span class="tooltip-title">قُرأت بواسطة:</span>
+                <div class="tooltip-user" *ngFor="let reader of msg.readStates">
+                  • {{ getReaderName(reader.userId) }}
+                </div>
+              </div>
             </span>
           </div>
         </div>

@@ -782,3 +782,63 @@ $border-color: #e2e8f0;
     }
   }
 }
+
+/* Status ticks container hover effect & tooltip styling */
+.status-ticks-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  
+  &:hover {
+    .readers-tooltip {
+      visibility: visible;
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .readers-tooltip {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    bottom: 22px;
+    right: 0;
+    background: #1e293b;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 10px;
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+    z-index: 1000;
+    transition: opacity 0.15s ease, visibility 0.15s ease, transform 0.15s ease;
+    transform: translateY(4px);
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    text-align: right;
+    direction: rtl;
+    
+    .tooltip-title {
+      font-weight: bold;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+      padding-bottom: 3px;
+      margin-bottom: 2px;
+    }
+    
+    .tooltip-user {
+      opacity: 0.9;
+    }
+    
+    &::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      right: 6px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: #1e293b transparent transparent transparent;
+    }
+  }
+}
