@@ -4,6 +4,26 @@ import { BehaviorSubject, Subject, Observable } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { API_CONFIG } from '../../api.config';
 
+export interface UserListItem {
+  id: string;
+  userName: string;
+  email: string;
+  phoneNumber: string;
+  role: string;
+  nameAr?: string;
+  nameEn?: string;
+  titleAr?: string;
+  titleEn?: string;
+  createdDate: string;
+  isActive: boolean;
+  isOnline: boolean;
+}
+
+export interface UserStatusEvent {
+  userId: string;
+  isOnline: boolean;
+}
+
 export interface ReactionEvent {
   messageId: number | string;
   userId: string;
@@ -26,6 +46,10 @@ export class ChatService {
 
   private reactionSource = new Subject<ReactionEvent>();
   public reactionReceived$: Observable<ReactionEvent> = this.reactionSource.asObservable();
+
+  // Observable for online/offline status changes
+  private userStatusSource = new Subject<UserStatusEvent>();
+  public userStatusChanged$: Observable<UserStatusEvent> = this.userStatusSource.asObservable();
 
   private audioCtx: AudioContext | null = null;
 
@@ -54,12 +78,15 @@ export class ChatService {
       .then(() => console.log('SignalR connected successfully!'))
       .catch(err => console.error('SignalR connection failed:', err));
 
-    // User typing listener
+    // Listen for live Online/Offline status changes
+    this.hubConnection.on('UserStatusChanged', (userId: string, isOnline: boolean) => {
+      this.userStatusSource.next({ userId, isOnline });
+    });
+
     this.hubConnection.on('UserTyping', (userName: string, isTyping: boolean) => {
       this.typingSource.next({ user: userName, isTyping });
     });
 
-    // Message reaction listener
     this.hubConnection.on('ReceiveReaction', (data: any) => {
       if (data) {
         this.reactionSource.next({
@@ -72,7 +99,6 @@ export class ChatService {
       }
     });
 
-    // Incoming message listener
     this.hubConnection.on('ReceiveMessage', (...args: any[]) => {
       let id: any = null;
       let senderId = '';
@@ -114,7 +140,6 @@ export class ChatService {
     });
   }
 
-  // Synthesized notification chime (No external mp3 required)
   public playNotificationSound(): void {
     if (typeof window === 'undefined') return;
 
@@ -133,14 +158,12 @@ export class ChatService {
       }
 
       const now = this.audioCtx.currentTime;
-
-      // Primary tone
       const osc = this.audioCtx.createOscillator();
       const gain = this.audioCtx.createGain();
 
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(587.33, now); // D5 note
-      osc.frequency.exponentialRampToValueAtTime(880, now + 0.12); // A5 note
+      osc.frequency.setValueAtTime(587.33, now);
+      osc.frequency.exponentialRampToValueAtTime(880, now + 0.12);
 
       gain.gain.setValueAtTime(0.18, now);
       gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
@@ -161,6 +184,18 @@ export class ChatService {
         .then(() => console.log('SignalR connected successfully on demand!'))
         .catch(err => console.error('SignalR manual connection failed:', err));
     }
+  }
+
+  // Fetch initial users list with isOnline status
+  public getAllUsers(): Observable<UserListItem[]> {
+    let token = '';
+    if (typeof window !== 'undefined' && window.localStorage) {
+      token = localStorage.getItem('auth_token') || '';
+    }
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.get<UserListItem[]>(`${API_CONFIG.baseUrl}/Auth/all-users`, { headers });
   }
 
   public sendReaction(messageId: number | string, emoji: string): Promise<void> {

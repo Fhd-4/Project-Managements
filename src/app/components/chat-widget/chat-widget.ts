@@ -1,13 +1,13 @@
 import { Component, OnInit, OnDestroy, ElementRef, ViewChild, NgZone, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ChatService, ReactionEvent } from './chat.service';
+import { ChatService, ReactionEvent, UserListItem, UserStatusEvent } from './chat.service';
 import { Subscription } from 'rxjs';
 
 export interface ReactionGroup {
   emoji: string;
   count: number;
-  users: string[]; // List of user IDs
+  users: string[];
 }
 
 export interface ChatMessage {
@@ -45,6 +45,10 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     { id: 0, user: 'Support', message: 'Hello! 👋 Need help tracking project milestones or updating a task status?', isIncoming: true, reactions: [] }
   ];
 
+  // User online status storage
+  usersList: UserListItem[] = [];
+  onlineUserIds = new Set<string>();
+
   isLocalTyping = false;
   typingTimeout: any;
   typingUsers = new Set<string>();
@@ -52,6 +56,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
   private messageSub!: Subscription;
   private typingSub!: Subscription;
   private reactionSub!: Subscription;
+  private statusSub!: Subscription;
 
   constructor(
     private chatService: ChatService,
@@ -62,9 +67,10 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.resolveCurrentUser();
     this.chatService.startConnection();
+    this.loadUsers();
     this.loadHistory();
 
-    // 1. Receive incoming messages & play sound notification
+    // 1. Receive incoming messages
     this.messageSub = this.chatService.currentMessage$.subscribe(data => {
       if (data) {
         const senderIdStr = String(data.userId || data.user || '').trim().toLowerCase();
@@ -84,7 +90,6 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
               reactions: []
             });
 
-            // 🔔 Play audio notification for incoming messages from others
             this.chatService.playNotificationSound();
 
             this.cdr.detectChanges();
@@ -97,7 +102,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
       }
     });
 
-    // 2. Receive live SignalR reaction event
+    // 2. Receive live SignalR reaction events
     this.reactionSub = this.chatService.reactionReceived$.subscribe((res: ReactionEvent) => {
       if (res) {
         this.ngZone.run(() => {
@@ -107,7 +112,27 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
       }
     });
 
-    // 3. Receive typing indicator events
+    // 3. Receive live User Online/Offline status changes
+    this.statusSub = this.chatService.userStatusChanged$.subscribe((status: UserStatusEvent) => {
+      if (status) {
+        this.ngZone.run(() => {
+          const user = this.usersList.find(u => u.id === status.userId);
+          if (user) {
+            user.isOnline = status.isOnline;
+          }
+
+          if (status.isOnline) {
+            this.onlineUserIds.add(status.userId);
+          } else {
+            this.onlineUserIds.delete(status.userId);
+          }
+
+          this.cdr.detectChanges();
+        });
+      }
+    });
+
+    // 4. Typing indicator events
     this.typingSub = this.chatService.typingStatus$.subscribe(data => {
       if (data) {
         this.ngZone.run(() => {
@@ -127,6 +152,46 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     });
   }
 
+  loadUsers(): void {
+  this.chatService.getAllUsers().subscribe({
+    next: (users) => {
+      if (users && Array.isArray(users)) {
+        this.usersList = users;
+        this.onlineUserIds.clear();
+        users.forEach(u => {
+          if (u.isOnline) {
+            this.onlineUserIds.add(u.id.toLowerCase());
+            if (u.userName) this.onlineUserIds.add(u.userName.toLowerCase());
+          }
+        });
+        this.cdr.detectChanges();
+      }
+    },
+    error: (err) => console.error('Failed to load users list:', err)
+  });
+  }
+
+  isUserOnline(userIdOrName?: string): boolean {
+  if (!userIdOrName) return false;
+  const searchKey = String(userIdOrName).trim().toLowerCase();
+
+  // 1. Direct ID check
+  if (this.onlineUserIds.has(searchKey)) {
+    return true;
+  }
+
+  // 2. Lookup matching user object by ID, UserName, NameAr, or NameEn
+  const matchedUser = this.usersList.find(u => 
+    (u.id && u.id.toLowerCase() === searchKey) ||
+    (u.userName && u.userName.toLowerCase() === searchKey) ||
+    (u.nameAr && u.nameAr.toLowerCase() === searchKey) ||
+    (u.nameEn && u.nameEn.toLowerCase() === searchKey)
+  );
+
+  return !!matchedUser?.isOnline;
+  
+}
+
   onMessageMouseEnter(index: number): void {
     clearTimeout(this.hoverLeaveTimeout);
     this.hoveredMessageIndex = index;
@@ -140,15 +205,11 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     }, 400);
   }
 
-  // Invoked when clicking an emoji on a message
   toggleReaction(msg: ChatMessage, emoji: string): void {
     if (!msg.id || msg.id === 0) return;
-
-    // Send to SignalR Hub
     this.chatService.sendReaction(msg.id, emoji);
   }
 
-  // Processes the backend broadcast: handles adds, updates, and removals
   private handleLiveReaction(event: ReactionEvent): void {
     const msg = this.messages.find(m => String(m.id) === String(event.messageId));
     if (!msg) return;
@@ -157,13 +218,11 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
       msg.reactions = [];
     }
 
-    // Remove user's previous reaction on this message (if any)
     msg.reactions.forEach(group => {
       group.users = group.users.filter(u => u !== event.userId);
       group.count = group.users.length;
     });
 
-    // If it's not a complete removal, add user to target emoji group
     if (!event.isRemoved) {
       const existingGroup = msg.reactions.find(g => g.emoji === event.emoji);
       if (existingGroup) {
@@ -180,11 +239,9 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
       }
     }
 
-    // Clean up empty reaction groups
     msg.reactions = msg.reactions.filter(g => g.count > 0);
   }
 
-  // Transforms raw API reactions [{ userId, userName, emoji }] into aggregated groups
   private formatReactionsFromHistory(rawReactions: any[]): ReactionGroup[] {
     if (!rawReactions || !Array.isArray(rawReactions)) return [];
 
@@ -295,6 +352,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     if (this.messageSub) this.messageSub.unsubscribe();
     if (this.typingSub) this.typingSub.unsubscribe();
     if (this.reactionSub) this.reactionSub.unsubscribe();
+    if (this.statusSub) this.statusSub.unsubscribe();
   }
 
   toggleChat(): void {
@@ -315,7 +373,6 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     this.stopLocalTyping();
     const messageText = this.newMessage;
     
-    // Add locally for instant UI feedback
     this.messages.push({ 
       id: Date.now(), 
       user: this.currentUser, 

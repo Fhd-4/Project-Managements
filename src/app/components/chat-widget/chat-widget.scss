@@ -145,7 +145,7 @@ $border-color: #e2e8f0;
         border-radius: 12px 12px 12px 2px;
         border: 1px solid $border-color;
 
-        /* Incoming message is on the right -> anchor to right edge so it expands leftward */
+        /* تمدد الشريط للداخل باتجاه اليسار */
         .reaction-strip {
           right: 0 !important;
           left: auto !important;
@@ -167,7 +167,7 @@ $border-color: #e2e8f0;
         color: white;
         border-radius: 12px 12px 2px 12px;
 
-        /* Outgoing message is on the left -> anchor to left edge so it expands rightward */
+        /* تمدد الشريط للداخل باتجاه اليمين */
         .reaction-strip {
           left: 0 !important;
           right: auto !important;
@@ -177,6 +177,38 @@ $border-color: #e2e8f0;
 
       .message-wrapper {
         align-items: flex-end;
+      }
+    }
+  }
+
+  /* حاوية الأفاتار ونقطة الاتصال */
+  .message-avatar {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    flex-shrink: 0;
+
+    .status-indicator {
+      position: absolute;
+      bottom: -1px;
+      right: -1px;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      border: 2px solid white;
+      z-index: 10;
+      display: inline-block;
+
+      &.online {
+        background-color: #22c55e !important;
+        box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.4);
+      }
+
+      &.offline {
+        background-color: #94a3b8 !important;
       }
     }
   }
@@ -204,7 +236,7 @@ $border-color: #e2e8f0;
     line-height: 1.4;
     word-break: break-word;
 
-    /* Floating WhatsApp Reaction Strip */
+    /* شريط التفاعلات العائم */
     .reaction-strip {
       position: absolute;
       top: -38px;
@@ -218,7 +250,7 @@ $border-color: #e2e8f0;
       white-space: nowrap;
       animation: popIn 0.15s ease-out;
 
-      /* Hover bridge preventing accidental close */
+      /* جسر شفاف يمنع اختفاء الشريط عند حركة المؤشر */
       &::after {
         content: '';
         position: absolute;

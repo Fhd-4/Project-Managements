@@ -35,6 +35,7 @@
          (mouseenter)="onMessageMouseEnter(i)"
          (mouseleave)="onMessageMouseLeave()">
       
+      <!-- صورة وأفاتار المرسل مع مؤشر حالة الاتصال -->
       <div class="message-avatar" *ngIf="msg.isIncoming">
         <div class="plain-avatar small">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -42,13 +43,18 @@
             <circle cx="12" cy="7" r="4"></circle>
           </svg>
         </div>
+        <!-- نقطة الاتصال الخضراء / الرمادية -->
+        <span class="status-indicator" 
+              [ngClass]="{'online': isUserOnline(msg.userId || msg.user), 'offline': !isUserOnline(msg.userId || msg.user)}"
+              [title]="isUserOnline(msg.userId || msg.user) ? 'Online' : 'Offline'">
+        </span>
       </div>
 
       <div class="message-wrapper">
         <span class="message-sender">{{ msg.user === currentUser ? 'You' : msg.user }}</span>
         
         <div class="message-bubble">
-          <!-- شريط التفاعلات العائم المتموضع مركزياً بالنسبة للفقاعة -->
+          <!-- شريط التفاعلات العائم -->
           <div class="reaction-strip" *ngIf="hoveredMessageIndex === i">
             <button type="button" 
                     *ngFor="let emoji of emojiList" 
