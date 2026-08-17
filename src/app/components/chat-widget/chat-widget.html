@@ -1,50 +1,65 @@
-<!-- الأيقونة العائمة أسفل اليمين -->
+<!-- Floating Open Button -->
 <div class="chat-fab" (click)="toggleChat()" *ngIf="!isOpen">
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
   </svg>
 </div>
 
-<!-- نافذة المحادثة المنبثقة -->
+<!-- Chat Popup Window -->
 <div class="chat-popup-container" *ngIf="isOpen">
   
-  <!-- رأس النافذة مع مؤشر التواجد بالقمة -->
+  <!-- Header Section -->
   <div class="chat-header">
     <div class="back-btn" (click)="toggleChat()">‹</div>
     <div class="chat-title">PMO Team Support</div>
     
-    <!-- الأفاتار الرئيسي بالرأس مع نقطة الاتصال وعداد المتصلين -->
     <div class="avatar-container">
       <div class="plain-avatar">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
           <circle cx="12" cy="7" r="4"></circle>
         </svg>
-        <span class="header-online-dot"></span>
       </div>
     </div>
     
     <div class="chat-subtitle">
       <span>We will reply as soon as we can</span>
-      <span class="online-pill" *ngIf="getOnlineCount() > 0">
-        <span class="pulse-dot"></span> {{ getOnlineCount() }} Online
-      </span>
     </div>
     <div class="chat-sub-desc">Ask about project status, tasks, or share feedback.</div>
   </div>
 
-  <!-- صندوق عرض الرسائل -->
+  <!-- Active Online Members Horizontal Strip -->
+  <div class="online-users-bar" *ngIf="getOnlyActiveUsers().length > 0">
+    <div class="online-bar-title">
+      <span class="pulse-dot"></span>
+      <span>المتصلون الآن ({{ getOnlyActiveUsers().length }}):</span>
+    </div>
+    
+    <div class="online-users-chips">
+      <div class="user-chip" *ngFor="let user of getOnlyActiveUsers()">
+        <div class="chip-avatar">
+          <img *ngIf="hasValidProfilePhoto(user.profilePhoto)" [src]="user.profilePhoto" class="avatar-img" [alt]="user.userName" />
+          <span *ngIf="!hasValidProfilePhoto(user.profilePhoto)" class="avatar-letter">
+            {{ user.userName.charAt(0).toUpperCase() }}
+          </span>
+          <span class="online-dot"></span>
+        </div>
+        <span class="chip-name">{{ user.userName }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Messages Scroll Body -->
   <div class="chat-body" #scrollContainer>
     <div class="date-badge">Today</div>
 
-    <!-- حلقة عرض الرسائل الحية -->
+    <!-- Message Iteration -->
     <div *ngFor="let msg of messages; let i = index" 
          class="message-row" 
          [ngClass]="{'incoming': msg.isIncoming, 'outgoing': !msg.isIncoming}"
          (mouseenter)="onMessageMouseEnter(i)"
          (mouseleave)="onMessageMouseLeave()">
       
-      <!-- صورة وأفاتار المرسل مع نقطة الحالة المباشرة -->
       <div class="message-avatar" *ngIf="msg.isIncoming">
         <div class="plain-avatar small">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -82,7 +97,7 @@
       </div>
     </div>
 
-    <!-- مؤشر الكتابة الجماعي الحي -->
+    <!-- Typing Indicator -->
     <div class="typing-indicator-row" *ngIf="typingUsers.size > 0">
       <div class="typing-bubble">
         <span class="typing-text">{{ getTypingText() }}</span>
@@ -100,7 +115,7 @@
     </div>
   </div>
 
-  <!-- شريط الإيموجي المنبثق فوق حقل الإدخال -->
+  <!-- Input Emoji Strip -->
   <div class="input-emoji-strip" *ngIf="showInputEmojiStrip">
     <button type="button" 
             *ngFor="let emoji of emojiList" 
@@ -110,7 +125,7 @@
     </button>
   </div>
 
-  <!-- شريط الإدخال السفلي -->
+  <!-- Input Footer -->
   <div class="chat-footer">
     <button class="attach-btn" type="button" title="Attach file">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -145,7 +160,7 @@
 
 </div>
 
-<!-- زر الإغلاق العائم عند فتح الشات -->
+<!-- Floating Close Button -->
 <div class="chat-fab close-fab" (click)="toggleChat()" *ngIf="isOpen">
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <line x1="18" y1="6" x2="6" y2="18"></line>

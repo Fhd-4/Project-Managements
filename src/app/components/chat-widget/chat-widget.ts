@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, ElementRef, ViewChild, NgZone, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ChatService, ReactionEvent, UserListItem, UserStatusEvent } from './chat.service';
+import { ChatService, ReactionEvent, OnlineUserDto, UserStatusEvent } from './chat.service';
 import { Subscription } from 'rxjs';
 
 export interface ReactionGroup {
@@ -45,7 +45,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     { id: 0, user: 'Support', message: 'Hello! 👋 Need help tracking project milestones or updating a task status?', isIncoming: true, reactions: [] }
   ];
 
-  usersList: UserListItem[] = [];
+  onlineUsersList: OnlineUserDto[] = [];
   onlineUserIds = new Set<string>();
 
   isLocalTyping = false;
@@ -66,7 +66,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.resolveCurrentUser();
     this.chatService.startConnection();
-    this.loadUsers();
+    this.loadOnlineUsers();
     this.loadHistory();
 
     // 1. Receive incoming messages
@@ -116,7 +116,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
       if (status) {
         this.ngZone.run(() => {
           const targetId = status.userId.toLowerCase();
-          const user = this.usersList.find(u => u.id.toLowerCase() === targetId);
+          const user = this.onlineUsersList.find(u => u.userId.toLowerCase() === targetId);
           if (user) {
             user.isOnline = status.isOnline;
           }
@@ -124,11 +124,9 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
           if (status.isOnline) {
             this.onlineUserIds.add(targetId);
             if (user?.userName) this.onlineUserIds.add(user.userName.toLowerCase());
-            if (user?.nameAr) this.onlineUserIds.add(user.nameAr.toLowerCase());
           } else {
             this.onlineUserIds.delete(targetId);
             if (user?.userName) this.onlineUserIds.delete(user.userName.toLowerCase());
-            if (user?.nameAr) this.onlineUserIds.delete(user.nameAr.toLowerCase());
           }
 
           this.cdr.detectChanges();
@@ -156,35 +154,37 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     });
   }
 
-  loadUsers(): void {
-    this.chatService.getAllUsers().subscribe({
-      next: (users) => {
+  loadOnlineUsers(): void {
+    this.chatService.getOnlineUsers().subscribe({
+      next: (users: OnlineUserDto[]) => {
         if (users && Array.isArray(users)) {
-          this.usersList = users;
+          this.onlineUsersList = users;
           this.onlineUserIds.clear();
           users.forEach(u => {
             if (u.isOnline) {
-              if (u.id) this.onlineUserIds.add(u.id.toLowerCase());
+              if (u.userId) this.onlineUserIds.add(u.userId.toLowerCase());
               if (u.userName) this.onlineUserIds.add(u.userName.toLowerCase());
-              if (u.nameAr) this.onlineUserIds.add(u.nameAr.toLowerCase());
-              if (u.nameEn) this.onlineUserIds.add(u.nameEn.toLowerCase());
             }
           });
           this.cdr.detectChanges();
         }
       },
-      error: (err) => console.error('Failed to load users list:', err)
+      error: (err: any) => console.error('Failed to load online users:', err)
     });
   }
 
-  getOnlineCount(): number {
-    return this.usersList.filter(u => u.isOnline).length;
+  getOnlyActiveUsers(): OnlineUserDto[] {
+    return this.onlineUsersList.filter(u => u.isOnline);
   }
 
   isUserOnline(userIdOrName?: string): boolean {
     if (!userIdOrName) return false;
     const key = String(userIdOrName).trim().toLowerCase();
     return this.onlineUserIds.has(key);
+  }
+
+  hasValidProfilePhoto(photoUrl?: string): boolean {
+    return !!photoUrl && !photoUrl.includes('default-profile.png');
   }
 
   onMessageMouseEnter(index: number): void {
@@ -303,7 +303,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
           }, 100);
         }
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Failed to load chat history:', err);
       }
     });
@@ -353,7 +353,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
   toggleChat(): void {
     this.isOpen = !this.isOpen;
     if (this.isOpen) {
-      this.loadUsers();
+      this.loadOnlineUsers();
       setTimeout(() => this.scrollToBottom(), 100);
     }
   }

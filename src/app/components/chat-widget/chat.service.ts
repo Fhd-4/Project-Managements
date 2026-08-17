@@ -4,19 +4,13 @@ import { BehaviorSubject, Subject, Observable } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { API_CONFIG } from '../../api.config';
 
-export interface UserListItem {
-  id: string;
+export interface OnlineUserDto {
+  userId: string;
   userName: string;
-  email: string;
-  phoneNumber: string;
-  role: string;
-  nameAr?: string;
-  nameEn?: string;
-  titleAr?: string;
-  titleEn?: string;
-  createdDate: string;
-  isActive: boolean;
+  profilePhoto?: string;
   isOnline: boolean;
+  lastSeenUtc?: string | null;
+  lastActivityUtc?: string | null;
 }
 
 export interface UserStatusEvent {
@@ -77,13 +71,11 @@ export class ChatService {
       .then(() => console.log('SignalR connected successfully!'))
       .catch(err => console.error('SignalR connection failed:', err));
 
-    // Handle UserStatusChanged with flexible argument unpacking
     this.hubConnection.on('UserStatusChanged', (...args: any[]) => {
-      console.log('UserStatusChanged received:', args);
       let userId = '';
       let isOnline = false;
 
-      if (args.length === 1 && typeof args[0] === 'object') {
+      if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
         userId = args[0].userId || args[0].id || '';
         isOnline = !!args[0].isOnline;
       } else if (args.length >= 2) {
@@ -199,7 +191,7 @@ export class ChatService {
     }
   }
 
-  public getAllUsers(): Observable<UserListItem[]> {
+  public getOnlineUsers(): Observable<OnlineUserDto[]> {
     let token = '';
     if (typeof window !== 'undefined' && window.localStorage) {
       token = localStorage.getItem('auth_token') || '';
@@ -207,7 +199,7 @@ export class ChatService {
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
-    return this.http.get<UserListItem[]>(`${API_CONFIG.baseUrl}/Auth/all-users`, { headers });
+    return this.http.get<OnlineUserDto[]>(`${API_CONFIG.baseUrl}/Chat/online-users`, { headers });
   }
 
   public sendReaction(messageId: number | string, emoji: string): Promise<void> {
