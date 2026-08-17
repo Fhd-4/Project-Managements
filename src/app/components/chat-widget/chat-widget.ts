@@ -64,7 +64,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     this.chatService.startConnection();
     this.loadHistory();
 
-    // 1. Receive incoming messages
+    // 1. Receive incoming messages & play sound notification
     this.messageSub = this.chatService.currentMessage$.subscribe(data => {
       if (data) {
         const senderIdStr = String(data.userId || data.user || '').trim().toLowerCase();
@@ -83,6 +83,10 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
               isIncoming: true,
               reactions: []
             });
+
+            // 🔔 Play audio notification for incoming messages from others
+            this.chatService.playNotificationSound();
+
             this.cdr.detectChanges();
             setTimeout(() => {
               this.scrollToBottom();

@@ -114,12 +114,12 @@ $border-color: #e2e8f0;
 .chat-body {
   flex: 1;
   background: $grey-light;
-  padding: 16px;
+  padding: 16px 12px;
   overflow-y: auto;
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
 
   .date-badge {
     text-align: center;
@@ -133,7 +133,7 @@ $border-color: #e2e8f0;
     display: flex;
     gap: 8px;
     align-items: flex-end;
-    max-width: 80%;
+    max-width: 82%;
 
     &.incoming {
       align-self: flex-start;
@@ -144,6 +144,13 @@ $border-color: #e2e8f0;
         color: $navy-dark;
         border-radius: 12px 12px 12px 2px;
         border: 1px solid $border-color;
+
+        /* Incoming message is on the right -> anchor to right edge so it expands leftward */
+        .reaction-strip {
+          right: 0 !important;
+          left: auto !important;
+          transform: none !important;
+        }
       }
 
       .message-wrapper {
@@ -159,6 +166,13 @@ $border-color: #e2e8f0;
         background: $primary-blue;
         color: white;
         border-radius: 12px 12px 2px 12px;
+
+        /* Outgoing message is on the left -> anchor to left edge so it expands rightward */
+        .reaction-strip {
+          left: 0 !important;
+          right: auto !important;
+          transform: none !important;
+        }
       }
 
       .message-wrapper {
@@ -185,28 +199,26 @@ $border-color: #e2e8f0;
     padding: 10px 14px;
     font-size: 13px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    min-width: 60px;
+    min-width: 50px;
     max-width: 240px;
     line-height: 1.4;
     word-break: break-word;
 
-    /* شريط التفاعلات العائم - متمركز فوق الفقاعة ومزود بجسر هوفر */
+    /* Floating WhatsApp Reaction Strip */
     .reaction-strip {
       position: absolute;
-      top: -42px;
-      left: 50%;
-      transform: translateX(-50%);
+      top: -38px;
       background: #1f2937;
-      border-radius: 24px;
-      padding: 4px 8px;
+      border-radius: 20px;
+      padding: 3px 6px;
       display: flex;
-      gap: 6px;
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+      gap: 3px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
       z-index: 100;
       white-space: nowrap;
       animation: popIn 0.15s ease-out;
 
-      /* جسر شفاف يمنع اختفاء الشريط أثناء تحريك الماوس من الفقاعة للشريط */
+      /* Hover bridge preventing accidental close */
       &::after {
         content: '';
         position: absolute;
@@ -219,14 +231,14 @@ $border-color: #e2e8f0;
       .reaction-btn {
         background: none;
         border: none;
-        font-size: 1.15rem;
+        font-size: 1rem;
         cursor: pointer;
-        padding: 2px 4px;
+        padding: 2px;
         line-height: 1;
-        transition: transform 0.12s ease;
+        transition: transform 0.1s ease;
 
         &:hover {
-          transform: scale(1.35);
+          transform: scale(1.25);
         }
       }
     }
@@ -324,8 +336,8 @@ $border-color: #e2e8f0;
 .input-emoji-strip {
   display: flex;
   justify-content: center;
-  gap: 10px;
-  padding: 6px 12px;
+  gap: 8px;
+  padding: 6px 10px;
   background: $grey-light;
   border-top: 1px solid $border-color;
   animation: slideUp 0.15s ease-out;
@@ -334,13 +346,13 @@ $border-color: #e2e8f0;
   .emoji-item {
     background: none;
     border: none;
-    font-size: 1.25rem;
+    font-size: 1.15rem;
     cursor: pointer;
     line-height: 1;
     transition: transform 0.1s;
 
     &:hover {
-      transform: scale(1.3);
+      transform: scale(1.25);
     }
   }
 }

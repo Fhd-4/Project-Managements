@@ -27,6 +27,8 @@ export class ChatService {
   private reactionSource = new Subject<ReactionEvent>();
   public reactionReceived$: Observable<ReactionEvent> = this.reactionSource.asObservable();
 
+  private audioCtx: AudioContext | null = null;
+
   constructor(private http: HttpClient) {
     this.initConnection();
   }
@@ -52,14 +54,13 @@ export class ChatService {
       .then(() => console.log('SignalR connected successfully!'))
       .catch(err => console.error('SignalR connection failed:', err));
 
-    // Listen for typing events
+    // User typing listener
     this.hubConnection.on('UserTyping', (userName: string, isTyping: boolean) => {
       this.typingSource.next({ user: userName, isTyping });
     });
 
-    // Listen for reaction broadcast event from backend (ReceiveReaction)
+    // Message reaction listener
     this.hubConnection.on('ReceiveReaction', (data: any) => {
-      console.log('ReceiveReaction received:', data);
       if (data) {
         this.reactionSource.next({
           messageId: data.messageId,
@@ -71,9 +72,8 @@ export class ChatService {
       }
     });
 
-    // Listen for incoming messages
+    // Incoming message listener
     this.hubConnection.on('ReceiveMessage', (...args: any[]) => {
-      console.log('ReceiveMessage event args received:', args);
       let id: any = null;
       let senderId = '';
       let senderName = '';
@@ -114,6 +114,47 @@ export class ChatService {
     });
   }
 
+  // Synthesized notification chime (No external mp3 required)
+  public playNotificationSound(): void {
+    if (typeof window === 'undefined') return;
+
+    try {
+      if (!this.audioCtx) {
+        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        if (AudioContextClass) {
+          this.audioCtx = new AudioContextClass();
+        }
+      }
+
+      if (!this.audioCtx) return;
+
+      if (this.audioCtx.state === 'suspended') {
+        this.audioCtx.resume();
+      }
+
+      const now = this.audioCtx.currentTime;
+
+      // Primary tone
+      const osc = this.audioCtx.createOscillator();
+      const gain = this.audioCtx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(587.33, now); // D5 note
+      osc.frequency.exponentialRampToValueAtTime(880, now + 0.12); // A5 note
+
+      gain.gain.setValueAtTime(0.18, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+
+      osc.connect(gain);
+      gain.connect(this.audioCtx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.35);
+    } catch (e) {
+      console.warn('Audio notification could not play:', e);
+    }
+  }
+
   public startConnection() {
     if (this.hubConnection && this.hubConnection.state === signalR.HubConnectionState.Disconnected) {
       this.hubConnection.start()
@@ -122,7 +163,6 @@ export class ChatService {
     }
   }
 
-  // Invokes SendReaction on the Hub
   public sendReaction(messageId: number | string, emoji: string): Promise<void> {
     if (this.hubConnection && this.hubConnection.state === signalR.HubConnectionState.Connected) {
       return this.hubConnection.invoke('SendReaction', Number(messageId), emoji)
