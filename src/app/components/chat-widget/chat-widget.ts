@@ -67,6 +67,18 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.resolveCurrentUser();
     this.chatService.startConnection();
+    this.chatService.userStatusChanged$.subscribe(event => {
+    console.log('🟣 USER STATUS EVENT:', event);
+
+    const user = this.usersList.find(
+      u => u.id.toLowerCase() === event.userId.toLowerCase()
+    );
+
+    if (user) {
+      user.isOnline = event.isOnline;
+    }
+
+    this.cdr.detectChanges(); });
     this.loadUsers();
     this.loadHistory();
 
@@ -152,22 +164,23 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     });
   }
 
-  loadUsers(): void {
+  loadUsers() {
+  console.log('🔵 Loading users...');
+
   this.chatService.getAllUsers().subscribe({
     next: (users) => {
-      if (users && Array.isArray(users)) {
-        this.usersList = users;
-        this.onlineUserIds.clear();
-        users.forEach(u => {
-          if (u.isOnline) {
-            this.onlineUserIds.add(u.id.toLowerCase());
-            if (u.userName) this.onlineUserIds.add(u.userName.toLowerCase());
-          }
-        });
-        this.cdr.detectChanges();
-      }
+      console.log('🟢 USERS FROM API:', users);
+
+      this.usersList = users;
+
+      console.log(
+        '🟢 ONLINE USERS:',
+        users.filter(u => u.isOnline)
+      );
     },
-    error: (err) => console.error('Failed to load users list:', err)
+    error: (err) => {
+      console.error('🔴 GET USERS ERROR:', err);
+    }
   });
   }
 

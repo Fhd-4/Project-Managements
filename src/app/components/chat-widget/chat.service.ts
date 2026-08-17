@@ -98,6 +98,12 @@ export class ChatService {
         });
       }
     });
+    this.hubConnection.on('UserStatusChanged',(userId: string, isOnline: boolean) => {
+      console.log('🟡 UserStatusChanged:', userId, isOnline);
+      this.userStatusSource.next({
+        userId,
+        isOnline
+      });});
 
     this.hubConnection.on('ReceiveMessage', (...args: any[]) => {
       let id: any = null;
