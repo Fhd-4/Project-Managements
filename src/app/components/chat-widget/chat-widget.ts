@@ -106,8 +106,8 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
 
             this.chatService.playNotificationSound();
 
-            if (this.isOpen) {
-              this.chatService.markMessagesAsRead();
+            if (this.isOpen && data.id) {
+              this.chatService.markMessageAsRead(Number(data.id));
             }
 
             this.cdr.detectChanges();
@@ -124,12 +124,10 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     this.readSub = this.chatService.readStatus$.subscribe(data => {
       if (data) {
         this.ngZone.run(() => {
-          data.messageIds.forEach(id => {
-            const msg = this.messages.find(m => m.id === id);
-            if (msg) {
-              msg.status = 2; // Read
-            }
-          });
+          const msg = this.messages.find(m => m.id === data.messageId);
+          if (msg) {
+            msg.status = 2; // Read
+          }
           this.cdr.detectChanges();
         });
       }
@@ -334,7 +332,11 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
           ];
             
             if (this.isOpen) {
-              this.chatService.markMessagesAsRead();
+              mapped.forEach(msg => {
+                if (msg.isIncoming && msg.id && msg.status !== 2) {
+                  this.chatService.markMessageAsRead(Number(msg.id));
+                }
+              });
             }
 
             this.cdr.detectChanges();
@@ -396,7 +398,11 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     this.isOpen = !this.isOpen;
     if (this.isOpen) {
       this.loadOnlineUsers();
-      this.chatService.markMessagesAsRead();
+      this.messages.forEach(msg => {
+        if (msg.isIncoming && msg.id && msg.status !== 2) {
+          this.chatService.markMessageAsRead(Number(msg.id));
+        }
+      });
       setTimeout(() => this.scrollToBottom(), 100);
     }
   }

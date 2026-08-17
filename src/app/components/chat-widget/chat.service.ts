@@ -44,8 +44,8 @@ export class ChatService {
   private userStatusSource = new Subject<UserStatusEvent>();
   public userStatusChanged$: Observable<UserStatusEvent> = this.userStatusSource.asObservable();
 
-  private readStatusSource = new Subject<{ readerUserId: string, messageIds: number[] }>();
-  public readStatus$: Observable<{ readerUserId: string, messageIds: number[] }> = this.readStatusSource.asObservable();
+  private readStatusSource = new Subject<{ readerUserId: string, messageId: number }>();
+  public readStatus$: Observable<{ readerUserId: string, messageId: number }> = this.readStatusSource.asObservable();
 
   private audioCtx: AudioContext | null = null;
 
@@ -107,8 +107,13 @@ export class ChatService {
       }
     });
 
-    this.hubConnection.on('MessagesRead', (readerUserId: string, messageIds: number[]) => {
-      this.readStatusSource.next({ readerUserId, messageIds });
+    this.hubConnection.on('MessageRead', (data: any) => {
+      if (data && data.messageId) {
+        this.readStatusSource.next({
+          readerUserId: data.userId,
+          messageId: data.messageId
+        });
+      }
     });
 
     this.hubConnection.on('ReceiveMessage', (...args: any[]) => {
@@ -225,11 +230,7 @@ export class ChatService {
 
   public sendMessage(message: string, replyToMessageId?: number): Promise<void> {
     if (this.hubConnection && this.hubConnection.state === signalR.HubConnectionState.Connected) {
-      if (replyToMessageId) {
-        return this.hubConnection.invoke('SendMessage', message, replyToMessageId)
-          .catch(err => console.error('Error sending message: ', err));
-      }
-      return this.hubConnection.invoke('SendMessage', message)
+      return this.hubConnection.invoke('SendMessage', message, replyToMessageId !== undefined ? replyToMessageId : null)
         .catch(err => console.error('Error sending message: ', err));
     }
     return Promise.resolve();
@@ -246,10 +247,10 @@ export class ChatService {
     return this.http.get<any[]>(`${API_CONFIG.baseUrl}/Auth/all-users`, { headers });
   }
 
-  public markMessagesAsRead(): Promise<void> {
+  public markMessageAsRead(messageId: number): Promise<void> {
     if (this.hubConnection && this.hubConnection.state === signalR.HubConnectionState.Connected) {
-      return this.hubConnection.invoke('MarkMessagesAsRead')
-        .catch(err => console.error('Error marking messages as read: ', err));
+      return this.hubConnection.invoke('MarkMessageAsRead', Number(messageId))
+        .catch(err => console.error('Error marking message as read: ', err));
     }
     return Promise.resolve();
   }
