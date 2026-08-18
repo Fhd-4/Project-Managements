@@ -104,12 +104,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     // 1. Receive incoming messages
     this.messageSub = this.chatService.currentMessage$.subscribe(data => {
       if (data) {
-        const senderIdStr = String(data.userId || data.user || '').trim().toLowerCase();
-        const currentUserIdStr = String(this.currentUserId || '').trim().toLowerCase();
-        const currentUserStr = String(this.currentUser || '').trim().toLowerCase();
-        
-        const isFromSelf = (senderIdStr && currentUserIdStr && senderIdStr === currentUserIdStr) ||
-                           (senderIdStr && currentUserStr && senderIdStr === currentUserStr);
+        const isFromSelf = this.isSelfMessage(data);
         if (!isFromSelf) {
           this.ngZone.run(() => {
             this.messages.push({
@@ -144,7 +139,10 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
             const tempMsg = this.messages
               .slice()
               .reverse()
-              .find(m => !m.isIncoming && m.message === data.message && typeof m.id === 'number' && m.id > 1000000000000);
+              .find(m => !m.isIncoming && 
+                         typeof m.id === 'number' && 
+                         m.id > 1000000000000 &&
+                         ((m.message || '').trim() === (data.message || '').trim() || (m.fileUrl && m.fileUrl === data.fileUrl)));
             
             if (tempMsg) {
               tempMsg.id = data.id;
@@ -395,17 +393,9 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
           const mapped: ChatMessage[] = history.map(msg => {
             const senderName = String(msg.senderName || msg.senderUserName || msg.userName || '').trim();
             const senderId = String(msg.senderId || msg.sender || msg.user || '').trim();
+            const isFromSelf = this.isSelfMessage({ userId: senderId, user: senderName });
             
-            const senderNameLower = senderName.toLowerCase();
-            const senderIdLower = senderId.toLowerCase();
-            const currentUserIdLower = String(this.currentUserId || '').trim().toLowerCase();
-            const currentUserLower = String(this.currentUser || '').trim().toLowerCase();
-
-            const isFromSelf = (senderIdLower && currentUserIdLower && senderIdLower === currentUserIdLower) ||
-                               (senderNameLower && currentUserLower && senderNameLower === currentUserLower) ||
-                               (senderIdLower && currentUserLower && senderIdLower === currentUserLower);
-            
-             const readStatesList = msg.readStates ?? msg.ReadStates ?? [];
+            const readStatesList = msg.readStates ?? msg.ReadStates ?? [];
              return {
                id: msg.id ?? msg.Id,
                user: senderName || senderId,
@@ -474,6 +464,18 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
         }
       }
     }
+  }
+
+  isSelfMessage(msg: any): boolean {
+    if (!msg) return false;
+    const senderId = String(msg.userId || msg.senderId || msg.user || '').trim().toLowerCase();
+    const currentUserId = String(this.currentUserId || '').trim().toLowerCase();
+    const currentUser = String(this.currentUser || '').trim().toLowerCase();
+    const senderName = String(msg.user || msg.senderName || '').trim().toLowerCase();
+
+    return (!!senderId && !!currentUserId && senderId === currentUserId) ||
+           (!!senderId && !!currentUser && senderId === currentUser) ||
+           (!!senderName && !!currentUser && senderName === currentUser);
   }
 
   insertEmoji(emoji: string): void {

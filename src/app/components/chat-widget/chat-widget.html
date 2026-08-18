@@ -74,7 +74,7 @@
       </div>
 
       <div class="message-wrapper">
-        <span class="message-sender">{{ msg.user === currentUser ? 'You' : msg.user }}</span>
+        <span class="message-sender">{{ isSelfMessage(msg) ? 'You' : msg.user }}</span>
         
         <div class="message-bubble">
           <div class="reaction-strip" *ngIf="hoveredMessageIndex === i && !msg.isDeleted">
@@ -97,7 +97,7 @@
           <ng-container *ngIf="!msg.isDeleted">
             <!-- Replied message header -->
             <div class="replied-message-box" *ngIf="msg.replyToMessage">
-              <span class="replied-sender">{{ msg.replyToMessage.senderName === currentUser ? 'You' : msg.replyToMessage.senderName }}</span>
+              <span class="replied-sender">{{ isSelfMessage({ user: msg.replyToMessage.senderName }) ? 'You' : msg.replyToMessage.senderName }}</span>
               <span class="replied-text">{{ msg.replyToMessage.content }}</span>
             </div>
 
