@@ -1013,3 +1013,40 @@ $border-color: #e2e8f0;
   from { opacity: 0.6; }
   to { opacity: 1; }
 }
+
+/* Edit Preview Bar & Message Editing Styling */
+.edit-preview-bar {
+  background: #f8fafc !important; /* Neutral background */
+  
+  .reply-bar-accent.editing {
+    background: #ef4444; /* Red accent for editing */
+  }
+  
+  .reply-preview-content {
+    .reply-sender-name {
+      color: #ef4444;
+    }
+    .reply-body-text {
+      color: #475569;
+    }
+  }
+}
+
+/* Reaction Strip hover actions extra styles */
+.reaction-strip {
+  .reply-action-btn {
+    border-radius: 12px;
+    padding: 3px 8px;
+    transition: background 0.1s ease;
+    
+    &.edit-action:hover {
+      background: rgba(234, 179, 8, 0.2) !important;
+      color: #facc15 !important;
+    }
+    
+    &.delete-action:hover {
+      background: rgba(239, 68, 68, 0.2) !important;
+      color: #f87171 !important;
+    }
+  }
+}

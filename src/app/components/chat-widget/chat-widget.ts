@@ -28,6 +28,8 @@ export interface ChatMessage {
   fileUrl?: string;
   fileName?: string;
   fileType?: string;
+  isEdited?: boolean;
+  isDeleted?: boolean;
 }
 
 @Component({
@@ -69,6 +71,10 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
   filteredUsers: any[] = [];
   showMentionsList = false;
   replyingToMessage: ChatMessage | null = null;
+  
+  // Message editing state variables
+  editingMessage: ChatMessage | null = null;
+  isEditingMode = false;
 
   isLocalTyping = false;
   typingTimeout: any;
@@ -79,6 +85,8 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
   private reactionSub!: Subscription;
   private statusSub!: Subscription;
   private readSub!: Subscription;
+  private editSub!: Subscription;
+  private deleteSub!: Subscription;
 
   constructor(
     private chatService: ChatService,
@@ -236,6 +244,35 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
             this.cdr.detectChanges();
             setTimeout(() => this.scrollToBottom(), 50);
           }
+        });
+      }
+    });
+    // 5. Receive live message edits
+    this.editSub = this.chatService.messageEdited$.subscribe(data => {
+      if (data) {
+        this.ngZone.run(() => {
+          const msg = this.messages.find(m => m.id === data.messageId);
+          if (msg) {
+            msg.message = data.content;
+            msg.isEdited = true;
+          }
+          this.cdr.detectChanges();
+        });
+      }
+    });
+
+    // 6. Receive live message deletions
+    this.deleteSub = this.chatService.messageDeleted$.subscribe(data => {
+      if (data) {
+        this.ngZone.run(() => {
+          const msg = this.messages.find(m => m.id === data.messageId);
+          if (msg) {
+            msg.isDeleted = true;
+            msg.fileUrl = undefined;
+            msg.fileName = undefined;
+            msg.fileType = undefined;
+          }
+          this.cdr.detectChanges();
         });
       }
     });
@@ -452,6 +489,8 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     if (this.reactionSub) this.reactionSub.unsubscribe();
     if (this.statusSub) this.statusSub.unsubscribe();
     if (this.readSub) this.readSub.unsubscribe();
+    if (this.editSub) this.editSub.unsubscribe();
+    if (this.deleteSub) this.deleteSub.unsubscribe();
   }
 
   toggleChat(): void {
@@ -511,11 +550,70 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     this.sendMessage();
   }
 
+  startEditingMessage(msg: ChatMessage): void {
+    this.editingMessage = msg;
+    this.isEditingMode = true;
+    this.newMessage = msg.message;
+    this.replyingToMessage = null;
+    this.showInputEmojiStrip = false;
+    this.cdr.detectChanges();
+  }
+
+  cancelEditingMessage(): void {
+    this.editingMessage = null;
+    this.isEditingMode = false;
+    this.newMessage = '';
+    this.cdr.detectChanges();
+  }
+
+  triggerDeleteMessage(msg: ChatMessage): void {
+    if (!msg.id) return;
+    const confirmMsg = this.getCurrentLang() === 'ar' ? 'هل تريد حذف هذه الرسالة؟' : 'Are you sure you want to delete this message?';
+    if (confirm(confirmMsg)) {
+      this.chatService.deleteMessage(msg.id).subscribe({
+        next: () => {
+          this.ngZone.run(() => {
+            msg.isDeleted = true;
+            msg.fileUrl = undefined;
+            msg.fileName = undefined;
+            msg.fileType = undefined;
+            this.cdr.detectChanges();
+          });
+        },
+        error: (err) => {
+          console.error('Delete message failed', err);
+        }
+      });
+    }
+  }
+
   sendMessage(): void {
     if (!this.newMessage.trim() && !this.uploadedFileUrl) return;
 
     this.stopLocalTyping();
     const messageText = this.newMessage;
+    
+    if (this.isEditingMode && this.editingMessage) {
+      const msgId = this.editingMessage.id;
+      if (msgId) {
+        this.chatService.editMessage(msgId, messageText).subscribe({
+          next: () => {
+            this.ngZone.run(() => {
+              if (this.editingMessage) {
+                this.editingMessage.message = messageText;
+                this.editingMessage.isEdited = true;
+              }
+              this.cancelEditingMessage();
+            });
+          },
+          error: (err) => {
+            console.error('Edit message failed', err);
+          }
+        });
+      }
+      return;
+    }
+
     const replyId = this.replyingToMessage?.id;
     const fileUrl = this.uploadedFileUrl;
     const fileName = this.uploadedFileName;

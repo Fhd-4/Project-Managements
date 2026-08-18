@@ -47,6 +47,12 @@ export class ChatService {
   private readStatusSource = new Subject<{ readerUserId: string, messageId: number }>();
   public readStatus$: Observable<{ readerUserId: string, messageId: number }> = this.readStatusSource.asObservable();
 
+  private messageEditedSource = new Subject<{ messageId: number | string, content: string }>();
+  public messageEdited$: Observable<{ messageId: number | string, content: string }> = this.messageEditedSource.asObservable();
+
+  private messageDeletedSource = new Subject<{ messageId: number | string }>();
+  public messageDeleted$: Observable<{ messageId: number | string }> = this.messageDeletedSource.asObservable();
+
   private audioCtx: AudioContext | null = null;
 
   constructor(private http: HttpClient) {
@@ -113,6 +119,25 @@ export class ChatService {
           readerUserId: data.userId,
           messageId: data.messageId
         });
+      }
+    });
+
+    this.hubConnection.on('MessageEdited', (data: any) => {
+      if (data) {
+        const messageId = data.messageId || data.id;
+        const content = data.content || data.message || '';
+        if (messageId) {
+          this.messageEditedSource.next({ messageId, content });
+        }
+      }
+    });
+
+    this.hubConnection.on('MessageDeleted', (data: any) => {
+      if (data) {
+        const messageId = data.messageId || data.id;
+        if (messageId) {
+          this.messageDeletedSource.next({ messageId });
+        }
       }
     });
 
@@ -314,5 +339,35 @@ export class ChatService {
         .catch(err => console.error('Error sending StopTyping: ', err));
     }
     return Promise.resolve();
+  }
+
+  public editMessage(messageId: number | string, content: string): Observable<any> {
+    let token = '';
+    if (typeof window !== 'undefined' && window.localStorage) {
+      token = localStorage.getItem('auth_token') || '';
+    }
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    });
+    return this.http.put<any>(
+      `${API_CONFIG.baseUrl}/Chat/messages/${messageId}`,
+      { content },
+      { headers }
+    );
+  }
+
+  public deleteMessage(messageId: number | string): Observable<any> {
+    let token = '';
+    if (typeof window !== 'undefined' && window.localStorage) {
+      token = localStorage.getItem('auth_token') || '';
+    }
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.delete<any>(
+      `${API_CONFIG.baseUrl}/Chat/messages/${messageId}`,
+      { headers }
+    );
   }
 }

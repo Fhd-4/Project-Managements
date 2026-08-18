@@ -77,7 +77,7 @@
         <span class="message-sender">{{ msg.user === currentUser ? 'You' : msg.user }}</span>
         
         <div class="message-bubble">
-          <div class="reaction-strip" *ngIf="hoveredMessageIndex === i">
+          <div class="reaction-strip" *ngIf="hoveredMessageIndex === i && !msg.isDeleted">
             <button type="button" 
                     *ngFor="let emoji of emojiList" 
                     (click)="toggleReaction(msg, emoji)" 
@@ -85,58 +85,72 @@
               {{ emoji }}
             </button>
             <button type="button" class="reply-action-btn" (click)="initiateReply(msg)" title="Reply">
-              ↩ الرد
+              ↩ {{ getCurrentLang() === 'ar' ? 'الرد' : 'Reply' }}
+            </button>
+            <button type="button" class="reply-action-btn edit-action" *ngIf="!msg.isIncoming" (click)="startEditingMessage(msg)" title="Edit">
+              ✏️ {{ getCurrentLang() === 'ar' ? 'تعديل' : 'Edit' }}
+            </button>
+            <button type="button" class="reply-action-btn delete-action" *ngIf="!msg.isIncoming" (click)="triggerDeleteMessage(msg)" title="Delete">
+              🗑️ {{ getCurrentLang() === 'ar' ? 'حذف' : 'Delete' }}
             </button>
           </div>
+          <ng-container *ngIf="!msg.isDeleted">
+            <!-- Replied message header -->
+            <div class="replied-message-box" *ngIf="msg.replyToMessage">
+              <span class="replied-sender">{{ msg.replyToMessage.senderName === currentUser ? 'You' : msg.replyToMessage.senderName }}</span>
+              <span class="replied-text">{{ msg.replyToMessage.content }}</span>
+            </div>
 
-          <!-- Replied message header -->
-          <div class="replied-message-box" *ngIf="msg.replyToMessage">
-            <span class="replied-sender">{{ msg.replyToMessage.senderName === currentUser ? 'You' : msg.replyToMessage.senderName }}</span>
-            <span class="replied-text">{{ msg.replyToMessage.content }}</span>
-          </div>
-
-          <!-- Attachments -->
-          <div class="message-attachment" *ngIf="msg.fileUrl">
-            <!-- Image Attachment -->
-            <a *ngIf="msg.fileType === 'image'" [href]="msg.fileUrl" target="_blank" class="attachment-image-link">
-              <img [src]="msg.fileUrl" class="attachment-image" [alt]="msg.fileName" />
-            </a>
-            <!-- File Attachment -->
-            <a *ngIf="msg.fileType !== 'image'" [href]="msg.fileUrl" target="_blank" class="attachment-file-box">
-              <svg class="file-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-              <div class="file-info-text">
-                <span class="file-name" [title]="msg.fileName">{{ msg.fileName }}</span>
-                <span class="file-download-label">{{ getCurrentLang() === 'ar' ? 'تحميل الملف' : 'Download File' }}</span>
-              </div>
-            </a>
-          </div>
-
-          <!-- Message Text formatting mentions -->
-          <div class="message-content-text" *ngIf="msg.message" [innerHTML]="formatMessage(msg.message)"></div>
-
-          <div class="reactions-badge" *ngIf="msg.reactions && msg.reactions.length > 0">
-            <span *ngFor="let r of msg.reactions" class="reaction-pill">
-              {{ r.emoji }} <small *ngIf="r.count > 1">{{ r.count }}</small>
-            </span>
-          </div>
-
-          <!-- Message Status and Time info -->
-          <div class="message-info">
-            <span class="message-time" *ngIf="msg.timestamp">{{ msg.timestamp | date:'shortTime' }}</span>
-            <span class="message-status status-ticks-container" *ngIf="!msg.isIncoming">
-              <svg *ngIf="msg.status === 0" class="checkmark sent" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
-              <svg *ngIf="msg.status === 1" class="checkmark delivered" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/><path d="M16 6l-8 8-3-3" opacity="0.6"/></svg>
-              <svg *ngIf="msg.status === 2" class="checkmark read" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/><path d="M16 6l-8 8-3-3" opacity="0.6"/></svg>
-
-              <!-- Tooltip showing who read the message -->
-              <div class="readers-tooltip" *ngIf="msg.readStates && msg.readStates.length > 0">
-                <span class="tooltip-title">قُرأت بواسطة:</span>
-                <div class="tooltip-user" *ngFor="let reader of msg.readStates">
-                  • {{ getReaderName(reader.userId) }}
+            <!-- Attachments -->
+            <div class="message-attachment" *ngIf="msg.fileUrl">
+              <!-- Image Attachment -->
+              <a *ngIf="msg.fileType === 'image'" [href]="msg.fileUrl" target="_blank" class="attachment-image-link">
+                <img [src]="msg.fileUrl" class="attachment-image" [alt]="msg.fileName" />
+              </a>
+              <!-- File Attachment -->
+              <a *ngIf="msg.fileType !== 'image'" [href]="msg.fileUrl" target="_blank" class="attachment-file-box">
+                <svg class="file-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                <div class="file-info-text">
+                  <span class="file-name" [title]="msg.fileName">{{ msg.fileName }}</span>
+                  <span class="file-download-label">{{ getCurrentLang() === 'ar' ? 'تحميل الملف' : 'Download File' }}</span>
                 </div>
-              </div>
-            </span>
-          </div>
+              </a>
+            </div>
+
+            <!-- Message Text formatting mentions -->
+            <div class="message-content-text" *ngIf="msg.message" [innerHTML]="formatMessage(msg.message)"></div>
+
+            <div class="reactions-badge" *ngIf="msg.reactions && msg.reactions.length > 0">
+              <span *ngFor="let r of msg.reactions" class="reaction-pill">
+                {{ r.emoji }} <small *ngIf="r.count > 1">{{ r.count }}</small>
+              </span>
+            </div>
+
+            <!-- Message Status and Time info -->
+            <div class="message-info">
+              <span class="edited-tag" *ngIf="msg.isEdited" style="font-size: 8px; opacity: 0.6; font-style: italic; margin-right: 4px;">({{ getCurrentLang() === 'ar' ? 'معدلة' : 'edited' }})</span>
+              <span class="message-time" *ngIf="msg.timestamp">{{ msg.timestamp | date:'shortTime' }}</span>
+              <span class="message-status status-ticks-container" *ngIf="!msg.isIncoming">
+                <svg *ngIf="msg.status === 0" class="checkmark sent" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+                <svg *ngIf="msg.status === 1" class="checkmark delivered" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/><path d="M16 6l-8 8-3-3" opacity="0.6"/></svg>
+                <svg *ngIf="msg.status === 2" class="checkmark read" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/><path d="M16 6l-8 8-3-3" opacity="0.6"/></svg>
+
+                <!-- Tooltip showing who read the message -->
+                <div class="readers-tooltip" *ngIf="msg.readStates && msg.readStates.length > 0">
+                  <span class="tooltip-title">قُرأت بواسطة:</span>
+                  <div class="tooltip-user" *ngFor="let reader of msg.readStates">
+                    • {{ getReaderName(reader.userId) }}
+                  </div>
+                </div>
+              </span>
+            </div>
+          </ng-container>
+
+          <ng-container *ngIf="msg.isDeleted">
+            <div class="message-content-text deleted-message" style="font-style: italic; color: #94a3b8; font-size: 11px;">
+              {{ getCurrentLang() === 'ar' ? 'تم حذف هذه الرسالة' : 'This message was deleted' }}
+            </div>
+          </ng-container>
         </div>
       </div>
     </div>
@@ -197,6 +211,16 @@
       <span class="reply-body-text">{{ isUploading ? (getCurrentLang() === 'ar' ? 'جاري الرفع...' : 'Uploading...') : (getCurrentLang() === 'ar' ? 'جاهز للإرسال' : 'Ready to send') }}</span>
     </div>
     <button class="close-reply-btn" (click)="clearSelectedFile()">✕</button>
+  </div>
+
+  <!-- Message Edit Preview Bar -->
+  <div class="file-upload-preview-bar edit-preview-bar" *ngIf="isEditingMode && editingMessage">
+    <div class="reply-bar-accent editing"></div>
+    <div class="reply-preview-content">
+      <span class="reply-sender-name">{{ getCurrentLang() === 'ar' ? 'تعديل الرسالة...' : 'Editing message...' }}</span>
+      <span class="reply-body-text">{{ editingMessage.message }}</span>
+    </div>
+    <button class="close-reply-btn" (click)="cancelEditingMessage()">✕</button>
   </div>
 
   <!-- Input Footer -->
