@@ -880,3 +880,136 @@ $border-color: #e2e8f0;
     }
   }
 }
+
+/* File Upload and Attachment Styling */
+.message-attachment {
+  margin-bottom: 8px;
+  border-radius: 8px;
+  overflow: hidden;
+  display: block;
+  
+  .attachment-image-link {
+    display: block;
+    cursor: pointer;
+  }
+  
+  .attachment-image {
+    max-width: 100%;
+    max-height: 180px;
+    border-radius: 8px;
+    display: block;
+    object-fit: cover;
+    transition: opacity 0.15s ease;
+    
+    &:hover {
+      opacity: 0.92;
+    }
+  }
+  
+  .attachment-file-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: rgba(0, 0, 0, 0.04);
+    border-radius: 8px;
+    text-decoration: none;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    transition: background 0.15s ease;
+    color: inherit;
+    
+    &:hover {
+      background: rgba(0, 0, 0, 0.07);
+    }
+    
+    .file-icon {
+      color: $primary-blue;
+      flex-shrink: 0;
+    }
+    
+    .file-info-text {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      
+      .file-name {
+        font-size: 11px;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      
+      .file-download-label {
+        font-size: 9px;
+        opacity: 0.7;
+        margin-top: 1px;
+      }
+    }
+  }
+}
+
+.outgoing {
+  .message-attachment {
+    .attachment-file-box {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.2);
+      
+      .file-icon {
+        color: white;
+      }
+    }
+  }
+}
+
+/* File Upload Preview Bar */
+.file-upload-preview-bar {
+  display: flex;
+  align-items: center;
+  background: #f0fdf4; /* Pale green background for upload */
+  border-top: 1px solid $border-color;
+  padding: 8px 14px;
+  gap: 12px;
+  position: relative;
+  animation: slideUp 0.15s ease-out;
+  flex-shrink: 0;
+  
+  .reply-bar-accent {
+    width: 4px;
+    align-self: stretch;
+    background: #22c55e; /* Green */
+    border-radius: 2px;
+    
+    &.uploading {
+      background: #eab308; /* Yellow/orange for active upload */
+      animation: pulse 1s infinite alternate;
+    }
+  }
+  
+  .reply-preview-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    
+    .reply-sender-name {
+      font-size: 11px;
+      font-weight: bold;
+      color: #15803d;
+    }
+    
+    .reply-body-text {
+      font-size: 11px;
+      color: #166534;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+}
+
+@keyframes pulse {
+  from { opacity: 0.6; }
+  to { opacity: 1; }
+}

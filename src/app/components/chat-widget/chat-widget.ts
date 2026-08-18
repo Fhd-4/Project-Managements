@@ -25,6 +25,9 @@ export interface ChatMessage {
   };
   status?: number;
   readStates?: Array<{ userId: string; readAt: string; }>;
+  fileUrl?: string;
+  fileName?: string;
+  fileType?: string;
 }
 
 @Component({
@@ -41,6 +44,13 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
   newMessage = '';
   currentUser = 'Yousra';
   currentUserId = '';
+
+  // File upload state variables
+  selectedFile: File | null = null;
+  uploadedFileUrl: string | null = null;
+  uploadedFileName: string | null = null;
+  uploadedFileType: string | null = null;
+  isUploading = false;
 
   showInputEmojiStrip = false;
   hoveredMessageIndex: number | null = null;
@@ -102,6 +112,9 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
               isIncoming: true,
               replyToMessage: data.replyToMessage,
               status: data.status || 0,
+              fileUrl: data.fileUrl,
+              fileName: data.fileName,
+              fileType: data.fileType,
               reactions: []
             });
 
@@ -128,6 +141,9 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
             if (tempMsg) {
               tempMsg.id = data.id;
               tempMsg.status = 1; // Delivered (2 checks)
+              tempMsg.fileUrl = data.fileUrl;
+              tempMsg.fileName = data.fileName;
+              tempMsg.fileType = data.fileType;
             } else {
               // Fallback: if not found, push it
               this.messages.push({
@@ -138,6 +154,9 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
                 isIncoming: false,
                 replyToMessage: data.replyToMessage,
                 status: 1, // Delivered (2 checks)
+                fileUrl: data.fileUrl,
+                fileName: data.fileName,
+                fileType: data.fileType,
                 reactions: []
               });
             }
@@ -360,6 +379,9 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
                status: readStatesList.length > 0 ? 2 : 1,
                replyToMessage: msg.replyToMessage,
                readStates: readStatesList,
+               fileUrl: msg.fileUrl ?? msg.FileUrl ?? null,
+               fileName: msg.fileName ?? msg.FileName ?? null,
+               fileType: msg.fileType ?? msg.FileType ?? null,
                reactions: this.formatReactionsFromHistory(msg.reactions ?? msg.Reactions)
              };
           });
@@ -445,17 +467,59 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     }
   }
 
+  onFileSelected(event: any): void {
+    const file = event.target?.files?.[0];
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      alert(this.getCurrentLang() === 'ar' ? 'حجم الملف يتجاوز الحد الأقصى المسموح به (10 ميجابايت)!' : 'File size exceeds maximum limit of 10 MB!');
+      return;
+    }
+
+    this.selectedFile = file;
+    this.isUploading = true;
+
+    this.chatService.uploadFile(file).subscribe({
+      next: (res) => {
+        this.uploadedFileUrl = res.fileUrl;
+        this.uploadedFileName = res.fileName;
+        this.uploadedFileType = res.fileType;
+        this.isUploading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('File upload failed', err);
+        alert(this.getCurrentLang() === 'ar' ? 'فشل رفع الملف!' : 'File upload failed!');
+        this.selectedFile = null;
+        this.isUploading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  clearSelectedFile(): void {
+    this.selectedFile = null;
+    this.uploadedFileUrl = null;
+    this.uploadedFileName = null;
+    this.uploadedFileType = null;
+    this.isUploading = false;
+    this.cdr.detectChanges();
+  }
+
   sendQuickMessage(text: string): void {
     this.newMessage = text;
     this.sendMessage();
   }
 
   sendMessage(): void {
-    if (!this.newMessage.trim()) return;
+    if (!this.newMessage.trim() && !this.uploadedFileUrl) return;
 
     this.stopLocalTyping();
     const messageText = this.newMessage;
     const replyId = this.replyingToMessage?.id;
+    const fileUrl = this.uploadedFileUrl;
+    const fileName = this.uploadedFileName;
+    const fileType = this.uploadedFileType;
     
     this.messages.push({ 
       id: Date.now(), 
@@ -469,15 +533,26 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
         senderName: this.replyingToMessage.user,
         content: this.replyingToMessage.message
       } : undefined,
+      fileUrl: fileUrl || undefined,
+      fileName: fileName || undefined,
+      fileType: fileType || undefined,
       reactions: [] 
     });
     
     this.newMessage = '';
     this.showInputEmojiStrip = false;
     this.replyingToMessage = null;
+    
+    // Clear upload state
+    this.selectedFile = null;
+    this.uploadedFileUrl = null;
+    this.uploadedFileName = null;
+    this.uploadedFileType = null;
+    this.isUploading = false;
+    
     setTimeout(() => this.scrollToBottom(), 50);
 
-    this.chatService.sendMessage(messageText, replyId as number);
+    this.chatService.sendMessage(messageText, replyId !== undefined ? Number(replyId) : null, fileUrl, fileName, fileType);
   }
 
   onInputChange(): void {

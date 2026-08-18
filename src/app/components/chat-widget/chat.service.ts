@@ -124,6 +124,9 @@ export class ChatService {
       let timestamp = '';
       let replyToMessage: any = null;
       let status = 0;
+      let fileUrl: string | null = null;
+      let fileName: string | null = null;
+      let fileType: string | null = null;
 
       if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
         const msgObj = args[0];
@@ -134,6 +137,9 @@ export class ChatService {
         timestamp = msgObj.timestamp || '';
         replyToMessage = msgObj.replyToMessage;
         status = msgObj.status || 0;
+        fileUrl = msgObj.fileUrl || msgObj.FileUrl || null;
+        fileName = msgObj.fileName || msgObj.FileName || null;
+        fileType = msgObj.fileType || msgObj.FileType || null;
       } else if (args.length === 4) {
         const [msgId, name, msgContent, msgTimestamp] = args;
         id = msgId;
@@ -158,6 +164,9 @@ export class ChatService {
         isIncoming: true,
         replyToMessage,
         status,
+        fileUrl,
+        fileName,
+        fileType,
         reactions: []
       });
     });
@@ -228,10 +237,35 @@ export class ChatService {
     return Promise.resolve();
   }
 
-  public sendMessage(message: string, replyToMessageId?: number): Promise<void> {
+  public uploadFile(file: File): Observable<any> {
+    let token = '';
+    if (typeof window !== 'undefined' && window.localStorage) {
+      token = localStorage.getItem('auth_token') || '';
+    }
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<any>(`${API_CONFIG.baseUrl}/Chat/upload`, formData, { headers });
+  }
+
+  public sendMessage(
+    message: string,
+    replyToMessageId?: number | null,
+    fileUrl?: string | null,
+    fileName?: string | null,
+    fileType?: string | null
+  ): Promise<void> {
     if (this.hubConnection && this.hubConnection.state === signalR.HubConnectionState.Connected) {
-      return this.hubConnection.invoke('SendMessage', message, replyToMessageId !== undefined ? replyToMessageId : null)
-        .catch(err => console.error('Error sending message: ', err));
+      return this.hubConnection.invoke(
+        'SendMessage',
+        message || '',
+        replyToMessageId !== undefined && replyToMessageId !== null ? replyToMessageId : null,
+        fileUrl || null,
+        fileName || null,
+        fileType || null
+      ).catch(err => console.error('Error sending message: ', err));
     }
     return Promise.resolve();
   }
