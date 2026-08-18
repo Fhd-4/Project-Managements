@@ -751,6 +751,9 @@ Description: Upgrading memory and hosting storage capacity to handle peak transa
   deleteUser(userId: string): Observable<any> {
     return this.http.delete<any>(`${this.authUrl}/delete-user/${userId}`, { headers: this.getHeaders() }).pipe(
       catchError(err => {
+        if (err.status === 400 || err.status === 404 || err.status === 403 || err.status === 500) {
+          return throwError(() => err);
+        }
         console.warn('deleteUser API failed, removing locally.', err);
         let users = this.getLocalUsers();
         users = users.filter(u => u.id !== userId);

@@ -20,7 +20,7 @@
           <line x1="6" y1="6" x2="18" y2="18"></line>
         </svg>
       </div>
-      <span>{{ isRtl ? 'حدث خطأ أثناء تنفيذ العملية.' : 'An error occurred during operation.' }}</span>
+      <span>{{ errorMessage || (isRtl ? 'حدث خطأ أثناء تنفيذ العملية.' : 'An error occurred during operation.') }}</span>
     </div>
   </div>
   <!-- Top Metrics Cards -->

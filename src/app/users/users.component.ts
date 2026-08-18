@@ -30,6 +30,7 @@ export class UsersComponent implements OnInit {
 
   showSuccessToast: boolean = false;
   showErrorToast: boolean = false;
+  errorMessage: string = '';
 
   translations = {
     ar: {
@@ -165,6 +166,7 @@ export class UsersComponent implements OnInit {
     event.stopPropagation();
     if (confirm(this.t.confirmDelete)) {
       this.isLoading = true;
+      this.errorMessage = '';
       this.projectService.deleteUser(userId).subscribe({
         next: () => {
           this.projectService.triggerSuccessToast();
@@ -172,8 +174,26 @@ export class UsersComponent implements OnInit {
         },
         error: (err) => {
           console.error('Delete failed', err);
-          this.projectService.triggerErrorToast();
           this.isLoading = false;
+          
+          if (err && err.error) {
+            if (typeof err.error === 'string') {
+              this.errorMessage = err.error;
+            } else if (err.error.message) {
+              this.errorMessage = err.error.message;
+            } else if (typeof err.error === 'object') {
+              const errors = err.error;
+              if (Array.isArray(errors)) {
+                this.errorMessage = errors.map(e => e.description || e.message || JSON.stringify(e)).join(', ');
+              } else {
+                this.errorMessage = JSON.stringify(errors);
+              }
+            }
+          } else {
+            this.errorMessage = '';
+          }
+          
+          this.projectService.triggerErrorToast();
           this.cdr.detectChanges();
         }
       });
