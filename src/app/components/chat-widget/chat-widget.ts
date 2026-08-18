@@ -117,6 +117,32 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
               this.cdr.detectChanges();
             }, 50);
           });
+        } else {
+          this.ngZone.run(() => {
+            // Find our temporary message and link it with the server-generated ID
+            const tempMsg = this.messages
+              .slice()
+              .reverse()
+              .find(m => !m.isIncoming && m.message === data.message && typeof m.id === 'number' && m.id > 1000000000000);
+            
+            if (tempMsg) {
+              tempMsg.id = data.id;
+              tempMsg.status = 1; // Delivered (2 checks)
+            } else {
+              // Fallback: if not found, push it
+              this.messages.push({
+                id: data.id,
+                user: data.user,
+                userId: data.userId,
+                message: data.message,
+                isIncoming: false,
+                replyToMessage: data.replyToMessage,
+                status: 1, // Delivered (2 checks)
+                reactions: []
+              });
+            }
+            this.cdr.detectChanges();
+          });
         }
       }
     });

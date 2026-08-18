@@ -245,8 +245,8 @@ $border-color: #e2e8f0;
         border: 1px solid $border-color;
 
         .reaction-strip {
-          right: 0 !important;
-          left: auto !important;
+          left: 0 !important;
+          right: auto !important;
           transform: none !important;
         }
       }
@@ -266,8 +266,8 @@ $border-color: #e2e8f0;
         border-radius: 12px 12px 2px 12px;
 
         .reaction-strip {
-          left: 0 !important;
-          right: auto !important;
+          right: 0 !important;
+          left: auto !important;
           transform: none !important;
         }
       }
@@ -809,7 +809,10 @@ $border-color: #e2e8f0;
     padding: 6px 10px;
     border-radius: 8px;
     font-size: 10px;
-    white-space: nowrap;
+    width: max-content;
+    max-width: 140px;
+    white-space: normal;
+    word-break: break-word;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
     z-index: 1000;
     transition: opacity 0.15s ease, visibility 0.15s ease, transform 0.15s ease;
