@@ -251,7 +251,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     this.editSub = this.chatService.messageEdited$.subscribe(data => {
       if (data) {
         this.ngZone.run(() => {
-          const msg = this.messages.find(m => m.id === data.messageId);
+          const msg = this.messages.find(m => m.id !== undefined && String(m.id) === String(data.messageId));
           if (msg) {
             msg.message = data.content;
             msg.isEdited = true;
@@ -265,7 +265,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     this.deleteSub = this.chatService.messageDeleted$.subscribe(data => {
       if (data) {
         this.ngZone.run(() => {
-          const msg = this.messages.find(m => m.id === data.messageId);
+          const msg = this.messages.find(m => m.id !== undefined && String(m.id) === String(data.messageId));
           if (msg) {
             msg.isDeleted = true;
             msg.fileUrl = undefined;

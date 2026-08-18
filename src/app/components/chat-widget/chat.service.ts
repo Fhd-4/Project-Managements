@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
-import { BehaviorSubject, Subject, Observable } from 'rxjs';
+import { BehaviorSubject, Subject, Observable, from } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { API_CONFIG } from '../../api.config';
 
@@ -125,7 +125,7 @@ export class ChatService {
     this.hubConnection.on('MessageEdited', (data: any) => {
       if (data) {
         const messageId = data.messageId || data.id;
-        const content = data.content || data.message || '';
+        const content = data.newContent || data.content || data.message || '';
         if (messageId) {
           this.messageEditedSource.next({ messageId, content });
         }
@@ -342,32 +342,20 @@ export class ChatService {
   }
 
   public editMessage(messageId: number | string, content: string): Observable<any> {
-    let token = '';
-    if (typeof window !== 'undefined' && window.localStorage) {
-      token = localStorage.getItem('auth_token') || '';
+    if (this.hubConnection && this.hubConnection.state === signalR.HubConnectionState.Connected) {
+      const promise = this.hubConnection.invoke('EditMessage', Number(messageId), content)
+        .catch(err => console.error('Error invoking EditMessage: ', err));
+      return from(promise);
     }
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    });
-    return this.http.put<any>(
-      `${API_CONFIG.baseUrl}/Chat/messages/${messageId}`,
-      { content },
-      { headers }
-    );
+    return from(Promise.resolve());
   }
 
   public deleteMessage(messageId: number | string): Observable<any> {
-    let token = '';
-    if (typeof window !== 'undefined' && window.localStorage) {
-      token = localStorage.getItem('auth_token') || '';
+    if (this.hubConnection && this.hubConnection.state === signalR.HubConnectionState.Connected) {
+      const promise = this.hubConnection.invoke('DeleteMessage', Number(messageId))
+        .catch(err => console.error('Error invoking DeleteMessage: ', err));
+      return from(promise);
     }
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
-    return this.http.delete<any>(
-      `${API_CONFIG.baseUrl}/Chat/messages/${messageId}`,
-      { headers }
-    );
+    return from(Promise.resolve());
   }
 }
