@@ -451,16 +451,28 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
         const token = localStorage.getItem('auth_token');
         if (token) {
           try {
-            const payload = JSON.parse(atob(token.split('.')[1]));
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const padded = base64.padEnd(base64.length + (4 - base64.length % 4) % 4, '=');
+            
+            const jsonPayload = decodeURIComponent(
+              atob(padded)
+                .split('')
+                .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+                .join('')
+            );
+            
+            const payload = JSON.parse(jsonPayload);
             this.currentUserId = payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'] ||
                                  payload.nameid || 
                                  payload.unique_name || 
-                                 'yousra';
+                                 '';
+            if (this.currentUserId) {
+              localStorage.setItem('auth_userId', this.currentUserId);
+            }
           } catch (e) {
-            this.currentUserId = 'yousra';
+            console.error('Error decoding JWT token:', e);
           }
-        } else {
-          this.currentUserId = 'yousra';
         }
       }
     }
