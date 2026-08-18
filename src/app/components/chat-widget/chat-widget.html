@@ -6,7 +6,7 @@
 </div>
 
 <!-- Chat Popup Window -->
-<div class="chat-popup-container" *ngIf="isOpen">
+<div class="chat-popup-container" *ngIf="isOpen" [dir]="getCurrentLang() === 'ar' ? 'rtl' : 'ltr'">
   
   <!-- Header Section -->
   <div class="chat-header">

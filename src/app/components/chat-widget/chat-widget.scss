@@ -36,7 +36,7 @@ $border-color: #e2e8f0;
   position: fixed;
   bottom: 95px;
   right: 24px;
-  width: 360px;
+  width: 410px;
   height: 540px;
   background: white;
   border-radius: 16px;
@@ -328,7 +328,7 @@ $border-color: #e2e8f0;
     font-size: 13px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     min-width: 50px;
-    max-width: 240px;
+    max-width: 280px;
     line-height: 1.4;
     word-break: break-word;
 
@@ -842,6 +842,41 @@ $border-color: #e2e8f0;
       border-width: 5px;
       border-style: solid;
       border-color: #1e293b transparent transparent transparent;
+    }
+  }
+}
+
+/* RTL Overrides for Reaction Strip and Readers Tooltip */
+.chat-popup-container[dir="rtl"] {
+  .message-row {
+    &.incoming {
+      .message-bubble {
+        .reaction-strip {
+          right: 0 !important;
+          left: auto !important;
+        }
+      }
+    }
+    
+    &.outgoing {
+      .message-bubble {
+        .reaction-strip {
+          left: 0 !important;
+          right: auto !important;
+        }
+      }
+    }
+  }
+
+  .status-ticks-container {
+    .readers-tooltip {
+      left: 0 !important;
+      right: auto !important;
+      
+      &::after {
+        left: 6px !important;
+        right: auto !important;
+      }
     }
   }
 }

@@ -349,18 +349,19 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
                                (senderNameLower && currentUserLower && senderNameLower === currentUserLower) ||
                                (senderIdLower && currentUserLower && senderIdLower === currentUserLower);
             
-            return {
-              id: msg.id ?? msg.Id,
-              user: senderName || senderId,
-              userId: senderId,
-              message: msg.content ?? msg.message ?? '',
-              isIncoming: !isFromSelf,
-              timestamp: msg.timestamp ?? '',
-              status: msg.status || 0,
-              replyToMessage: msg.replyToMessage,
-              readStates: msg.readStates ?? msg.ReadStates ?? [],
-              reactions: this.formatReactionsFromHistory(msg.reactions ?? msg.Reactions)
-            };
+             const readStatesList = msg.readStates ?? msg.ReadStates ?? [];
+             return {
+               id: msg.id ?? msg.Id,
+               user: senderName || senderId,
+               userId: senderId,
+               message: msg.content ?? msg.message ?? '',
+               isIncoming: !isFromSelf,
+               timestamp: msg.timestamp ?? '',
+               status: readStatesList.length > 0 ? 2 : 1,
+               replyToMessage: msg.replyToMessage,
+               readStates: readStatesList,
+               reactions: this.formatReactionsFromHistory(msg.reactions ?? msg.Reactions)
+             };
           });
 
           this.messages = [
