@@ -7,7 +7,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "Project-Managements": {
+    "ProSync-Project": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -70,10 +70,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "Project-Managements:build:production"
+              "buildTarget": "ProSync-Project:build:production"
             },
             "development": {
-              "buildTarget": "Project-Managements:build:development"
+              "buildTarget": "ProSync-Project:build:development"
             }
           },
           "defaultConfiguration": "development"

@@ -1,5 +1,5 @@
 {
-  "name": "project-managements",
+  "name": "prosync-project",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
@@ -7,7 +7,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:Project-Managements": "node dist/Project-Managements/server/server.mjs"
+    "serve:ssr:ProSync-Project": "node dist/ProSync-Project/server/server.mjs"
   },
   "private": true,
   "packageManager": "npm@11.13.0",
